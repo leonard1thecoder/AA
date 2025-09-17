@@ -18,9 +18,9 @@ public class UsersEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long pkUsersId;
+    private Long pkUsersId,usersIdentityNo;
     private Integer ftPrivilegeId;
-    private Short usersStatus;
+    private Short usersStatus,usersAge;
     private String usersFullName, usersEmailAddress, usersPassword, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
 
 
