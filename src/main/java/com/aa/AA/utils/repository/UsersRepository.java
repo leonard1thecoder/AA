@@ -1,6 +1,6 @@
-package utils.repository;
+package com.aa.AA.utils.repository;
 
-import entities.UsersEntity;
+import com.aa.AA.entities.UsersEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
