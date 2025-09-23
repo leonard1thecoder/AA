@@ -19,7 +19,7 @@ import static com.aa.AA.utils.HandlingLoadingService.*;
 
 @Service
 public class UsersService implements Callable<List<UsersRequest>> {
-    @Setter
+
     public static String serviceHandler;
 
 
@@ -41,6 +41,26 @@ public class UsersService implements Callable<List<UsersRequest>> {
     public UsersService(@Autowired UsersRepository  usersRepository,@Autowired UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
+    }
+
+    public static void setUsersEntity(UsersEntity usersEntity) {
+        UsersService.usersEntity = usersEntity;
+    }
+
+    public void setUsersIdentityNo(Long usersIdentityNo) {
+        this.usersIdentityNo = usersIdentityNo;
+    }
+
+    public void setUsersFullName(String usersFullName) {
+        this.usersFullName = usersFullName;
+    }
+
+    public void setPkUsersId(Long pkUsersId) {
+        this.pkUsersId = pkUsersId;
+    }
+
+    public static void setServiceHandler(String serviceHandler) {
+        UsersService.serviceHandler = serviceHandler;
     }
 
     private List<UsersRequest> registerUsers() {
