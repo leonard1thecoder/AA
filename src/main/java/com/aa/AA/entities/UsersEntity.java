@@ -1,24 +1,24 @@
 package com.aa.AA.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @AllArgsConstructor
 @ToString
-@Setter
-@Getter
+
 @NoArgsConstructor
 public class UsersEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+
     private Long pkUsersId;
+    @JoinColumn(name = "pkPrivilegeId", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL)
+    private PrivilegeEntity fkPrivilegeId;
+
     private Long usersIdentityNo;
-    private Integer fkPrivilegeId;
     private Short usersStatus,usersAge;
     private String usersFullName, usersEmailAddress, usersPassword, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
 
