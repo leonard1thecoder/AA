@@ -3,6 +3,8 @@ package com.aa.AA.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @AllArgsConstructor
 @ToString
@@ -17,6 +19,9 @@ public class UsersEntity {
     @JoinColumn(name = "pkPrivilegeId", nullable = false)
     @OneToOne(cascade = CascadeType.ALL)
     private PrivilegeEntity fkPrivilegeId;
+
+    @OneToMany(mappedBy = "usersEntity",cascade = CascadeType.ALL)
+    private List<LiquorStoreEntity> liquorStoreEntities;
 
     private Long usersIdentityNo;
     private Short usersStatus,usersAge;
