@@ -41,7 +41,11 @@ public class LiquorStoreEntity {
     @OneToOne
     private Country countryEntity;
 
-    private String liquorStoreName,liquorStoreCertNo,liquorCity;
+    @JoinColumn(name = "cityId")
+    @OneToOne
+    private City city;
+
+    private String liquorStoreName,liquorStoreCertNo;
 
     private Byte liquorStoreStatus;
 
