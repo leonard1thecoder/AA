@@ -28,10 +28,11 @@ public class LiquorStoreEntity {
     @OneToMany(mappedBy = "usersEntity",cascade = CascadeType.ALL)
     private List<LiquorStoreStockEntity> liquorStoreStockEntities;
 
+    @OneToMany(mappedBy = "", cascade= CascadeType.ALL)
+    private List<LiquorStorePromotionsEntity> liquorStorePromotionsEntities;
+
     private String liquorStoreName,liquorStoreCertNo,liquorStoreCountry,liquorCity;
 
     private Byte liquorStoreStatus;
-
-
 
 }
