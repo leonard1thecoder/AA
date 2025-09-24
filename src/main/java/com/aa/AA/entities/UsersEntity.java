@@ -24,6 +24,11 @@ public class UsersEntity {
     @OneToOne
     private Country countryEntity;
 
+    @JoinColumn(name = "cityId")
+    @OneToOne
+    private City city;
+
+
     @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
     private List<LiquorStoreEntity> liquorStoreEntities;
 
@@ -41,7 +46,7 @@ public class UsersEntity {
 
     private Long usersIdentityNo;
     private Short usersStatus, usersAge;
-    private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersLanguage, usersModifiedDate;
+    private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersModifiedDate;
 
     public Long getUsersIdentityNo() {
         return usersIdentityNo;
