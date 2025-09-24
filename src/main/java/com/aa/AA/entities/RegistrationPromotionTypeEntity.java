@@ -12,7 +12,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @Entity
-public class RegistrationPromotionType {
+public class RegistrationPromotionTypeEntity {
 
 
     @Id
