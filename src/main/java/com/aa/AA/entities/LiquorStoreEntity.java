@@ -3,6 +3,8 @@ package com.aa.AA.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -22,6 +24,9 @@ public class LiquorStoreEntity {
     @OneToOne
     @JoinColumn(name="pkPrivilegeId", nullable = false)
     private PrivilegeEntity privilegeEntity;
+
+    @OneToMany(mappedBy = "usersEntity",cascade = CascadeType.ALL)
+    private List<LiquorStoreStockEntity> liquorStoreStockEntities;
 
     private String liquorStoreName,liquorStoreCertNo,liquorStoreCountry,liquorCity;
 

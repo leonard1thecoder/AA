@@ -23,6 +23,8 @@ public class UsersEntity {
     @OneToMany(mappedBy = "usersEntity",cascade = CascadeType.ALL)
     private List<LiquorStoreEntity> liquorStoreEntities;
 
+        @ManyToMany(mappedBy = "usersEntity",cascade = CascadeType.ALL)
+        private List<LiquorStoreStockEntity> liquorStoreStockEntities;
     private Long usersIdentityNo;
     private Short usersStatus,usersAge;
     private String usersFullName, usersEmailAddress, usersPassword, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
