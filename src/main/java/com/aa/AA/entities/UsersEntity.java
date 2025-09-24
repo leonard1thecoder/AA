@@ -31,6 +31,9 @@ public class UsersEntity {
 
     @OneToOne(mappedBy = "usersEntity")
     private UsersRegistersPromotionTypeEntity usersRegistersPromotionTypeEntity;
+
+    @OneToMany(mappedBy="usersEntity", cascade = CascadeType.ALL)
+    private List<EventAttendanceEntity> eventAttendanceEntites;
     private Long usersIdentityNo;
     private Short usersStatus, usersAge;
     private String usersFullName, usersEmailAddress, usersPassword, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
