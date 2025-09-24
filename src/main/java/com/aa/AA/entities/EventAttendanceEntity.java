@@ -1,7 +1,13 @@
 package com.aa.AA.entities;
 
 import jakarta.persistence.*;
+import lombok.*;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Getter
+@Setter
 @Entity
 public class EventAttendanceEntity {
 

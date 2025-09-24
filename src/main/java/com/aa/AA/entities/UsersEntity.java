@@ -20,6 +20,10 @@ public class UsersEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private PrivilegeEntity fkPrivilegeId;
 
+    @JoinColumn(name = "code")
+    @OneToOne
+    private Country countryEntity;
+
     @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
     private List<LiquorStoreEntity> liquorStoreEntities;
 
@@ -34,9 +38,10 @@ public class UsersEntity {
 
     @OneToMany(mappedBy="usersEntity", cascade = CascadeType.ALL)
     private List<EventAttendanceEntity> eventAttendanceEntites;
+
     private Long usersIdentityNo;
     private Short usersStatus, usersAge;
-    private String usersFullName, usersEmailAddress, usersPassword, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
+    private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersLanguage, usersModifiedDate;
 
     public Long getUsersIdentityNo() {
         return usersIdentityNo;
