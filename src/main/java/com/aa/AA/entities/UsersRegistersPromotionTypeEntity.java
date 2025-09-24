@@ -1,25 +1,31 @@
 package com.aa.AA.entities;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Getter
+@Setter
 public class UsersRegistersPromotionTypeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long pkUsersRegistersPromotionTypeId;
 
-    @JoinColumn
+    @JoinColumn(name="pkUsersId", nullable = false)
     @OneToOne
     private UsersEntity usersEntity;
 
-    @JoinColumn
+    @JoinColumn(name="pkRegistrationPromotionTypeId", nullable = false)
     @OneToOne
     private RegistrationPromotionTypeEntity registrationPromotionTypeEntity;
 
-    @JoinColumn
+    @JoinColumn(name="pkLiquorStoreId")
     @OneToOne
     private LiquorStoreEntity liquorStoreEntity;
 
