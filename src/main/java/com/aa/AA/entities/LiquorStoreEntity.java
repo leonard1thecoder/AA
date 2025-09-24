@@ -37,7 +37,11 @@ public class LiquorStoreEntity {
     @OneToMany(mappedBy = "liquorStoreEntity",cascade=CascadeType.ALL)
     private List<EventsEntity> eventsEntities;
 
-    private String liquorStoreName,liquorStoreCertNo,liquorStoreCountry,liquorCity;
+    @JoinColumn(name = "code")
+    @OneToOne
+    private Country countryEntity;
+
+    private String liquorStoreName,liquorStoreCertNo,liquorCity;
 
     private Byte liquorStoreStatus;
 
