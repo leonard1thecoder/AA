@@ -20,13 +20,16 @@ public class UsersEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private PrivilegeEntity fkPrivilegeId;
 
-    @OneToMany(mappedBy = "usersEntity",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
     private List<LiquorStoreEntity> liquorStoreEntities;
 
-        @ManyToMany(mappedBy = "usersEntity",cascade = CascadeType.ALL)
-        private List<LiquorStoreStockEntity> liquorStoreStockEntities;
+    @ManyToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
+    private List<LiquorStoreStockEntity> liquorStoreStockEntities;
+
+    @OneToMany(mappedBy = "usersEntity")
+    private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
     private Long usersIdentityNo;
-    private Short usersStatus,usersAge;
+    private Short usersStatus, usersAge;
     private String usersFullName, usersEmailAddress, usersPassword, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
 
     public Long getUsersIdentityNo() {
