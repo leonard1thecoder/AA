@@ -25,12 +25,14 @@ public class LiquorStoreEntity {
     @JoinColumn(name="pkPrivilegeId", nullable = false)
     private PrivilegeEntity privilegeEntity;
 
-    @OneToMany(mappedBy = "usersEntity",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "liquorStoreEntity",cascade = CascadeType.ALL)
     private List<LiquorStoreStockEntity> liquorStoreStockEntities;
 
-    @OneToMany(mappedBy = "", cascade= CascadeType.ALL)
+    @OneToMany(mappedBy = "liquorStoreEntity", cascade= CascadeType.ALL)
     private List<LiquorStorePromotionsEntity> liquorStorePromotionsEntities;
 
+    @OneToOne(mappedBy = "liquorStoreEntity", cascade= CascadeType.ALL)
+    private UsersRegistersPromotionTypeEntity usersRegistersPromotionTypeEntity;
     private String liquorStoreName,liquorStoreCertNo,liquorStoreCountry,liquorCity;
 
     private Byte liquorStoreStatus;
