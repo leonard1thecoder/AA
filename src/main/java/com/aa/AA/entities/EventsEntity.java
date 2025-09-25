@@ -18,16 +18,16 @@ public class EventsEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long pkEventId;
 
-    @JoinColumn(name = "pkLiquorStoreId",nullable = false)
+    @JoinColumn(name = "pkLiquorStoreId",nullable = true)
     @OneToMany
-    private LiquorStoreEntity liquorStoreEntity;
+    private List<LiquorStoreEntity> liquorStoreEntity;
 
-    @JoinColumn(name = "pkPrivilegeId",nullable = false)
+    @JoinColumn(name = "pkPrivilegeId",nullable = true)
     @OneToOne
     private PrivilegeEntity privilegeEntity;
 
-    @OneToMany(mappedBy="eventsEntity", cascade = CascadeType.ALL)
-    private List<EventAttendanceEntity> eventAttendanceEntites;
+//    @OneToMany(mappedBy="eventsEntity", cascade = CascadeType.ALL)
+//    private List<EventAttendanceEntity> eventAttendanceEntites;
 
     private String eventName,eventTheme;
 

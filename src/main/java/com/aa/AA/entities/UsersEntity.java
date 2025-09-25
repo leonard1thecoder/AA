@@ -19,10 +19,10 @@ public class UsersEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-
+    @Column(insertable=false, updatable=false)
     private Long pkUsersId;
-    @JoinColumn(name = "pkPrivilegeId", nullable = false)
-    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "pkPrivilegeId", nullable = true)
+    @OneToOne
     private PrivilegeEntity fkPrivilegeId;
 
     @JoinColumn(name = "code")
@@ -37,23 +37,23 @@ public class UsersEntity {
     @OneToOne
     @JoinColumn(name= "pkPromotionId")
     private  LiquorStorePromotionsEntity liquorStorePromotionsEntity;
-    @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
-    private List<AlcoholAgentEntity> alcoholAgentEntities;
-
-    @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
-    private List<LiquorStoreEntity> liquorStoreEntities;
-
-    @ManyToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
-    private List<LiquorStoreStockEntity> liquorStoreStockEntities;
-
-    @OneToMany(mappedBy = "usersEntity")
-    private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
-
-    @OneToOne(mappedBy = "usersEntity")
-    private UsersRegistersPromotionTypeEntity usersRegistersPromotionTypeEntity;
-
-    @OneToMany(mappedBy="usersEntity", cascade = CascadeType.ALL)
-    private List<EventAttendanceEntity> eventAttendanceEntities;
+//    @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
+//    private List<AlcoholAgentEntity> alcoholAgentEntities;
+//
+//    @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
+//    private List<LiquorStoreEntity> liquorStoreEntities;
+//
+//    @ManyToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
+//    private List<LiquorStoreStockEntity> liquorStoreStockEntities;
+//
+//    @OneToMany(mappedBy = "usersEntity")
+//    private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
+//
+//    @OneToOne(mappedBy = "usersEntity")
+//    private UsersRegistersPromotionTypeEntity usersRegistersPromotionTypeEntity;
+//
+//    @OneToMany(mappedBy="usersEntity", cascade = CascadeType.ALL)
+//    private List<EventAttendanceEntity> eventAttendanceEntities;
 
     private Long usersIdentityNo;
     /*

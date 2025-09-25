@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,11 +18,11 @@ public class LiquorStorePromotionUsersEntity {
     @GeneratedValue
     private Long pkPromotionUsersId;
 
-    @ManyToMany
-    @JoinColumn(name = "pkPromotionId", nullable = false)
-    private LiquorStorePromotionsEntity liquorStorePromotionsEntities;
+    @OneToMany
+    @JoinColumn(name = "pkPromotionId", nullable = true)
+    private List<LiquorStorePromotionsEntity> liquorStorePromotionsEntities;
 
-    @JoinColumn(name = "pkUsersId", nullable = false)
+    @JoinColumn(name = "pkUsersId", nullable = true)
     @ManyToOne
     private UsersEntity usersEntity;
 
