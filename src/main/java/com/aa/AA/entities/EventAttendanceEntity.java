@@ -3,6 +3,8 @@ package com.aa.AA.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -16,11 +18,11 @@ public class EventAttendanceEntity {
     private Long eventAttendanceId;
 
 
-    @JoinColumn(name= "",nullable = false)
-    @ManyToMany
-    private UsersEntity usersEntity;
+    @JoinColumn(name= "",nullable = true)
+    @OneToMany
+    private List<UsersEntity> usersEntity;
 
-    @JoinColumn(name="pkEventId",nullable = false)
+    @JoinColumn(name="pkEventId",nullable = true)
     @ManyToOne
     private EventsEntity eventsEntity;
 

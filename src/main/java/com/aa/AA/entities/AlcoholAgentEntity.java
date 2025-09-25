@@ -19,12 +19,12 @@ public class AlcoholAgentEntity {
     @GeneratedValue
     private Long pkAlcoholAgentId;
 
-    @JoinColumn(name = "pkUsersId", nullable = false)
-    @OneToMany
+    @JoinColumn(name = "pkUsersId", nullable = true)
+    @OneToOne
     private UsersEntity usersEntity;
 
-    @JoinColumn(name = "pkStockId", nullable = false)
-    @ManyToMany
+    @JoinColumn(name = "pkStockId", nullable = true)
+    @OneToMany
     private List<LiquorStoreStockEntity> liquorStoreStockEntity;
 
     private Integer itemsPurchase;

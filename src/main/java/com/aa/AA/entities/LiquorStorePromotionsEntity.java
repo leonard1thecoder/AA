@@ -28,18 +28,18 @@ public class LiquorStorePromotionsEntity {
     private Long pkPromotionId;
 
     @JoinColumn
-    @ManyToMany
-    private LiquorStoreEntity entity;
+    @OneToMany
+    private List<LiquorStoreEntity> entity;
 
     @JoinColumn
     @OneToOne
     private LiquorStorePromotionsTypeEntity liquorStorePromotionsTypeEntity;
 
-    @OneToMany(mappedBy = "liquorStorePromotionsEntities",cascade = CascadeType.ALL)
-    private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
-
-    @OneToMany(mappedBy = "liquorStorePromotionsEntity",cascade = CascadeType.ALL)
-    private  List<UsersEntity> usersEntities;
+//    @OneToMany(mappedBy = "liquorStorePromotionsEntities",cascade = CascadeType.ALL)
+//    private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
+//
+//    @OneToMany(mappedBy = "liquorStorePromotionsEntity",cascade = CascadeType.ALL)
+//    private  List<UsersEntity> usersEntities;
 
     private String promotionName, promotionDescription;
 

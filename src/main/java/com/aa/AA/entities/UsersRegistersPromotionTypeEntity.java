@@ -17,11 +17,11 @@ public class UsersRegistersPromotionTypeEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long pkUsersRegistersPromotionTypeId;
 
-    @JoinColumn(name="pkUsersId", nullable = false)
+    @JoinColumn(name="pkUsersId", nullable = true)
     @OneToOne
     private UsersEntity usersEntity;
 
-    @JoinColumn(name="pkRegistrationPromotionTypeId", nullable = false)
+    @JoinColumn(name="pkRegistrationPromotionTypeId", nullable = true)
     @OneToOne
     private RegistrationPromotionTypeEntity registrationPromotionTypeEntity;
 

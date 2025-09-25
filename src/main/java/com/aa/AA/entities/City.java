@@ -3,6 +3,8 @@ package com.aa.AA.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -16,11 +18,12 @@ public class City {
     private Integer cityId;
 
     @JoinColumn(name="code",nullable = false)
-    @OneToMany
+    @OneToOne
     private Country country;
 
     private String cityName;
 
+    private String district;
     private Integer population;
 
 

@@ -18,24 +18,24 @@ public class LiquorStoreStockEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long pkStockId;
 
-    @ManyToMany
+    @OneToMany
     @JoinColumn(name="pkUsersId", nullable =false)
-    private UsersEntity usersEntity;
+    private List<UsersEntity> usersEntity;
 
     @OneToOne
     @JoinColumn(name="pkPrivilegeId", nullable= false)
     private PrivilegeEntity privilegeEntity;
 
     @OneToOne
-    @JoinColumn(name="pkStockSizeId", nullable = false)
+    @JoinColumn(name="pkStockSizeId", nullable = true)
     private LiquorStoreStockSizeEntity liquorStoreStockSize;
 
-    @ManyToMany
-    @JoinColumn(name="pkLiquorStoreId", nullable = false)
-    private LiquorStoreEntity liquorStoreEntity;
+    @OneToMany
+    @JoinColumn(name="pkLiquorStoreId", nullable = true)
+    private List<LiquorStoreEntity> liquorStoreEntity;
 
-    @ManyToMany(mappedBy = "liquorStoreStockEntity", cascade = CascadeType.ALL)
-    private List<AlcoholAgentEntity> alcoholAgentEntities;
+//    @ManyToMany(mappedBy = "liquorStoreStockEntity", cascade = CascadeType.ALL)
+//    private List<AlcoholAgentEntity> alcoholAgentEntities;
 
     private LocalDateTime stockRegistrationDate, stockModifiedDate;
 
