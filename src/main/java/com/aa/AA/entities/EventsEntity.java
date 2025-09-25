@@ -19,15 +19,15 @@ public class EventsEntity {
     private Long pkEventId;
 
     @JoinColumn(name = "pkLiquorStoreId",nullable = true)
-    @OneToMany
-    private List<LiquorStoreEntity> liquorStoreEntity;
+    @ManyToOne
+    private LiquorStoreEntity liquorStoreEntity;
 
     @JoinColumn(name = "pkPrivilegeId",nullable = true)
     @OneToOne
     private PrivilegeEntity privilegeEntity;
 
-//    @OneToMany(mappedBy="eventsEntity", cascade = CascadeType.ALL)
-//    private List<EventAttendanceEntity> eventAttendanceEntites;
+    @OneToMany(mappedBy="eventsEntity", cascade = CascadeType.ALL)
+    private List<EventAttendanceEntity> eventAttendanceEntites;
 
     private String eventName,eventTheme;
 
