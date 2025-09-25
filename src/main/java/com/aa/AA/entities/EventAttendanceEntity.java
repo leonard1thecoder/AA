@@ -18,9 +18,9 @@ public class EventAttendanceEntity {
     private Long eventAttendanceId;
 
 
-    @JoinColumn(name= "",nullable = true)
-    @OneToMany
-    private List<UsersEntity> usersEntity;
+    @JoinColumn(name= "pkUsersId",nullable = true)
+    @ManyToOne
+    private UsersEntity usersEntity;
 
     @JoinColumn(name="pkEventId",nullable = true)
     @ManyToOne

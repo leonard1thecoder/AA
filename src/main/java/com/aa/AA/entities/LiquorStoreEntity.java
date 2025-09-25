@@ -18,24 +18,24 @@ public class LiquorStoreEntity {
     private Long pkLiquorStoreId;
 
     @ManyToOne
-    @JoinColumn(name="pkUsersId", nullable = true)
+    @JoinColumn(name="pkUsersId", nullable = false)
     private UsersEntity usersEntity;
 
     @OneToOne
-    @JoinColumn(name="pkPrivilegeId", nullable = true)
+    @JoinColumn(name="pkPrivilegeId", nullable = false)
     private PrivilegeEntity privilegeEntity;
 
-//    @OneToMany(mappedBy = "liquorStoreEntity",cascade = CascadeType.ALL)
-//    private List<LiquorStoreStockEntity> liquorStoreStockEntities;
-//
-//    @OneToMany(mappedBy = "liquorStoreEntity", cascade= CascadeType.ALL)
-//    private List<LiquorStorePromotionsEntity> liquorStorePromotionsEntities;
-//
-//    @OneToOne(mappedBy = "liquorStoreEntity", cascade= CascadeType.ALL)
-//    private UsersRegistersPromotionTypeEntity usersRegistersPromotionTypeEntity;
-//
-//    @OneToMany(mappedBy = "liquorStoreEntity",cascade=CascadeType.ALL)
-//    private List<EventsEntity> eventsEntities;
+    @OneToMany(mappedBy = "liquorStoreEntity",cascade = CascadeType.ALL)
+    private List<LiquorStoreStockEntity> liquorStoreStockEntities;
+
+    @OneToMany(mappedBy = "entity", cascade= CascadeType.ALL)
+    private List<LiquorStorePromotionsEntity> liquorStorePromotionsEntities;
+
+    @OneToOne(mappedBy = "liquorStoreEntity", cascade= CascadeType.ALL)
+    private UsersRegistersPromotionTypeEntity usersRegistersPromotionTypeEntity;
+
+    @OneToMany(mappedBy = "liquorStoreEntity",cascade=CascadeType.ALL)
+    private List<EventsEntity> eventsEntities;
 
 
 

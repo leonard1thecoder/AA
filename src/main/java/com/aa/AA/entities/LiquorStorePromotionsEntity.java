@@ -27,19 +27,19 @@ public class LiquorStorePromotionsEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long pkPromotionId;
 
-    @JoinColumn
-    @OneToMany
-    private List<LiquorStoreEntity> entity;
+    @JoinColumn(name = "pkLiquorStoreId")
+    @ManyToOne
+    private LiquorStoreEntity entity;
 
-    @JoinColumn
+    @JoinColumn(name="pkPromotionTypeId", nullable = false)
     @OneToOne
     private LiquorStorePromotionsTypeEntity liquorStorePromotionsTypeEntity;
 
-//    @OneToMany(mappedBy = "liquorStorePromotionsEntities",cascade = CascadeType.ALL)
-//    private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
-//
-//    @OneToMany(mappedBy = "liquorStorePromotionsEntity",cascade = CascadeType.ALL)
-//    private  List<UsersEntity> usersEntities;
+    @OneToMany(mappedBy = "liquorStorePromotionsEntities",cascade = CascadeType.ALL)
+    private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
+
+    @OneToMany(mappedBy = "liquorStorePromotionsEntity",cascade = CascadeType.ALL)
+    private  List<UsersEntity> usersEntities;
 
     private String promotionName, promotionDescription;
 
