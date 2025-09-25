@@ -10,6 +10,11 @@ import java.util.List;
 @ToString
 
 @NoArgsConstructor
+
+
+/*
+  * Once promotion deployed, need to change the uses liquor store
+ */
 public class UsersEntity {
 
     @Id
@@ -29,6 +34,12 @@ public class UsersEntity {
     private City city;
 
 
+    @OneToOne
+    @JoinColumn(name= "pkPromotionId")
+    private  LiquorStorePromotionsEntity liquorStorePromotionsEntity;
+    @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
+    private List<AlcoholAgentEntity> alcoholAgentEntities;
+
     @OneToMany(mappedBy = "usersEntity", cascade = CascadeType.ALL)
     private List<LiquorStoreEntity> liquorStoreEntities;
 
@@ -42,9 +53,13 @@ public class UsersEntity {
     private UsersRegistersPromotionTypeEntity usersRegistersPromotionTypeEntity;
 
     @OneToMany(mappedBy="usersEntity", cascade = CascadeType.ALL)
-    private List<EventAttendanceEntity> eventAttendanceEntites;
+    private List<EventAttendanceEntity> eventAttendanceEntities;
 
     private Long usersIdentityNo;
+    /*
+        NB!!! All type of promotion need separate fields
+     */
+    private Integer noPromotionToken;
     private Short usersStatus, usersAge;
     private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersModifiedDate;
 

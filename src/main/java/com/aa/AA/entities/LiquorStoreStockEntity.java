@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,6 +33,9 @@ public class LiquorStoreStockEntity {
     @ManyToMany
     @JoinColumn(name="pkLiquorStoreId", nullable = false)
     private LiquorStoreEntity liquorStoreEntity;
+
+    @ManyToMany(mappedBy = "liquorStoreStockEntity", cascade = CascadeType.ALL)
+    private List<AlcoholAgentEntity> alcoholAgentEntities;
 
     private LocalDateTime stockRegistrationDate, stockModifiedDate;
 
