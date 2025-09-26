@@ -9,7 +9,7 @@ public class LiquorStorePromotionsTypeEntity {
 
     @Id
     @GeneratedValue
-    private Byte pkPromotionTypeId;
+    private Byte promotionTypeId;
 
     private String promotionTypeName;
 

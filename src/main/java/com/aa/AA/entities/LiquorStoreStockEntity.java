@@ -16,7 +16,7 @@ public class LiquorStoreStockEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long pkStockId;
+    private Long stockId;
 
     @ManyToOne
     @JoinColumn(name="pkUsersId", nullable =false)

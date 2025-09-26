@@ -20,7 +20,7 @@ public class UsersEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(insertable=false, updatable=false)
-    private Long pkUsersId;
+    private Long usersId;
     @JoinColumn(name = "pkPrivilegeId", nullable = true)
     @OneToOne
     private PrivilegeEntity fkPrivilegeId;

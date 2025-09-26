@@ -14,7 +14,7 @@ public class PrivilegeEntity {
     @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int pkPrivilegeId;
+    private int privilegeId;
     @Setter
     @Getter
     private String privilegeName;

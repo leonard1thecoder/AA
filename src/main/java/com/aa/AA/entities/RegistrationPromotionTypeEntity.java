@@ -17,7 +17,7 @@ public class RegistrationPromotionTypeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Byte pkRegistrationPromotionTypeId;
+    private Byte registrationPromotionTypeId;
 
     private String promotionTypeName;
 

@@ -17,7 +17,7 @@ public class LiquorStoreStockSizeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Short pkStockSizeId;
+    private Short stockSizeId;
 
     private Short sizeInMilliLiter;
 

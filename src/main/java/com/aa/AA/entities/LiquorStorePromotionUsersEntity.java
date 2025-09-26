@@ -16,7 +16,7 @@ public class LiquorStorePromotionUsersEntity {
 
     @Id
     @GeneratedValue
-    private Long pkPromotionUsersId;
+    private Long promotionUsersId;
 
     @ManyToOne
     @JoinColumn(name = "pkPromotionId", nullable = false)

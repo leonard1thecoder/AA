@@ -15,7 +15,7 @@ public class UsersRegistersPromotionTypeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long pkUsersRegistersPromotionTypeId;
+    private Long usersRegistersPromotionTypeId;
 
     @JoinColumn(name="pkUsersId", nullable = true)
     @OneToOne
