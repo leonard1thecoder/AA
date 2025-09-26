@@ -17,7 +17,7 @@ public class AlcoholAgentEntity {
 
     @Id
     @GeneratedValue
-    private Long pkAlcoholAgentId;
+    private Long alcoholAgentId;
 
     @JoinColumn(name = "pkUsersId", nullable = false)
     @OneToOne

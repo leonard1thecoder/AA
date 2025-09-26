@@ -16,7 +16,7 @@ public class EventsEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long pkEventId;
+    private Long eventId;
 
     @JoinColumn(name = "pkLiquorStoreId",nullable = true)
     @ManyToOne
