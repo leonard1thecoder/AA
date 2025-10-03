@@ -52,4 +52,32 @@ public class UsersController {
         else
             return ResponseEntity.ok(list);
     }
+
+    @GetMapping("/getUsersByFullName/{UserFullName}")
+    public ResponseEntity<List<UsersRequest>> getUserByFullName(@PathVariable String UserFullName) {
+        UsersService.setServiceHandler("getUsersByFullName");
+        service.setUsersFullName(UserFullName);
+        var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
+
+        if (list.isEmpty())
+            return ResponseEntity.notFound().build();
+        else if (list == null)
+            return ResponseEntity.badRequest().build();
+        else
+            return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/findUserByIdentityNumber/{id}")
+    public ResponseEntity<List<UsersRequest>> getUserByIdNo(@PathVariable Long id) {
+        UsersService.setServiceHandler("getUsersByIdentityNo");
+        service.setUsersIdentityNo(id);
+        var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
+
+        if (list.isEmpty())
+            return ResponseEntity.notFound().build();
+        else if (list == null)
+            return ResponseEntity.badRequest().build();
+        else
+            return ResponseEntity.ok(list);
+    }
 }
