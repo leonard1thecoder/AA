@@ -1,14 +1,99 @@
 package com.aa.AA.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
-@AllArgsConstructor
+import java.io.Serializable;
+
+
 @Getter
-public class UsersRequest {
+@NoArgsConstructor
+@ToString
+public class UsersRequest implements Serializable {
     private Long usersIdentityNo;
-    private Integer ftPrivilegeId;
     private Short usersStatus,usersAge;
     private String usersFullName, usersEmailAddress, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
 
+    public UsersRequest(Long usersIdentityNo, Short usersAge, Short usersStatus, String usersFullName, String usersEmailAddress, String usersRegistrationDate, String usersCountryName, String usersLanguage, String usersModifiedDate) {
+        this.usersIdentityNo = usersIdentityNo;
+        this.usersAge = usersAge;
+        this.usersStatus = usersStatus;
+        this.usersFullName = usersFullName;
+        this.usersEmailAddress = usersEmailAddress;
+        this.usersRegistrationDate = usersRegistrationDate;
+        this.usersCountryName = usersCountryName;
+        this.usersLanguage = usersLanguage;
+        this.usersModifiedDate = usersModifiedDate;
+    }
+
+    public Long getUsersIdentityNo() {
+        return usersIdentityNo;
+    }
+
+    public void setUsersIdentityNo(Long usersIdentityNo) {
+        this.usersIdentityNo = usersIdentityNo;
+    }
+
+    public Short getUsersAge() {
+        return usersAge;
+    }
+
+    public void setUsersAge(Short usersAge) {
+        this.usersAge = usersAge;
+    }
+
+    public Short getUsersStatus() {
+        return usersStatus;
+    }
+
+    public void setUsersStatus(Short usersStatus) {
+        this.usersStatus = usersStatus;
+    }
+
+    public String getUsersFullName() {
+        return usersFullName;
+    }
+
+    public void setUsersFullName(String usersFullName) {
+        this.usersFullName = usersFullName;
+    }
+
+    public String getUsersEmailAddress() {
+        return usersEmailAddress;
+    }
+
+    public void setUsersEmailAddress(String usersEmailAddress) {
+        this.usersEmailAddress = usersEmailAddress;
+    }
+
+    public String getUsersCountryName() {
+        return usersCountryName;
+    }
+
+    public void setUsersCountryName(String usersCountryName) {
+        this.usersCountryName = usersCountryName;
+    }
+
+    public String getUsersRegistrationDate() {
+        return usersRegistrationDate;
+    }
+
+    public void setUsersRegistrationDate(String usersRegistrationDate) {
+        this.usersRegistrationDate = usersRegistrationDate;
+    }
+
+    public String getUsersLanguage() {
+        return usersLanguage;
+    }
+
+    public void setUsersLanguage(String usersLanguage) {
+        this.usersLanguage = usersLanguage;
+    }
+
+    public String getUsersModifiedDate() {
+        return usersModifiedDate;
+    }
+
+    public void setUsersModifiedDate(String usersModifiedDate) {
+        this.usersModifiedDate = usersModifiedDate;
+    }
 }
