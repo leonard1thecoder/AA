@@ -38,9 +38,6 @@ public class LiquorStorePromotionsEntity {
     @OneToMany(mappedBy = "liquorStorePromotionsEntities",cascade = CascadeType.ALL)
     private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
 
-    @OneToMany(mappedBy = "liquorStorePromotionsEntity",cascade = CascadeType.ALL)
-    private  List<UsersEntity> usersEntities;
-
     private String promotionName, promotionDescription;
 
     private LocalDateTime promotionCreationDate, promotionExpirationDate;
