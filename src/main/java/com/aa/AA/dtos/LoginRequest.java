@@ -24,4 +24,12 @@ public class LoginRequest {
     public String getUsersPassword() {
         return usersPassword;
     }
+
+    public void setUsersEmailAddress(String usersEmailAddress) {
+        this.usersEmailAddress = usersEmailAddress;
+    }
+
+    public void setUsersPassword(String usersPassword) {
+        this.usersPassword = usersPassword;
+    }
 }
