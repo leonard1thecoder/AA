@@ -30,6 +30,10 @@ public class UsersService implements Callable<List<UsersRequest>> {
     private Long usersIdentityNo, pkUsersId;
     @Setter
     private String usersFullName;
+    @Setter
+    private String usersEmailAddress;
+    @Setter
+    private String usersPassword;
 
     private UsersMapper usersMapper;
 
@@ -94,6 +98,10 @@ public class UsersService implements Callable<List<UsersRequest>> {
         return usersRepository.findByUsersFullName(usersFullName).stream().map(usersMapper::toDto).toList();
     }
 
+    private List<UsersRequest> login(){
+        return usersRepository.findByUsersEmailAddressAndUsersPassword(usersEmailAddress,usersPassword).stream().map(usersMapper::toDto).toList();
+    }
+
     @Override
     public List<UsersRequest> call()  {
          if(handleServiceHandler(serviceHandler) != "START_SERVICE")
@@ -108,6 +116,8 @@ public class UsersService implements Callable<List<UsersRequest>> {
                     return this.findUserByUsersIdentityNo();
                 case "getUsersById":
                     return this.findUserById();
+                case "userLogin":
+                    return this.login();
                 default:
                     throw new ServiceHandlerException("Failed execute service due to incorrect service string");
             }

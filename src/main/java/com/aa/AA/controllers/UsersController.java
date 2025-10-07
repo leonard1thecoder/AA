@@ -1,14 +1,13 @@
 package com.aa.AA.controllers;
 
+import com.aa.AA.dtos.LoginRequest;
 import com.aa.AA.dtos.UsersRequest;
 import com.aa.AA.services.UsersService;
 import com.aa.AA.utils.executors.UsersServiceConcurrentExecutor;
+import com.aa.AA.utils.mappers.UsersMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,11 +17,12 @@ public class UsersController {
 
     private UsersService service;
     private UsersServiceConcurrentExecutor usersServiceConcurrentExecutor;
-
+    private UsersMapper mapper;
     @Autowired
-    public UsersController(@Autowired UsersService service,@Autowired UsersServiceConcurrentExecutor usersServiceConcurrentExecutor) {
+    public UsersController(@Autowired UsersMapper mapper,@Autowired UsersService service,@Autowired UsersServiceConcurrentExecutor usersServiceConcurrentExecutor) {
         this.usersServiceConcurrentExecutor = usersServiceConcurrentExecutor;
         this.service = service;
+        this.mapper = mapper;
     }
 
     @GetMapping("/getAllUsers")
@@ -57,6 +57,21 @@ public class UsersController {
     public ResponseEntity<List<UsersRequest>> getUserByFullName(@PathVariable String UserFullName) {
         UsersService.setServiceHandler("getUsersByFullName");
         service.setUsersFullName(UserFullName);
+        var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
+
+        if (list.isEmpty())
+            return ResponseEntity.notFound().build();
+        else if (list == null)
+            return ResponseEntity.badRequest().build();
+        else
+            return ResponseEntity.ok(list);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<List<UsersRequest>> login(@RequestBody LoginRequest request) {
+        UsersService.setServiceHandler("getUsersByFullName");
+        service.setUsersPassword(request.getUsersPassword());
+        service.setUsersEmailAddress(request.getUsersEmailAddress());
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
 
         if (list.isEmpty())
