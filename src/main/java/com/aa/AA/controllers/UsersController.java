@@ -1,6 +1,7 @@
 package com.aa.AA.controllers;
 
 import com.aa.AA.dtos.LoginRequest;
+import com.aa.AA.dtos.UpdatePasswordRequest;
 import com.aa.AA.dtos.UsersRequest;
 import com.aa.AA.services.UsersService;
 import com.aa.AA.utils.executors.UsersServiceConcurrentExecutor;
@@ -67,6 +68,24 @@ public class UsersController {
             return ResponseEntity.ok(list);
     }
 
+    @PutMapping("/updatePassword/{usersEmailAddress}")
+    public ResponseEntity<Void> updateUsersPassword(@PathVariable String usersEmailAddress, @RequestBody UpdatePasswordRequest request) {
+        UsersService.setServiceHandler("getUsersByFullName");
+        service.setUsersEmailAddress(usersEmailAddress);
+
+        if(request.getUsersPassword().equals(request.getUsersConfirmPassword())) {
+            var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
+
+            if (list.isEmpty())
+                return ResponseEntity.notFound().build();
+            else if (list == null)
+                return ResponseEntity.badRequest().build();
+            else
+                return ResponseEntity.noContent().build();
+        }else{
+            return ResponseEntity.badRequest().build();
+        }
+    }
     @PostMapping("/login")
     public ResponseEntity<List<UsersRequest>> login(@RequestBody LoginRequest request) {
         UsersService.setServiceHandler("getUsersByFullName");

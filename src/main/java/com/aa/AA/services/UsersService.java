@@ -2,6 +2,7 @@ package com.aa.AA.services;
 
 import com.aa.AA.dtos.UsersRequest;
 import com.aa.AA.entities.UsersEntity;
+import com.aa.AA.utils.exceptions.UserEmailDoesNotExist;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class UsersService implements Callable<List<UsersRequest>> {
     }
 
     @Autowired
-    public UsersService(@Autowired UsersRepository  usersRepository,@Autowired UsersMapper usersMapper) {
+    public UsersService(@Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
     }
@@ -86,6 +87,21 @@ public class UsersService implements Callable<List<UsersRequest>> {
         return usersRepository.findByUsersIdentityNo(usersIdentityNo).stream().map(usersMapper::toDto).toList();
     }
 
+    private List<UsersRequest> updateUsersPassword() {
+
+        var list = usersRepository.findByUsersEmailAddress(this.usersEmailAddress);
+        if (list.size() == 1) {
+            var user = list.get(0);
+            user.setUsersPassword(this.usersPassword);
+            usersRepository.save(user);
+            return list.stream().map(usersMapper::toDto).toList();
+        } else if (list.isEmpty()) {
+            throw new UserEmailDoesNotExist("User doesn't exists, check your email address");
+        } else {
+            throw new RuntimeException("Many users exists with same email");
+        }
+    }
+
     private List<UsersRequest> findUserById() {
         return usersRepository.findById(pkUsersId).stream().map(usersMapper::toDto).toList();
     }
@@ -98,13 +114,13 @@ public class UsersService implements Callable<List<UsersRequest>> {
         return usersRepository.findByUsersFullName(usersFullName).stream().map(usersMapper::toDto).toList();
     }
 
-    private List<UsersRequest> login(){
-        return usersRepository.findByUsersEmailAddressAndUsersPassword(usersEmailAddress,usersPassword).stream().map(usersMapper::toDto).toList();
+    private List<UsersRequest> login() {
+        return usersRepository.findByUsersEmailAddressAndUsersPassword(usersEmailAddress, usersPassword).stream().map(usersMapper::toDto).toList();
     }
 
     @Override
-    public List<UsersRequest> call()  {
-         if(handleServiceHandler(serviceHandler) != "START_SERVICE")
+    public List<UsersRequest> call() {
+        if (handleServiceHandler(serviceHandler) != "START_SERVICE")
             switch (serviceHandler) {
                 case "registerUsers":
                     return this.registerUsers();
@@ -121,8 +137,8 @@ public class UsersService implements Callable<List<UsersRequest>> {
                 default:
                     throw new ServiceHandlerException("Failed execute service due to incorrect service string");
             }
-         else
-             return new ArrayList<>();
+        else
+            return new ArrayList<>();
 
     }
 }
