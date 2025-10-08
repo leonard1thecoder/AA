@@ -1,5 +1,6 @@
 package com.aa.AA.services;
 
+import com.aa.AA.dtos.UsersRegisterRequest;
 import com.aa.AA.dtos.UsersRequest;
 import com.aa.AA.entities.UsersEntity;
 import com.aa.AA.utils.exceptions.UserEmailDoesNotExist;
@@ -25,15 +26,14 @@ public class UsersService implements Callable<List<UsersRequest>> {
 
 
     private UsersRepository usersRepository;
-    @Setter
-    private static UsersEntity usersEntity;
-    @Setter
+    private UsersRegisterRequest usersRegisterRequest;
+
     private Long usersIdentityNo, pkUsersId;
-    @Setter
+    
     private String usersFullName;
-    @Setter
+    
     private String usersEmailAddress;
-    @Setter
+    
     private String usersPassword;
 
     private UsersMapper usersMapper;
@@ -48,9 +48,15 @@ public class UsersService implements Callable<List<UsersRequest>> {
         this.usersMapper = usersMapper;
     }
 
-    public static void setUsersEntity(UsersEntity usersEntity) {
-        UsersService.usersEntity = usersEntity;
+    public UsersRegisterRequest usersRegisterRequest() {
+        return usersRegisterRequest;
     }
+
+    public UsersService setUsersRegisterRequest(UsersRegisterRequest usersRegisterRequest) {
+        this.usersRegisterRequest = usersRegisterRequest;
+        return this;
+    }
+
 
     public void setUsersIdentityNo(Long usersIdentityNo) {
         this.usersIdentityNo = usersIdentityNo;
@@ -69,7 +75,9 @@ public class UsersService implements Callable<List<UsersRequest>> {
     }
 
     private List<UsersRequest> registerUsers() {
-        var entitiesList = usersRepository.findByUsersIdentityNo(usersIdentityNo);
+
+        var usersEntity  = usersMapper.toEntity(this.usersRegisterRequest);
+        var entitiesList = usersRepository.findByUsersIdentityNo(usersEntity.getUsersIdentityNo());
         entitiesList.forEach(s -> {
             if (s.getUsersIdentityNo() == usersEntity.getUsersIdentityNo()) {
                 throw new UsersExistsException("Can't register user : User has already been registered");
@@ -139,6 +147,14 @@ public class UsersService implements Callable<List<UsersRequest>> {
             }
         else
             return new ArrayList<>();
+
+    }
+
+    public void setUsersEmailAddress(String usersEmailAddress) {
+    }
+
+    public void setUsersPassword(String usersPassword) {
+
 
     }
 }
