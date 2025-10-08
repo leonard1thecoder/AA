@@ -2,6 +2,7 @@ package com.aa.AA.controllers;
 
 import com.aa.AA.dtos.LoginRequest;
 import com.aa.AA.dtos.UpdatePasswordRequest;
+import com.aa.AA.dtos.UsersRegisterRequest;
 import com.aa.AA.dtos.UsersRequest;
 import com.aa.AA.services.UsersService;
 import com.aa.AA.utils.executors.UsersServiceConcurrentExecutor;
@@ -9,6 +10,7 @@ import com.aa.AA.utils.mappers.UsersMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -25,6 +27,24 @@ public class UsersController {
         this.service = service;
         this.mapper = mapper;
     }
+
+
+    @PostMapping("UserRegisters")
+    public ResponseEntity<List<UsersRequest>> userRegisters(@RequestBody UsersRegisterRequest request, UriComponentsBuilder uriBuilder){
+
+        service.setUsersRegisterRequest(request);
+        UsersService.setServiceHandler("registerUsers");
+        var set = usersServiceConcurrentExecutor.buildServiceExecutor(service);
+
+        if (set.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        } else {
+            // creating status 201
+            var uri = uriBuilder.path("/dev/api/findUserByIdentityNumber/{id}").buildAndExpand(request.usersIdentityNo()).toUri();
+            return ResponseEntity.created(uri).body(set);
+        }
+    }
+
 
     @GetMapping("/getAllUsers")
     public ResponseEntity<List<UsersRequest>> getAllUsers() {
