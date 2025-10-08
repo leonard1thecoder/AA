@@ -1,10 +1,8 @@
 package com.aa.AA.services;
 
-import com.aa.AA.dtos.UsersRegisterRequest;
-import com.aa.AA.dtos.UsersRequest;
+import com.aa.AA.dtos.*;
 import com.aa.AA.entities.UsersEntity;
 import com.aa.AA.utils.exceptions.UserEmailDoesNotExist;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.aa.AA.utils.exceptions.ServiceHandlerException;
@@ -24,28 +22,30 @@ public class UsersService implements Callable<List<UsersRequest>> {
 
     public static String serviceHandler;
 
-
+    private UsersFullNameRequest usersFullNameRequest;
     private UsersRepository usersRepository;
     private UsersRegisterRequest usersRegisterRequest;
+    private UpdatePasswordRequest updatePasswordRequest;
+    private LoginRequest loginRequest;
+    private IdentityNoRequest identityNoRequest;
+    private Long pkUsersId;
 
-    private Long usersIdentityNo, pkUsersId;
-    
-    private String usersFullName;
-    
-    private String usersEmailAddress;
-    
-    private String usersPassword;
 
     private UsersMapper usersMapper;
-
-    public UsersService() {
-        super();
-    }
 
     @Autowired
     public UsersService(@Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
+    }
+
+    public UsersFullNameRequest usersFullNameRequest() {
+        return usersFullNameRequest;
+    }
+
+    public UsersService setUsersFullNameRequest(UsersFullNameRequest usersFullNameRequest) {
+        this.usersFullNameRequest = usersFullNameRequest;
+        return this;
     }
 
     public UsersRegisterRequest usersRegisterRequest() {
@@ -57,14 +57,33 @@ public class UsersService implements Callable<List<UsersRequest>> {
         return this;
     }
 
-
-    public void setUsersIdentityNo(Long usersIdentityNo) {
-        this.usersIdentityNo = usersIdentityNo;
+    public LoginRequest loginRequest() {
+        return loginRequest;
     }
 
-    public void setUsersFullName(String usersFullName) {
-        this.usersFullName = usersFullName;
+    public IdentityNoRequest identityNoRequest() {
+        return identityNoRequest;
     }
+
+    public UsersService setIdentityNoRequest(IdentityNoRequest identityNoRequest) {
+        this.identityNoRequest = identityNoRequest;
+        return this;
+    }
+
+    public UsersService setLoginRequest(LoginRequest loginRequest) {
+        this.loginRequest = loginRequest;
+        return this;
+    }
+
+    public UpdatePasswordRequest updatePasswordRequest() {
+        return updatePasswordRequest;
+    }
+
+    public UsersService setUpdatePasswordRequest(UpdatePasswordRequest updatePasswordRequest) {
+        this.updatePasswordRequest = updatePasswordRequest;
+        return this;
+    }
+
 
     public void setPkUsersId(Long pkUsersId) {
         this.pkUsersId = pkUsersId;
@@ -76,7 +95,7 @@ public class UsersService implements Callable<List<UsersRequest>> {
 
     private List<UsersRequest> registerUsers() {
 
-        var usersEntity  = usersMapper.toEntity(this.usersRegisterRequest);
+        var usersEntity = usersMapper.toEntity(this.usersRegisterRequest());
         var entitiesList = usersRepository.findByUsersIdentityNo(usersEntity.getUsersIdentityNo());
         entitiesList.forEach(s -> {
             if (s.getUsersIdentityNo() == usersEntity.getUsersIdentityNo()) {
@@ -92,15 +111,17 @@ public class UsersService implements Callable<List<UsersRequest>> {
     }
 
     private List<UsersRequest> findUserByUsersIdentityNo() {
-        return usersRepository.findByUsersIdentityNo(usersIdentityNo).stream().map(usersMapper::toDto).toList();
+        var entity = usersMapper.toEntity(identityNoRequest());
+        return usersRepository.findByUsersIdentityNo(entity.getUsersIdentityNo()).stream().map(usersMapper::toDto).toList();
     }
 
     private List<UsersRequest> updateUsersPassword() {
 
-        var list = usersRepository.findByUsersEmailAddress(this.usersEmailAddress);
+        var entity = usersMapper.toEntity(this.updatePasswordRequest());
+        var list = usersRepository.findByUsersEmailAddress(entity.getUsersEmailAddress());
         if (list.size() == 1) {
             var user = list.get(0);
-            user.setUsersPassword(this.usersPassword);
+            user.setUsersPassword(entity.getUsersPassword());
             usersRepository.save(user);
             return list.stream().map(usersMapper::toDto).toList();
         } else if (list.isEmpty()) {
@@ -119,11 +140,13 @@ public class UsersService implements Callable<List<UsersRequest>> {
     }
 
     private List<UsersRequest> findAllUsersByName() {
-        return usersRepository.findByUsersFullName(usersFullName).stream().map(usersMapper::toDto).toList();
+        var entity = usersMapper.toEntity(usersFullNameRequest());
+        return usersRepository.findByUsersFullName(entity.getUsersFullName()).stream().map(usersMapper::toDto).toList();
     }
 
     private List<UsersRequest> login() {
-        return usersRepository.findByUsersEmailAddressAndUsersPassword(usersEmailAddress, usersPassword).stream().map(usersMapper::toDto).toList();
+        var entity = usersMapper.toEntity(loginRequest());
+        return usersRepository.findByUsersEmailAddressAndUsersPassword(entity.getUsersEmailAddress(), entity.getUsersPassword()).stream().map(usersMapper::toDto).toList();
     }
 
     @Override
@@ -147,14 +170,6 @@ public class UsersService implements Callable<List<UsersRequest>> {
             }
         else
             return new ArrayList<>();
-
-    }
-
-    public void setUsersEmailAddress(String usersEmailAddress) {
-    }
-
-    public void setUsersPassword(String usersPassword) {
-
 
     }
 }

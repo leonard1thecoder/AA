@@ -1,9 +1,6 @@
 package com.aa.AA.controllers;
 
-import com.aa.AA.dtos.LoginRequest;
-import com.aa.AA.dtos.UpdatePasswordRequest;
-import com.aa.AA.dtos.UsersRegisterRequest;
-import com.aa.AA.dtos.UsersRequest;
+import com.aa.AA.dtos.*;
 import com.aa.AA.services.UsersService;
 import com.aa.AA.utils.executors.UsersServiceConcurrentExecutor;
 import com.aa.AA.utils.mappers.UsersMapper;
@@ -74,10 +71,10 @@ public class UsersController {
             return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/getUsersByFullName/{UserFullName}")
-    public ResponseEntity<List<UsersRequest>> getUserByFullName(@PathVariable String UserFullName) {
+    @PostMapping("/getUsersByFullName")
+    public ResponseEntity<List<UsersRequest>> getUserByFullName(@PathVariable UsersFullNameRequest request) {
         UsersService.setServiceHandler("getUsersByFullName");
-        service.setUsersFullName(UserFullName);
+        service.setUsersFullNameRequest(request);
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
 
         if (list.isEmpty())
@@ -91,7 +88,7 @@ public class UsersController {
     @PutMapping("/updatePassword/{usersEmailAddress}")
     public ResponseEntity<Void> updateUsersPassword(@PathVariable String usersEmailAddress, @RequestBody UpdatePasswordRequest request) {
         UsersService.setServiceHandler("getUsersByFullName");
-        service.setUsersEmailAddress(usersEmailAddress);
+        service.setUpdatePasswordRequest(request);
 
         if(request.getUsersPassword().equals(request.getUsersConfirmPassword())) {
             var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
@@ -109,8 +106,7 @@ public class UsersController {
     @PostMapping("/login")
     public ResponseEntity<List<UsersRequest>> login(@RequestBody LoginRequest request) {
         UsersService.setServiceHandler("getUsersByFullName");
-        service.setUsersPassword(request.getUsersPassword());
-        service.setUsersEmailAddress(request.getUsersEmailAddress());
+        service.setLoginRequest(request);
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
 
         if (list.isEmpty())
@@ -121,10 +117,10 @@ public class UsersController {
             return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/findUserByIdentityNumber/{id}")
-    public ResponseEntity<List<UsersRequest>> getUserByIdNo(@PathVariable Long id) {
+    @PostMapping("/findUserByIdentityNumber/{id}")
+    public ResponseEntity<List<UsersRequest>> getUserByIdNo(@RequestBody IdentityNoRequest request) {
         UsersService.setServiceHandler("getUsersByIdentityNo");
-        service.setUsersIdentityNo(id);
+        service.setIdentityNoRequest(request);
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
 
         if (list.isEmpty())
