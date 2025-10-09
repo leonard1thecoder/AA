@@ -44,11 +44,11 @@ public class UsersEntity {
     }
 
     public Long getPkUsersId() {
-        return pkUsersId;
+        return usersId;
     }
 
-    public void setPkUsersId(Long pkUsersId) {
-        this.pkUsersId = pkUsersId;
+    public void setPkUsersId(Long usersId) {
+        this.usersId = usersId;
     }
 
     public PrivilegeEntity getFkPrivilegeId() {
