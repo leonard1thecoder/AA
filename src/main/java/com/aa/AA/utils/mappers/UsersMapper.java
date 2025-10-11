@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 
 public interface UsersMapper {
-    UsersRequest toDto(UsersEntity request);
+    UsersResponse toDto(UsersEntity request);
     UsersEntity toEntity(UsersRegisterRequest request);
     UsersEntity toEntity(UpdatePasswordRequest request);
     UsersEntity toEntity(LoginRequest request);
