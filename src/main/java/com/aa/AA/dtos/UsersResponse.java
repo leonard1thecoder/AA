@@ -8,12 +8,12 @@ import java.io.Serializable;
 @Getter
 @NoArgsConstructor
 @ToString
-public class UsersRequest implements Serializable {
+public class UsersResponse implements Serializable {
     private Long usersIdentityNo;
     private Short usersStatus,usersAge;
     private String usersFullName, usersEmailAddress, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
-
-    public UsersRequest(Long usersIdentityNo, Short usersAge, Short usersStatus, String usersFullName, String usersEmailAddress, String usersRegistrationDate, String usersCountryName, String usersLanguage, String usersModifiedDate) {
+    private String token;
+    public UsersResponse(Long usersIdentityNo, Short usersAge, Short usersStatus, String usersFullName, String usersEmailAddress, String usersRegistrationDate, String usersCountryName, String usersLanguage, String usersModifiedDate) {
         this.usersIdentityNo = usersIdentityNo;
         this.usersAge = usersAge;
         this.usersStatus = usersStatus;
@@ -33,6 +33,14 @@ public class UsersRequest implements Serializable {
         this.usersIdentityNo = usersIdentityNo;
     }
 
+    public String getUsersFullName() {
+        return usersFullName;
+    }
+
+    public void setUsersFullName(String usersFullName) {
+        this.usersFullName = usersFullName;
+    }
+
     public Short getUsersAge() {
         return usersAge;
     }
@@ -47,14 +55,6 @@ public class UsersRequest implements Serializable {
 
     public void setUsersStatus(Short usersStatus) {
         this.usersStatus = usersStatus;
-    }
-
-    public String getUsersFullName() {
-        return usersFullName;
-    }
-
-    public void setUsersFullName(String usersFullName) {
-        this.usersFullName = usersFullName;
     }
 
     public String getUsersEmailAddress() {
@@ -95,5 +95,13 @@ public class UsersRequest implements Serializable {
 
     public void setUsersModifiedDate(String usersModifiedDate) {
         this.usersModifiedDate = usersModifiedDate;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

@@ -1,6 +1,6 @@
 package com.aa.AA.utils.executors;
 
-import com.aa.AA.dtos.UsersRequest;
+import com.aa.AA.dtos.UsersResponse;
 import com.aa.AA.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,8 +22,8 @@ public class UsersServiceConcurrentExecutor {
         this.executorService = Executors.newFixedThreadPool(threads);
     }
 
-   public  List<UsersRequest> buildServiceExecutor() {
-        Future <List<UsersRequest>> future = this.executorService.submit(this.service);
+   public  List<UsersResponse> buildServiceExecutor() {
+        Future <List<UsersResponse>> future = this.executorService.submit(this.service);
        try {
            return  future.get(15, TimeUnit.SECONDS);
        } catch (InterruptedException e) {
@@ -35,8 +35,8 @@ public class UsersServiceConcurrentExecutor {
        }
    }
 
-    public  List<UsersRequest> buildServiceExecutor(UsersService service) {
-        Future <List<UsersRequest>> future = this.executorService.submit(service);
+    public  List<UsersResponse> buildServiceExecutor(UsersService service) {
+        Future <List<UsersResponse>> future = this.executorService.submit(service);
         try {
             return  future.get(15, TimeUnit.SECONDS);
         } catch (InterruptedException e) {

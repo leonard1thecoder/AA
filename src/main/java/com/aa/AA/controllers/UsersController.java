@@ -7,44 +7,29 @@ import com.aa.AA.utils.mappers.UsersMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/dev/api")
+@RequestMapping("/dev/api/users/")
 public class UsersController {
 
     private UsersService service;
     private UsersServiceConcurrentExecutor usersServiceConcurrentExecutor;
     private UsersMapper mapper;
     @Autowired
-    public UsersController(@Autowired UsersMapper mapper,@Autowired UsersService service,@Autowired UsersServiceConcurrentExecutor usersServiceConcurrentExecutor) {
+    public UsersController(@Autowired UsersMapper mapper, @Autowired UsersService service, @Autowired UsersServiceConcurrentExecutor usersServiceConcurrentExecutor) {
         this.usersServiceConcurrentExecutor = usersServiceConcurrentExecutor;
         this.service = service;
         this.mapper = mapper;
     }
 
 
-    @PostMapping("UserRegisters")
-    public ResponseEntity<List<UsersRequest>> userRegisters(@RequestBody UsersRegisterRequest request, UriComponentsBuilder uriBuilder){
 
-        service.setUsersRegisterRequest(request);
-        UsersService.setServiceHandler("registerUsers");
-        var set = usersServiceConcurrentExecutor.buildServiceExecutor(service);
-
-        if (set.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        } else {
-            // creating status 201
-            var uri = uriBuilder.path("/dev/api/findUserByIdentityNumber/{id}").buildAndExpand(request.usersIdentityNo()).toUri();
-            return ResponseEntity.created(uri).body(set);
-        }
-    }
 
 
     @GetMapping("/getAllUsers")
-    public ResponseEntity<List<UsersRequest>> getAllUsers() {
+    public ResponseEntity<List<UsersResponse>> getAllUsers() {
         UsersService.setServiceHandler("getAllUsers");
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor();
 
@@ -58,7 +43,7 @@ public class UsersController {
 
 
     @GetMapping("/getAllUsers/{id}")
-    public ResponseEntity<List<UsersRequest>> getUserById(@PathVariable Long id) {
+    public ResponseEntity<List<UsersResponse>> getUserById(@PathVariable Long id) {
         UsersService.setServiceHandler("getUsersById");
         service.setPkUsersId(id);
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
@@ -72,7 +57,7 @@ public class UsersController {
     }
 
     @PostMapping("/getUsersByFullName")
-    public ResponseEntity<List<UsersRequest>> getUserByFullName(@PathVariable UsersFullNameRequest request) {
+    public ResponseEntity<List<UsersResponse>> getUserByFullName(@PathVariable UsersFullNameRequest request) {
         UsersService.setServiceHandler("getUsersByFullName");
         service.setUsersFullNameRequest(request);
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
@@ -85,40 +70,11 @@ public class UsersController {
             return ResponseEntity.ok(list);
     }
 
-    @PutMapping("/updatePassword/{usersEmailAddress}")
-    public ResponseEntity<Void> updateUsersPassword(@PathVariable String usersEmailAddress, @RequestBody UpdatePasswordRequest request) {
-        UsersService.setServiceHandler("getUsersByFullName");
-        service.setUpdatePasswordRequest(request);
 
-        if(request.getUsersPassword().equals(request.getUsersConfirmPassword())) {
-            var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
 
-            if (list.isEmpty())
-                return ResponseEntity.notFound().build();
-            else if (list == null)
-                return ResponseEntity.badRequest().build();
-            else
-                return ResponseEntity.noContent().build();
-        }else{
-            return ResponseEntity.badRequest().build();
-        }
-    }
-    @PostMapping("/login")
-    public ResponseEntity<List<UsersRequest>> login(@RequestBody LoginRequest request) {
-        UsersService.setServiceHandler("getUsersByFullName");
-        service.setLoginRequest(request);
-        var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
-
-        if (list.isEmpty())
-            return ResponseEntity.notFound().build();
-        else if (list == null)
-            return ResponseEntity.badRequest().build();
-        else
-            return ResponseEntity.ok(list);
-    }
 
     @PostMapping("/findUserByIdentityNumber/{id}")
-    public ResponseEntity<List<UsersRequest>> getUserByIdNo(@RequestBody IdentityNoRequest request) {
+    public ResponseEntity<List<UsersResponse>> getUserByIdNo(@RequestBody IdentityNoRequest request) {
         UsersService.setServiceHandler("getUsersByIdentityNo");
         service.setIdentityNoRequest(request);
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
