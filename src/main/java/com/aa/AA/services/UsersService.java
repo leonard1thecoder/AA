@@ -2,12 +2,12 @@ package com.aa.AA.services;
 
 import com.aa.AA.dtos.*;
 import com.aa.AA.entities.UsersEntity;
-import com.aa.AA.utils.exceptions.UserEmailDoesNotExist;
+import com.aa.AA.utils.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.aa.AA.utils.exceptions.ServiceHandlerException;
-import com.aa.AA.utils.exceptions.UserUnderAgeOf18Exception;
-import com.aa.AA.utils.exceptions.UsersExistsException;
 import com.aa.AA.utils.mappers.UsersMapper;
 import com.aa.AA.utils.repository.UsersRepository;
 
@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
 import static com.aa.AA.utils.HandlingLoadingService.*;
 
 @Service
-public class UsersService implements Callable<List<UsersRequest>> {
+public class UsersService implements Callable<List<UsersResponse>> {
 
     public static String serviceHandler;
 
@@ -29,14 +29,18 @@ public class UsersService implements Callable<List<UsersRequest>> {
     private LoginRequest loginRequest;
     private IdentityNoRequest identityNoRequest;
     private Long pkUsersId;
-
-
+    private JwtService jwtService;
+    private AuthenticationManager authenticationManager;
     private UsersMapper usersMapper;
-
+    private PasswordEncoder passwordEncoder;
     @Autowired
-    public UsersService(@Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
+    public UsersService(@Autowired PasswordEncoder passwordEncoder,@Autowired JwtService jwtService,@Autowired AuthenticationManager authenticationManager,@Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
+
     }
 
     public UsersFullNameRequest usersFullNameRequest() {
@@ -93,9 +97,10 @@ public class UsersService implements Callable<List<UsersRequest>> {
         UsersService.serviceHandler = serviceHandler;
     }
 
-    private List<UsersRequest> registerUsers() {
+    private List<UsersResponse> registerUsers() {
 
         var usersEntity = usersMapper.toEntity(this.usersRegisterRequest());
+
         var entitiesList = usersRepository.findByUsersIdentityNo(usersEntity.getUsersIdentityNo());
         entitiesList.forEach(s -> {
             if (s.getUsersIdentityNo() == usersEntity.getUsersIdentityNo()) {
@@ -104,53 +109,61 @@ public class UsersService implements Callable<List<UsersRequest>> {
                 throw new UserUnderAgeOf18Exception("Can't register user : User is currently under age can't register");
             }
         });
+        usersEntity.setUsersPassword(passwordEncoder.encode(usersRegisterRequest().getUsersPassword()));
         var entity = usersRepository.save(usersEntity);
+        entity.setToken(jwtService.generateToken(entity));
+
+        var entityWithToken = usersRepository.save(entity);
         var entityList = new ArrayList<UsersEntity>();
-        entityList.add(entity);
+        entityList.add(entityWithToken);
         return entityList.stream().map(usersMapper::toDto).toList();
     }
 
-    private List<UsersRequest> findUserByUsersIdentityNo() {
+    private List<UsersResponse> findUserByUsersIdentityNo() {
         var entity = usersMapper.toEntity(identityNoRequest());
         return usersRepository.findByUsersIdentityNo(entity.getUsersIdentityNo()).stream().map(usersMapper::toDto).toList();
     }
 
-    private List<UsersRequest> updateUsersPassword() {
+    private List<UsersResponse> updateUsersPassword() {
 
         var entity = usersMapper.toEntity(this.updatePasswordRequest());
-        var list = usersRepository.findByUsersEmailAddress(entity.getUsersEmailAddress());
-        if (list.size() == 1) {
-            var user = list.get(0);
+        var dbEntity = usersRepository.findByUsersEmailAddress(entity.getUsersEmailAddress());
+        if (dbEntity.isPresent()) {
+            var user = dbEntity.get();
             user.setUsersPassword(entity.getUsersPassword());
-            usersRepository.save(user);
-            return list.stream().map(usersMapper::toDto).toList();
-        } else if (list.isEmpty()) {
+           var updateEntity =   usersRepository.save(user);
+            return List.of(updateEntity).stream().map(usersMapper::toDto).toList();
+        } else if (dbEntity.isEmpty()) {
             throw new UserEmailDoesNotExist("User doesn't exists, check your email address");
         } else {
             throw new RuntimeException("Many users exists with same email");
         }
     }
 
-    private List<UsersRequest> findUserById() {
+    private List<UsersResponse> findUserById() {
         return usersRepository.findById(pkUsersId).stream().map(usersMapper::toDto).toList();
     }
 
-    private List<UsersRequest> findAllUsers() {
+    private List<UsersResponse> findAllUsers() {
         return usersRepository.findAll().stream().map(usersMapper::toDto).toList();
     }
 
-    private List<UsersRequest> findAllUsersByName() {
+    private List<UsersResponse> findAllUsersByName() {
         var entity = usersMapper.toEntity(usersFullNameRequest());
         return usersRepository.findByUsersFullName(entity.getUsersFullName()).stream().map(usersMapper::toDto).toList();
     }
 
-    private List<UsersRequest> login() {
+    private List<UsersResponse> login() {
         var entity = usersMapper.toEntity(loginRequest());
-        return usersRepository.findByUsersEmailAddressAndUsersPassword(entity.getUsersEmailAddress(), entity.getUsersPassword()).stream().map(usersMapper::toDto).toList();
+        var jwt = jwtService.generateToken(entity);
+
+        System.out.println(jwt);
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(entity.getUsersEmailAddress(),entity.getUsersPassword()));
+       return  usersRepository.findByUsersEmailAddressAndUsersPassword(entity.getUsersEmailAddress(), entity.getUsersPassword()).stream().map(usersMapper::toDto).toList();
     }
 
     @Override
-    public List<UsersRequest> call() {
+    public List<UsersResponse> call() {
         if (handleServiceHandler(serviceHandler) != "START_SERVICE")
             switch (serviceHandler) {
                 case "registerUsers":
