@@ -37,84 +37,79 @@ public class UsersRegisterRequest {
         return this;
     }
 
-    public Long usersIdentityNo() {
-        return usersIdentityNo;
+    public PrivilegeEntity getFkPrivilegeId() {
+        return fkPrivilegeId;
     }
 
-    public UsersRegisterRequest setUsersIdentityNo(Long usersIdentityNo) {
-        this.usersIdentityNo = usersIdentityNo;
-        return this;
-    }
-
-    public Integer noPromotionToken() {
+    public Integer getNoPromotionToken() {
         return noPromotionToken;
     }
 
-    public UsersRegisterRequest setNoPromotionToken(Integer noPromotionToken) {
+    public void setNoPromotionToken(Integer noPromotionToken) {
         this.noPromotionToken = noPromotionToken;
-        return this;
     }
 
-    public Short usersStatus() {
+    public Long getUsersIdentityNo() {
+        return usersIdentityNo;
+    }
+
+    public void setUsersIdentityNo(Long usersIdentityNo) {
+        this.usersIdentityNo = usersIdentityNo;
+    }
+
+    public Short getUsersStatus() {
         return usersStatus;
     }
 
-    public UsersRegisterRequest setUsersStatus(Short usersStatus) {
+    public void setUsersStatus(Short usersStatus) {
         this.usersStatus = usersStatus;
-        return this;
     }
 
-    public Short usersAge() {
+    public Short getUsersAge() {
         return usersAge;
     }
 
-    public UsersRegisterRequest setUsersAge(Short usersAge) {
+    public void setUsersAge(Short usersAge) {
         this.usersAge = usersAge;
-        return this;
     }
 
-    public String usersEmailAddress() {
+    public String getUsersEmailAddress() {
         return usersEmailAddress;
     }
 
-    public UsersRegisterRequest setUsersEmailAddress(String usersEmailAddress) {
+    public void setUsersEmailAddress(String usersEmailAddress) {
         this.usersEmailAddress = usersEmailAddress;
-        return this;
     }
 
-    public String usersFullName() {
+    public String getUsersFullName() {
         return usersFullName;
     }
 
-    public UsersRegisterRequest setUsersFullName(String usersFullName) {
+    public void setUsersFullName(String usersFullName) {
         this.usersFullName = usersFullName;
-        return this;
     }
 
-    public String usersPassword() {
+    public String getUsersPassword() {
         return usersPassword;
     }
 
-    public UsersRegisterRequest setUsersPassword(String usersPassword) {
+    public void setUsersPassword(String usersPassword) {
         this.usersPassword = usersPassword;
-        return this;
     }
 
-    public String usersRegistrationDate() {
+    public String getUsersRegistrationDate() {
         return usersRegistrationDate;
     }
 
-    public UsersRegisterRequest setUsersRegistrationDate(String usersRegistrationDate) {
+    public void setUsersRegistrationDate(String usersRegistrationDate) {
         this.usersRegistrationDate = usersRegistrationDate;
-        return this;
     }
 
-    public String usersModifiedDate() {
+    public String getUsersModifiedDate() {
         return usersModifiedDate;
     }
 
-    public UsersRegisterRequest setUsersModifiedDate(String usersModifiedDate) {
+    public void setUsersModifiedDate(String usersModifiedDate) {
         this.usersModifiedDate = usersModifiedDate;
-        return this;
     }
 }
