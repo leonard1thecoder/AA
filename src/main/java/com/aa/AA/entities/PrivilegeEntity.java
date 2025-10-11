@@ -25,4 +25,30 @@ public class PrivilegeEntity {
     @Getter
     private byte privilegeStatus;
 
+    public int privilegeId() {
+        return privilegeId;
+    }
+
+    public PrivilegeEntity setPrivilegeId(int privilegeId) {
+        this.privilegeId = privilegeId;
+        return this;
+    }
+
+    public String privilegeName() {
+        return privilegeName;
+    }
+
+    public PrivilegeEntity setPrivilegeName(String privilegeName) {
+        this.privilegeName = privilegeName;
+        return this;
+    }
+
+    public byte privilegeStatus() {
+        return privilegeStatus;
+    }
+
+    public PrivilegeEntity setPrivilegeStatus(byte privilegeStatus) {
+        this.privilegeStatus = privilegeStatus;
+        return this;
+    }
 }

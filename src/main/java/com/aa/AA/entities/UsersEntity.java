@@ -2,7 +2,11 @@ package com.aa.AA.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -14,40 +18,30 @@ import java.util.List;
 /*
   * Once promotion deployed, need to change the uses liquor store
  */
-public class UsersEntity {
+public class UsersEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(insertable=false, updatable=false)
     private Long usersId;
     @JoinColumn(name = "pkPrivilegeId", nullable = true)
     @OneToOne
     private PrivilegeEntity fkPrivilegeId;
-    @Column(nullable = false)
+
     private Long usersIdentityNo;
     /*
         NB!!! All type of promotion need separate fields
      */
-    @Column(nullable = false)
     private Integer noPromotionToken;
-    @Column(nullable = false)
     private Short usersStatus, usersAge;
-    @Column(nullable = false)
     private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersModifiedDate;
 
-    public Long getUsersIdentityNo() {
-        return usersIdentityNo;
-    }
+    private String token;
 
-    public Short getUsersAge() {
-        return usersAge;
-    }
-
-    public Long getPkUsersId() {
+    public Long getUsersId() {
         return usersId;
     }
 
-    public void setPkUsersId(Long usersId) {
+    public void setUsersId(Long usersId) {
         this.usersId = usersId;
     }
 
@@ -59,6 +53,14 @@ public class UsersEntity {
         this.fkPrivilegeId = fkPrivilegeId;
     }
 
+    public Long getUsersIdentityNo() {
+        return usersIdentityNo;
+    }
+
+    public void setUsersIdentityNo(Long usersIdentityNo) {
+        this.usersIdentityNo = usersIdentityNo;
+    }
+
     public Integer getNoPromotionToken() {
         return noPromotionToken;
     }
@@ -67,16 +69,16 @@ public class UsersEntity {
         this.noPromotionToken = noPromotionToken;
     }
 
-    public void setUsersIdentityNo(Long usersIdentityNo) {
-        this.usersIdentityNo = usersIdentityNo;
-    }
-
     public Short getUsersStatus() {
         return usersStatus;
     }
 
     public void setUsersStatus(Short usersStatus) {
         this.usersStatus = usersStatus;
+    }
+
+    public Short getUsersAge() {
+        return usersAge;
     }
 
     public void setUsersAge(Short usersAge) {
@@ -123,8 +125,51 @@ public class UsersEntity {
         this.usersModifiedDate = usersModifiedDate;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     @Override
     public String toString(){
         return this.usersFullName;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(fkPrivilegeId.privilegeName()));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.getUsersPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.getUsersEmailAddress();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
