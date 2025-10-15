@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final Filter jwtAuthFilterConfig;
@@ -38,7 +40,9 @@ public class SecurityConfig {
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authencticationProvider)
-                .addFilterBefore(jwtAuthFilterConfig, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilterConfig, UsernamePasswordAuthenticationFilter.class)
+                .httpBasic(Customizer.withDefaults());
+
         return http.build();
     }
 
