@@ -9,11 +9,11 @@ import java.io.Serializable;
 @NoArgsConstructor
 @ToString
 public class UsersResponse implements Serializable {
-    private Long usersIdentityNo;
+    private String usersIdentityNo;
     private Short usersStatus,usersAge;
     private String usersFullName, usersEmailAddress, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
     private String token;
-    public UsersResponse(Long usersIdentityNo, Short usersAge, Short usersStatus, String usersFullName, String usersEmailAddress, String usersRegistrationDate, String usersCountryName, String usersLanguage, String usersModifiedDate) {
+    public UsersResponse(String usersIdentityNo, Short usersAge, Short usersStatus, String usersFullName, String usersEmailAddress, String usersRegistrationDate, String usersCountryName, String usersLanguage, String usersModifiedDate) {
         this.usersIdentityNo = usersIdentityNo;
         this.usersAge = usersAge;
         this.usersStatus = usersStatus;
@@ -25,11 +25,11 @@ public class UsersResponse implements Serializable {
         this.usersModifiedDate = usersModifiedDate;
     }
 
-    public Long getUsersIdentityNo() {
+    public String getUsersIdentityNo() {
         return usersIdentityNo;
     }
 
-    public void setUsersIdentityNo(Long usersIdentityNo) {
+    public void setUsersIdentityNo(String usersIdentityNo) {
         this.usersIdentityNo = usersIdentityNo;
     }
 
