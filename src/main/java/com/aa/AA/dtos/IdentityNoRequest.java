@@ -1,17 +1,17 @@
 package com.aa.AA.dtos;
 
 public class IdentityNoRequest {
-    private Long usersIdentityNo;
+    private String usersIdentityNo;
 
-    public IdentityNoRequest(Long usersIdentityNo) {
+    public IdentityNoRequest(String usersIdentityNo) {
         this.usersIdentityNo = usersIdentityNo;
     }
 
-    public Long usersIdentityNo() {
+    public String usersIdentityNo() {
         return usersIdentityNo;
     }
 
-    public IdentityNoRequest setUsersIdentityNo(Long usersIdentityNo) {
+    public IdentityNoRequest setUsersIdentityNo(String usersIdentityNo) {
         this.usersIdentityNo = usersIdentityNo;
         return this;
     }
