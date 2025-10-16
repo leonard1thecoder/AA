@@ -2,6 +2,7 @@ package com.aa.AA.controllers;
 
 import com.aa.AA.dtos.*;
 import com.aa.AA.services.UsersService;
+import com.aa.AA.utils.config.CachingConfig;
 import com.aa.AA.utils.executors.UsersServiceConcurrentExecutor;
 import com.aa.AA.utils.mappers.UsersMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +18,15 @@ public class UsersController {
     private UsersService service;
     private UsersServiceConcurrentExecutor usersServiceConcurrentExecutor;
     private UsersMapper mapper;
+    private CachingConfig config;
+
     @Autowired
-    public UsersController(@Autowired UsersMapper mapper, @Autowired UsersService service, @Autowired UsersServiceConcurrentExecutor usersServiceConcurrentExecutor) {
+
+    public UsersController(@Autowired CachingConfig config,@Autowired UsersMapper mapper, @Autowired UsersService service, @Autowired UsersServiceConcurrentExecutor usersServiceConcurrentExecutor) {
         this.usersServiceConcurrentExecutor = usersServiceConcurrentExecutor;
         this.service = service;
         this.mapper = mapper;
+        this.config = config;
     }
 
 
@@ -85,5 +90,15 @@ public class UsersController {
             return ResponseEntity.badRequest().build();
         else
             return ResponseEntity.ok(list);
+    }
+
+    /*
+        ***TESTING CACHING***
+     */
+
+
+    @GetMapping("/cache")
+    public void cache(){
+        var cache = config.cache("UsersSessionID");
     }
 }

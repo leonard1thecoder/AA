@@ -4,6 +4,7 @@ import com.aa.AA.dtos.*;
 import com.aa.AA.entities.UsersEntity;
 import com.aa.AA.utils.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -100,7 +101,7 @@ public class UsersService implements Callable<List<UsersResponse>> {
     public static void setServiceHandler(String serviceHandler) {
         UsersService.serviceHandler = serviceHandler;
     }
-
+    @Cacheable("UsersLoginSessionID")
     private List<UsersResponse> registerUsers() {
 
         var request = this.usersRegisterRequest();
@@ -129,6 +130,7 @@ public class UsersService implements Callable<List<UsersResponse>> {
         }
     }
 
+    @Cacheable("UsersFindByIdSessionID")
     private List<UsersResponse> findUserByUsersIdentityNo() {
         var entity = usersMapper.toEntity(identityNoRequest());
         return usersRepository.findByUsersIdentityNo(entity.getUsersIdentityNo()).stream().map(usersMapper::toDto).toList();
@@ -151,19 +153,22 @@ public class UsersService implements Callable<List<UsersResponse>> {
         }
     }
 
+    @Cacheable("UsersByIdSessionID")
     private List<UsersResponse> findUserById() {
         return usersRepository.findById(pkUsersId).stream().map(usersMapper::toDto).toList();
     }
 
+    @Cacheable("UsersSessionID")
     private List<UsersResponse> findAllUsers() {
+        System.out.println("Testing");
         return usersRepository.findAll().stream().map(usersMapper::toDto).toList();
     }
-
+    @Cacheable("UsersFindByNameSessionID")
     private List<UsersResponse> findAllUsersByName() {
         var entity = usersMapper.toEntity(usersFullNameRequest());
         return usersRepository.findByUsersFullName(entity.getUsersFullName()).stream().map(usersMapper::toDto).toList();
     }
-
+    @Cacheable("UsersLoginSessionID")
     private List<UsersResponse> login() {
         var entity = new UsersEntity(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword());
 
@@ -181,6 +186,7 @@ public class UsersService implements Callable<List<UsersResponse>> {
 
         }
     }
+
 
     @Override
     public List<UsersResponse> call() {
