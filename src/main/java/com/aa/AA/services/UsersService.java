@@ -5,12 +5,15 @@ import com.aa.AA.entities.UsersEntity;
 import com.aa.AA.utils.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.aa.AA.utils.mappers.UsersMapper;
 import com.aa.AA.utils.repository.UsersRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -33,8 +36,9 @@ public class UsersService implements Callable<List<UsersResponse>> {
     private AuthenticationManager authenticationManager;
     private UsersMapper usersMapper;
     private PasswordEncoder passwordEncoder;
+
     @Autowired
-    public UsersService(@Autowired PasswordEncoder passwordEncoder,@Autowired JwtService jwtService,@Autowired AuthenticationManager authenticationManager,@Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
+    public UsersService(@Autowired PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
         this.passwordEncoder = passwordEncoder;
@@ -99,24 +103,30 @@ public class UsersService implements Callable<List<UsersResponse>> {
 
     private List<UsersResponse> registerUsers() {
 
-        var usersEntity = usersMapper.toEntity(this.usersRegisterRequest());
+        var request = this.usersRegisterRequest();
 
-        var entitiesList = usersRepository.findByUsersIdentityNo(usersEntity.getUsersIdentityNo());
-        entitiesList.forEach(s -> {
-            if (s.getUsersIdentityNo() == usersEntity.getUsersIdentityNo()) {
+
+        var usersEntity = new UsersEntity(null, request.getFkPrivilegeId(), request.getUsersIdentityNo(), request.getNoPromotionToken(), request.getUsersStatus(), request.getUsersAge(), request.getUsersFullName(), request.getUsersEmailAddress(), request.getUsersPassword(), LocalDateTime.now().toString(), "", "");
+        var entitiesList = usersRepository.findByUsersIdentityNo(request.getUsersIdentityNo());
+        if (entitiesList.isPresent()) {
+            var entity = entitiesList.get();
+            if (entity.getUsersIdentityNo() == request.getUsersIdentityNo()) {
                 throw new UsersExistsException("Can't register user : User has already been registered");
-            } else if (usersEntity.getUsersAge() < 18) {
+            } else if (request.getUsersAge() < 18) {
                 throw new UserUnderAgeOf18Exception("Can't register user : User is currently under age can't register");
+            } else {
+                throw new RuntimeException("BLocker");
             }
-        });
-        usersEntity.setUsersPassword(passwordEncoder.encode(usersRegisterRequest().getUsersPassword()));
-        var entity = usersRepository.save(usersEntity);
-        entity.setToken(jwtService.generateToken(entity));
+        } else {
+            usersEntity.setUsersPassword(passwordEncoder.encode(usersRegisterRequest().getUsersPassword()));
+            var entity = usersRepository.save(usersEntity);
+            entity.setToken(jwtService.generateToken(entity));
 
-        var entityWithToken = usersRepository.save(entity);
-        var entityList = new ArrayList<UsersEntity>();
-        entityList.add(entityWithToken);
-        return entityList.stream().map(usersMapper::toDto).toList();
+            var entityWithToken = usersRepository.save(entity);
+            var entityList = new ArrayList<UsersEntity>();
+            entityList.add(entityWithToken);
+            return entityList.stream().map(usersMapper::toDto).toList();
+        }
     }
 
     private List<UsersResponse> findUserByUsersIdentityNo() {
@@ -127,11 +137,12 @@ public class UsersService implements Callable<List<UsersResponse>> {
     private List<UsersResponse> updateUsersPassword() {
 
         var entity = usersMapper.toEntity(this.updatePasswordRequest());
+
         var dbEntity = usersRepository.findByUsersEmailAddress(entity.getUsersEmailAddress());
         if (dbEntity.isPresent()) {
             var user = dbEntity.get();
             user.setUsersPassword(entity.getUsersPassword());
-           var updateEntity =   usersRepository.save(user);
+            var updateEntity = usersRepository.save(user);
             return List.of(updateEntity).stream().map(usersMapper::toDto).toList();
         } else if (dbEntity.isEmpty()) {
             throw new UserEmailDoesNotExist("User doesn't exists, check your email address");
@@ -154,12 +165,21 @@ public class UsersService implements Callable<List<UsersResponse>> {
     }
 
     private List<UsersResponse> login() {
-        var entity = usersMapper.toEntity(loginRequest());
+        var entity = new UsersEntity(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword());
+
         var jwt = jwtService.generateToken(entity);
 
         System.out.println(jwt);
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(entity.getUsersEmailAddress(),entity.getUsersPassword()));
-       return  usersRepository.findByUsersEmailAddressAndUsersPassword(entity.getUsersEmailAddress(), entity.getUsersPassword()).stream().map(usersMapper::toDto).toList();
+        try {
+            var auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(entity.getUsersEmailAddress(), entity.getUsersPassword()));
+            if (auth.isAuthenticated())
+                return usersRepository.findByUsersEmailAddress(entity.getUsersEmailAddress()).stream().map(usersMapper::toDto).toList();
+            else throw new BadCredentialsException("Error with password or username");
+        } catch (AuthenticationException e) {
+            e.printStackTrace();
+            throw new BadCredentialsException("Error with password or username");
+
+        }
     }
 
     @Override

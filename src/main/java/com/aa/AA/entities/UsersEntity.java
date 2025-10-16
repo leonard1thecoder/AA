@@ -10,10 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@AllArgsConstructor
 @ToString
-@NoArgsConstructor
-
 
 /*
   * Once promotion deployed, need to change the uses liquor store
@@ -21,19 +18,42 @@ import java.util.List;
 public class UsersEntity implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long usersId;
     @JoinColumn(name = "pkPrivilegeId", nullable = true)
     @OneToOne
     private PrivilegeEntity fkPrivilegeId;
 
-    private Long usersIdentityNo;
+    private String usersIdentityNo;
     /*
         NB!!! All type of promotion need separate fields
      */
     private Integer noPromotionToken;
     private Short usersStatus, usersAge;
     private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersModifiedDate;
+public UsersEntity(){
+    super();
+}
+
+    public UsersEntity(String usersEmailAddress, String usersPassword) {
+        this.usersEmailAddress = usersEmailAddress;
+        this.usersPassword = usersPassword;
+    }
+
+    public UsersEntity(Long usersId, PrivilegeEntity fkPrivilegeId, String usersIdentityNo, Integer noPromotionToken, Short usersStatus, Short usersAge, String usersFullName, String usersEmailAddress, String usersPassword, String usersRegistrationDate, String usersModifiedDate, String token) {
+        this.usersId = usersId;
+        this.fkPrivilegeId = fkPrivilegeId;
+        this.usersIdentityNo = usersIdentityNo;
+        this.noPromotionToken = noPromotionToken;
+        this.usersStatus = usersStatus;
+        this.usersAge = usersAge;
+        this.usersFullName = usersFullName;
+        this.usersEmailAddress = usersEmailAddress;
+        this.usersPassword = usersPassword;
+        this.usersRegistrationDate = usersRegistrationDate;
+        this.usersModifiedDate = usersModifiedDate;
+        this.token = token;
+    }
 
     private String token;
 
@@ -53,11 +73,11 @@ public class UsersEntity implements UserDetails {
         this.fkPrivilegeId = fkPrivilegeId;
     }
 
-    public Long getUsersIdentityNo() {
+    public String getUsersIdentityNo() {
         return usersIdentityNo;
     }
 
-    public void setUsersIdentityNo(Long usersIdentityNo) {
+    public void setUsersIdentityNo(String usersIdentityNo) {
         this.usersIdentityNo = usersIdentityNo;
     }
 
@@ -165,7 +185,7 @@ public class UsersEntity implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override

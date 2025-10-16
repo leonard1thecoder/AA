@@ -44,7 +44,8 @@ public class JwtService {
             return Jwts.builder()
                     .claims(extraClaims)
                     .subject(userDetails.getUsername())
-                    .setIssuedAt(new Date(System.currentTimeMillis()))
+                    .issuedAt(new Date(System.currentTimeMillis()))
+                    .expiration(new Date(System.currentTimeMillis() * 1000 * 60 * 24))
                     .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                     .compact();
     }

@@ -6,7 +6,7 @@ public class UsersRegisterRequest {
  
     private PrivilegeEntity fkPrivilegeId;
     
-    private Long usersIdentityNo;
+    private String usersIdentityNo;
 
     private Integer noPromotionToken;
   
@@ -15,7 +15,7 @@ public class UsersRegisterRequest {
     private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersModifiedDate;
 
 
-    public UsersRegisterRequest(PrivilegeEntity fkPrivilegeId, String usersRegistrationDate, String usersPassword, String usersEmailAddress, String usersFullName, Short usersAge, Short usersStatus, Integer noPromotionToken, Long usersIdentityNo, String usersModifiedDate) {
+    public UsersRegisterRequest(PrivilegeEntity fkPrivilegeId, String usersRegistrationDate, String usersPassword, String usersEmailAddress, String usersFullName, Short usersAge, Short usersStatus, Integer noPromotionToken, String usersIdentityNo, String usersModifiedDate) {
         this.fkPrivilegeId = fkPrivilegeId;
         this.usersRegistrationDate = usersRegistrationDate;
         this.usersPassword = usersPassword;
@@ -49,11 +49,11 @@ public class UsersRegisterRequest {
         this.noPromotionToken = noPromotionToken;
     }
 
-    public Long getUsersIdentityNo() {
+    public String getUsersIdentityNo() {
         return usersIdentityNo;
     }
 
-    public void setUsersIdentityNo(Long usersIdentityNo) {
+    public void setUsersIdentityNo(String usersIdentityNo) {
         this.usersIdentityNo = usersIdentityNo;
     }
 
