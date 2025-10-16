@@ -32,9 +32,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults())
-                // CSRF protection enabled by default
-                .csrf(Customizer.withDefaults())
+        http
+                .csrf(csrf
+                        -> csrf.disable())
                 .authorizeHttpRequests(auth
                         -> auth.requestMatchers("/dev/api/auth/**").permitAll().anyRequest().authenticated())
                 .sessionManagement(
@@ -42,7 +42,6 @@ public class SecurityConfig {
                 .authenticationProvider(authencticationProvider)
                 .addFilterBefore(jwtAuthFilterConfig, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());
-
         return http.build();
     }
 
