@@ -24,13 +24,22 @@ public class UsersEntity implements UserDetails {
     @OneToOne
     private PrivilegeEntity fkPrivilegeId;
 
+    @Column(unique = true)
+
+
     private String usersIdentityNo;
     /*
         NB!!! All type of promotion need separate fields
      */
+    @Column(unique = true)
+
+    private String usersEmailAddress;
+
+    @Column(columnDefinition = "TEXT")
+    private String usersPassword;
     private Integer noPromotionToken;
     private Short usersStatus, usersAge;
-    private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersModifiedDate;
+    private String usersFullName, usersRegistrationDate, usersModifiedDate;
 public UsersEntity(){
     super();
 }
