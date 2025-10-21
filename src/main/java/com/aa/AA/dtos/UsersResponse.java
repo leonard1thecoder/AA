@@ -1,18 +1,19 @@
 package com.aa.AA.dtos;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.*;
 
 import java.io.Serializable;
 
-
-@Getter
-@NoArgsConstructor
 @ToString
-public class UsersResponse implements Serializable {
+public class UsersResponse {
     private String usersIdentityNo;
     private Short usersStatus,usersAge;
     private String usersFullName, usersEmailAddress, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
     private String token;
+
+    @JsonCreator
+    public UsersResponse(){}
     public UsersResponse(String usersIdentityNo, Short usersAge, Short usersStatus, String usersFullName, String usersEmailAddress, String usersRegistrationDate, String usersCountryName, String usersLanguage, String usersModifiedDate) {
         this.usersIdentityNo = usersIdentityNo;
         this.usersAge = usersAge;

@@ -50,7 +50,7 @@ public class UsersController {
     @GetMapping("/getAllUsers/{id}")
     public ResponseEntity<List<UsersResponse>> getUserById(@PathVariable Long id) {
         UsersService.setServiceHandler("getUsersById");
-        service.setPkUsersId(id);
+        service.setFindByIdRequest(new FindByIdRequest(id));
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
 
         if (list.isEmpty())
