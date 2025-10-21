@@ -3,6 +3,7 @@ package com.aa.AA.services;
 import com.aa.AA.dtos.*;
 import com.aa.AA.entities.UsersEntity;
 import com.aa.AA.utils.exceptions.*;
+import com.aa.AA.utils.exceptions.controllerAdvices.UsersControllerAdvice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -102,7 +103,6 @@ public class UsersService implements Callable<List<UsersResponse>> {
     }
 
 
-
     public static void setServiceHandler(String serviceHandler) {
         UsersService.serviceHandler = serviceHandler;
     }
@@ -115,24 +115,25 @@ public class UsersService implements Callable<List<UsersResponse>> {
         var usersEntity = new UsersEntity(null, request.getFkPrivilegeId(), request.getUsersIdentityNo(), request.getNoPromotionToken(), request.getUsersStatus(), request.getUsersAge(), request.getUsersFullName(), request.getUsersEmailAddress(), request.getUsersPassword(), LocalDateTime.now().toString(), "", "");
         var entitiesList = usersRepository.findByUsersIdentityNo(request.getUsersIdentityNo());
         if (entitiesList.isPresent()) {
-            var entity = entitiesList.get();
-            if (entity.getUsersIdentityNo() == request.getUsersIdentityNo()) {
-                throw new UsersExistsException("Can't register user : User has already been registered");
-            } else if (request.getUsersAge() < 18) {
-                throw new UserUnderAgeOf18Exception("Can't register user : User is currently under age can't register");
+
+            if (request.getUsersAge() < 18) {
+                var errorMessage = UsersControllerAdvice.setMessage("Can't register user : User is currently under age can't register");
+                UsersControllerAdvice.setResolveIssueDetails("Please ensure you inserting correct identity number");
+                throw new UserUnderAgeOf18Exception(errorMessage);
             } else {
-                throw new RuntimeException("BLocker");
+                var errorMessage = UsersControllerAdvice.setMessage("Can't register user : User has already been registered");
+                UsersControllerAdvice.setResolveIssueDetails("identity number already registered, please login or update password");
+                throw new UsersExistsException(errorMessage);
             }
+
         } else {
             usersEntity.setUsersPassword(passwordEncoder.encode(usersRegisterRequest().getUsersPassword()));
             var entity = usersRepository.save(usersEntity);
             entity.setToken(jwtService.generateToken(entity));
-
             var entityWithToken = usersRepository.save(entity);
             var entityList = new ArrayList<UsersEntity>();
             entityList.add(entityWithToken);
             var responseList = entityList.stream().map(usersMapper::toDto).toList();
-            redisService.set("_usersCache", responseList, 3L, TimeUnit.MINUTES);
             return responseList;
         }
     }
@@ -151,7 +152,9 @@ public class UsersService implements Callable<List<UsersResponse>> {
                 redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
                 return responseList;
             } else {
-                return null;
+                var errorMessage = UsersControllerAdvice.setMessage("User with identity no ending with XXX-XXX-XXX-" + identityNoRequest.usersIdentityNo().substring(9));
+                UsersControllerAdvice.setResolveIssueDetails("Please review the identity no inserted");
+                throw new UserNotFoundException(errorMessage);
             }
         }
 
@@ -159,18 +162,23 @@ public class UsersService implements Callable<List<UsersResponse>> {
 
     private List<UsersResponse> updateUsersPassword() {
 
-        var entity = usersMapper.toEntity(this.updatePasswordRequest());
 
-        var dbEntity = usersRepository.findByUsersEmailAddress(entity.getUsersEmailAddress());
+        var dbEntity = usersRepository.findByUsersEmailAddress(this.updatePasswordRequest().getUsersEmailAddress());
         if (dbEntity.isPresent()) {
             var user = dbEntity.get();
-            user.setUsersPassword(entity.getUsersPassword());
-            var updateEntity = usersRepository.save(user);
-            return List.of(updateEntity).stream().map(usersMapper::toDto).toList();
-        } else if (dbEntity.isEmpty()) {
-            throw new UserEmailDoesNotExist("User doesn't exists, check your email address");
+            user.setUsersPassword(this.updatePasswordRequest().getUsersPassword());
+            if (this.updatePasswordRequest().getUsersPassword().equals(this.updatePasswordRequest().getUsersConfirmPassword())) {
+                var updateEntity = usersRepository.save(user);
+                return List.of(updateEntity).stream().map(usersMapper::toDto).toList();
+            } else {
+                var errorMessage = UsersControllerAdvice.setMessage("new password and confirm password don't match");
+                UsersControllerAdvice.setResolveIssueDetails("Please check your email address");
+                throw new PasswordMisMatchException(errorMessage);
+            }
         } else {
-            throw new RuntimeException("Many users exists with same email");
+            var errorMessage = UsersControllerAdvice.setMessage("User doesn't exists, check your email address");
+            UsersControllerAdvice.setResolveIssueDetails("Please check your email address");
+            throw new UserEmailDoesNotExistException(errorMessage);
         }
     }
 
@@ -190,7 +198,9 @@ public class UsersService implements Callable<List<UsersResponse>> {
                 redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
                 return responseList;
             } else {
-                return null;
+                var errorMessage = UsersControllerAdvice.setMessage("user id : " + this.getFindByIdRequest().getPkUsersId() + " not found");
+                UsersControllerAdvice.setResolveIssueDetails("Please review the id inserted");
+                throw new UserNotFoundException(errorMessage);
             }
         }
     }
@@ -215,7 +225,9 @@ public class UsersService implements Callable<List<UsersResponse>> {
                 redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
                 return responseList;
             } else {
-                return null;
+                var errorMessage = UsersControllerAdvice.setMessage("user with full name :" + usersFullNameRequest().usersFullName() + " is not found");
+                UsersControllerAdvice.setResolveIssueDetails("Please review the full name inserted");
+                throw new UserNotFoundException(errorMessage);
             }
         }
 
@@ -255,21 +267,28 @@ public class UsersService implements Callable<List<UsersResponse>> {
 
         try {
             if (redisStatus) {
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersPassword(), loginRequest().getUsersPassword()));
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
                 return List.of(redisUserResponse);
             } else {
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersPassword(), loginRequest().getUsersPassword()));
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
                 return List.of(jpaUserResponse);
             }
         } catch (AuthenticationException e) {
             e.printStackTrace();
-            if (redisStatus)
-                throw new CachedUsersPasswordChangedException("Cached user password changed, auth failed : " + e.getMessage());
-            else {
-                if (passwordStatus)
-                    throw new UsersPasswordIncorrectException("Recorded password  in DB is incorrect : " + e.getMessage());
-                else
-                    throw new UsersExistsException("User is not registered");
+            if (redisStatus) {
+                var errorMessage = UsersControllerAdvice.setMessage("cached data shows change of password ");
+                UsersControllerAdvice.setResolveIssueDetails("please provide correct new password");
+                throw new CachedUsersPasswordChangedException(errorMessage);
+            } else {
+                if (passwordStatus) {
+                    var errorMessage = UsersControllerAdvice.setMessage("password inserted is incorrect");
+                    UsersControllerAdvice.setResolveIssueDetails("please provide correct password or update password");
+                    throw new UsersPasswordIncorrectException(errorMessage);
+                } else {
+                    var errorMessage = UsersControllerAdvice.setMessage("email address" + loginRequest().getUsersEmailAddress() + " is not found");
+                    UsersControllerAdvice.setResolveIssueDetails("please provide correct password or register with the email address");
+                    throw new UserNotFoundException(errorMessage);
+                }
             }
 
         }

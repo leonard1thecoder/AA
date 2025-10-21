@@ -4,17 +4,20 @@ import lombok.Setter;
 
 public class UpdatePasswordRequest {
 
+
     @Setter
-    private String usersPassword;
+    private String usersPassword,usersEmailAddress;
     @Setter
     private String usersConfirmPassword;
 
-    public UpdatePasswordRequest(String usersPassword, String usersConfirmPassword) {
 
-        this.usersPassword = usersPassword;
-        this.usersConfirmPassword = usersConfirmPassword;
+    public String getUsersEmailAddress() {
+        return usersEmailAddress;
     }
 
+    public void setUsersEmailAddress(String usersEmailAddress) {
+        this.usersEmailAddress = usersEmailAddress;
+    }
 
     public String getUsersConfirmPassword() {
         return usersConfirmPassword;
@@ -24,7 +27,11 @@ public class UpdatePasswordRequest {
         return usersPassword;
     }
 
-
+    public UpdatePasswordRequest(String usersPassword, String usersEmailAddress, String usersConfirmPassword) {
+        this.usersPassword = usersPassword;
+        this.usersEmailAddress = usersEmailAddress;
+        this.usersConfirmPassword = usersConfirmPassword;
+    }
 
     public void setUsersPassword(String usersPassword) {
         this.usersPassword = usersPassword;
