@@ -27,7 +27,7 @@ public class UsersController {
     }
 
     @GetMapping("/getAllUsers")
-    public ResponseEntity<List<? extends Response>> getAllUsers() {
+    public ResponseEntity<List<UsersResponse>> getAllUsers() {
         UsersService.setServiceHandler("getAllUsers");
         var list = this.usersServiceConcurrentExecutor.buildServiceExecutor();
         return ResponseEntity.ok(list);
