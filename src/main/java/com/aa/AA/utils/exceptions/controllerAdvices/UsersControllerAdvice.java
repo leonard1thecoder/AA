@@ -66,4 +66,21 @@ public class UsersControllerAdvice {
     public ResponseEntity<ErrorResponse> manageUsersPasswordIncorrectException(){
         return new ResponseEntity<>(new ErrorResponse(LocalDateTime.now(),getResolveIssueDetails(), getMessage()),HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(ServiceTimeoutException.class)
+    public ResponseEntity<ErrorResponse> manageServiceTimeoutException(){
+        return new ResponseEntity<>(new ErrorResponse(LocalDateTime.now(),getResolveIssueDetails(), getMessage()),HttpStatus.GATEWAY_TIMEOUT);
+    }
+
+
+    @ExceptionHandler(ServiceInterruptedException.class)
+    public ResponseEntity<ErrorResponse> manageServiceInterruptedException(){
+        return new ResponseEntity<>(new ErrorResponse(LocalDateTime.now(),getResolveIssueDetails(), getMessage()),HttpStatus.BAD_GATEWAY);
+    }
+
+    @ExceptionHandler(ServiceExecutionException.class)
+    public ResponseEntity<ErrorResponse> manageServiceExecutionException(){
+        return new ResponseEntity<>(new ErrorResponse(LocalDateTime.now(),getResolveIssueDetails(), getMessage()),HttpStatus.BAD_GATEWAY);
+    }
+
 }
