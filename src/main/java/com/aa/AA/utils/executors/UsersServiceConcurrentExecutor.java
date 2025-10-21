@@ -27,11 +27,11 @@ public class UsersServiceConcurrentExecutor {
        try {
            return  future.get(15, TimeUnit.SECONDS);
        } catch (InterruptedException e) {
-           throw new RuntimeException(e);
+           throw new ServiceInterruptedException(e);
        } catch (ExecutionException e) {
-           throw new RuntimeException(e);
+           throw new ServiceExecutionException(e);
        } catch (TimeoutException e) {
-           throw new RuntimeException(e);
+           throw new ServiceTimeoutException(e);
        }
    }
 
@@ -40,11 +40,11 @@ public class UsersServiceConcurrentExecutor {
         try {
             return  future.get(15, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new ServiceInterruptedException(e);
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new ServiceExecutionException(e);
         } catch (TimeoutException e) {
-            throw new RuntimeException(e);
+            throw new ServiceTimeoutException(e);
         }
     }
 
