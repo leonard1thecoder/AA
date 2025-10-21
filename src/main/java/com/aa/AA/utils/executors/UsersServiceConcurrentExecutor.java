@@ -41,7 +41,7 @@ public class UsersServiceConcurrentExecutor {
         } catch (TimeoutException e) {
             var errorMessage = UsersControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
             UsersControllerAdvice.setResolveIssueDetails("please try again later");
-            throw new ServiceTimeoutException(e.getMessage());
+            throw new ServiceTimeoutException(errorMessage);
         }
     }
 
@@ -60,7 +60,7 @@ public class UsersServiceConcurrentExecutor {
         } catch (TimeoutException e) {
             var errorMessage = UsersControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
             UsersControllerAdvice.setResolveIssueDetails("please try again later");
-            throw new ServiceTimeoutException(e.getMessage());
+            throw new ServiceTimeoutException(errorMessage);
         }
     }
 
