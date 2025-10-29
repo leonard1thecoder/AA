@@ -20,7 +20,7 @@ public class EventsEntity {
 
     @JoinColumn(name = "pkLiquorStoreId",nullable = true)
     @ManyToOne
-    private LiquorStoreEntity liquorStoreEntity;
+    private RetailCompanyEntity retailCompanyEntity;
 
     @JoinColumn(name = "pkPrivilegeId",nullable = true)
     @OneToOne
