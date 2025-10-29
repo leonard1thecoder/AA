@@ -5,7 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 @Entity
-public class LiquorStorePromotionsTypeEntity {
+public class RetailCompanyPromotionsTypeEntity {
 
     @Id
     @GeneratedValue
