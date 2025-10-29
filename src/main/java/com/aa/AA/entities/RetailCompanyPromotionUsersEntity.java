@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -12,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class LiquorStorePromotionUsersEntity {
+public class RetailCompanyPromotionUsersEntity {
 
     @Id
     @GeneratedValue
@@ -20,7 +19,7 @@ public class LiquorStorePromotionUsersEntity {
 
     @ManyToOne
     @JoinColumn(name = "pkPromotionId", nullable = false)
-    private LiquorStorePromotionsEntity liquorStorePromotionsEntities;
+    private RetailCompanyPromotionsEntity liquorStorePromotionsEntities;
 
     @JoinColumn(name = "pkUsersId", nullable = true)
     @ManyToOne

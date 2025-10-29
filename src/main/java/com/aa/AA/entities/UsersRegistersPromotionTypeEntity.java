@@ -27,7 +27,7 @@ public class UsersRegistersPromotionTypeEntity {
 
     @JoinColumn(name="pkLiquorStoreId")
     @OneToOne
-    private LiquorStoreEntity liquorStoreEntity;
+    private RetailCompanyEntity retailCompanyEntity;
 
     private LocalDateTime promotionRegisteredDate;
 }

@@ -4,8 +4,6 @@ package com.aa.AA.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -25,7 +23,7 @@ public class AlcoholAgentEntity {
 
     @JoinColumn(name = "pkStockId", nullable = false)
     @ManyToOne
-    private LiquorStoreStockEntity liquorStoreStockEntity;
+    private RetailCompanyStockEntity retailCompanyStockEntity;
 
     private Integer itemsPurchase;
 

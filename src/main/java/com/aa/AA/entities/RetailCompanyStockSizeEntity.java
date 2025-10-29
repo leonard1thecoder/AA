@@ -13,7 +13,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @Entity
-public class LiquorStoreStockSizeEntity {
+public class RetailCompanyStockSizeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

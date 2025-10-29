@@ -21,7 +21,7 @@ Promotion need to filter by event sTE
     * First Number of people to select to come in event and come !!! People will promotion in event
     *
  * */
-public class LiquorStorePromotionsEntity {
+public class RetailCompanyPromotionsEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -29,14 +29,14 @@ public class LiquorStorePromotionsEntity {
 
     @JoinColumn(name = "pkLiquorStoreId")
     @ManyToOne
-    private LiquorStoreEntity entity;
+    private RetailCompanyEntity entity;
 
     @JoinColumn(name="pkPromotionTypeId", nullable = false)
     @OneToOne
-    private LiquorStorePromotionsTypeEntity liquorStorePromotionsTypeEntity;
+    private RetailCompanyPromotionsTypeEntity retailCompanyPromotionsTypeEntity;
 
     @OneToMany(mappedBy = "liquorStorePromotionsEntities",cascade = CascadeType.ALL)
-    private List<LiquorStorePromotionUsersEntity> liquorStorePromotionUsersEntities;
+    private List<RetailCompanyPromotionUsersEntity> liquorStorePromotionUsersEntities;
 
     private String promotionName, promotionDescription;
 

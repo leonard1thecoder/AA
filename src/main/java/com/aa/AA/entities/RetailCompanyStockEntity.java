@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class LiquorStoreStockEntity {
+public class RetailCompanyStockEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,11 +28,11 @@ public class LiquorStoreStockEntity {
 
     @OneToOne
     @JoinColumn(name="pkStockSizeId", nullable = false)
-    private LiquorStoreStockSizeEntity liquorStoreStockSize;
+    private RetailCompanyStockSizeEntity liquorStoreStockSize;
 
     @ManyToOne
     @JoinColumn(name="pkLiquorStoreId", nullable = false)
-    private LiquorStoreEntity liquorStoreEntity;
+    private RetailCompanyEntity retailCompanyEntity;
 
     @OneToMany(mappedBy = "liquorStoreStockEntity", cascade = CascadeType.ALL)
     private List<AlcoholAgentEntity> alcoholAgentEntities;
