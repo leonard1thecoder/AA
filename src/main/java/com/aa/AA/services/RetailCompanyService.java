@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.Callable;
+
 import java.util.concurrent.TimeUnit;
 
 import static com.aa.AA.utils.exceptions.exceptionHandler.ExceptionHandler.throwExceptionAndReport;
@@ -24,7 +24,7 @@ public class RetailCompanyService implements Execute<List<RetailCompanyResponse>
     private Logger logger = LoggerFactory.getLogger(RetailCompanyService.class);
 
     private RetailCompanyRepository retailCompanyRepository;
-    private static String serviceHandler;
+    public static String serviceHandler;
     private RedisService redisService;
     private RegisterRetailCompanyRequest registerRetailCompanyRequest;
     private RetailCompanyMapper retailCompanyMapper;
