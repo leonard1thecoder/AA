@@ -4,6 +4,7 @@ import com.aa.AA.dtos.*;
 import com.aa.AA.entities.RetailCompanyEntity;
 import com.aa.AA.utils.exceptions.RetailCompanyAlreadyExistException;
 import com.aa.AA.utils.exceptions.RetailCompanyNotFoundException;
+import com.aa.AA.utils.executors.Execute;
 import com.aa.AA.utils.mappers.RetailCompanyMapper;
 import com.aa.AA.utils.repository.RetailCompanyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class RetailCompanyService implements Callable<List<RetailCompanyResponse>> {
+public class RetailCompanyService implements Execute<List<RetailCompanyResponse>> {
 
     private RetailCompanyRepository retailCompanyRepository;
     private static String serviceHandler;
@@ -27,10 +28,21 @@ public class RetailCompanyService implements Callable<List<RetailCompanyResponse
     private DisplayRetailCompanyByNameRequest displayRetailCompanyByNameRequest;
     private DisplayRetailCompaniesByOwnerNameRequest displayRetailCompaniesByOwnerNameRequest;
 
-    public RetailCompanyService(@Autowired RetailCompanyMapper retailCompanyMapper, @Autowired RetailCompanyRepository retailCompanyRepository, @Autowired RedisService redisService) {
+    public RetailCompanyService(@Autowired RetailCompanyMapper retailCompanyMapper, @Autowired RetailCompanyRepository retailCompanyRepository) {
         this.retailCompanyRepository = retailCompanyRepository;
         this.retailCompanyMapper = retailCompanyMapper;
-        this.redisService = redisService;
+    }
+
+    public void setDisplayRetailCompanyByRetailCoRegNoRequest(DisplayRetailCompanyByRetailCoRegNoRequest displayRetailCompanyByRetailCoRegNoRequest) {
+        this.displayRetailCompanyByRetailCoRegNoRequest = displayRetailCompanyByRetailCoRegNoRequest;
+    }
+
+    public void setDisplayRetailCompanyByNameRequest(DisplayRetailCompanyByNameRequest displayRetailCompanyByNameRequest) {
+        this.displayRetailCompanyByNameRequest = displayRetailCompanyByNameRequest;
+    }
+
+    public void setDisplayRetailCompaniesByOwnerNameRequest(DisplayRetailCompaniesByOwnerNameRequest displayRetailCompaniesByOwnerNameRequest) {
+        this.displayRetailCompaniesByOwnerNameRequest = displayRetailCompaniesByOwnerNameRequest;
     }
 
     public void setRegisterLiquorStoreRequest(RegisterRetailCompanyRequest registerRetailCompanyRequest) {
@@ -39,7 +51,7 @@ public class RetailCompanyService implements Callable<List<RetailCompanyResponse
 
     private List<RetailCompanyResponse> registerRetailCompany() {
         List<RetailCompanyResponse> retailCompanyResponseList;
-        var liquorStoreEntity = new RetailCompanyEntity(registerRetailCompanyRequest.getUsersEntity(), registerRetailCompanyRequest.getPrivilegeEntity(), registerRetailCompanyRequest.getLiquorStoreName(), registerRetailCompanyRequest.getCountryName(), registerRetailCompanyRequest.getCityName(), registerRetailCompanyRequest.getLiquorStoreCertNo(), registerRetailCompanyRequest.getLiquorStoreStatus());
+        var liquorStoreEntity = new RetailCompanyEntity(null,registerRetailCompanyRequest.getUsersEntity(), registerRetailCompanyRequest.getPrivilegeEntity(), registerRetailCompanyRequest.getLiquorStoreName(), registerRetailCompanyRequest.getCountryName(), registerRetailCompanyRequest.getCityName(), registerRetailCompanyRequest.getLiquorStoreCertNo(), registerRetailCompanyRequest.getLiquorStoreStatus());
         if (retailCompanyRepository.findByLiquorStoreCertNo(registerRetailCompanyRequest.getLiquorStoreCertNo()).isPresent() || retailCompanyRepository.findByLiquorStoreName(registerRetailCompanyRequest.getLiquorStoreName()).isPresent()) {
             throw new RetailCompanyAlreadyExistException("Retail company you trying to already exists, confirm your license or name");
         } else {
@@ -128,5 +140,15 @@ public class RetailCompanyService implements Callable<List<RetailCompanyResponse
             default:
                 throw new RuntimeException();
         }
+    }
+
+    @Override
+    public void setCache(@Autowired RedisService redisService) {
+        this.redisService = redisService;
+    }
+
+    @Override
+    public void setEncodeCacheKey(@Autowired PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
     }
 }

@@ -4,6 +4,7 @@ import com.aa.AA.dtos.*;
 import com.aa.AA.entities.UsersEntity;
 import com.aa.AA.utils.exceptions.*;
 import com.aa.AA.utils.exceptions.controllerAdvices.UsersControllerAdvice;
+import com.aa.AA.utils.executors.Execute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import static com.aa.AA.utils.HandlingLoadingService.*;
 
 @Service
-public class UsersService implements Callable<List<UsersResponse>> {
+public class UsersService implements Execute<List<UsersResponse>> {
 
     public static String serviceHandler;
 
@@ -40,13 +41,12 @@ public class UsersService implements Callable<List<UsersResponse>> {
     private RedisService redisService;
 
     @Autowired
-    public UsersService(@Autowired RedisService redisService, @Autowired PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
+    public UsersService(@Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
-        this.passwordEncoder = passwordEncoder;
+
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
-        this.redisService = redisService;
     }
 
     public UsersFullNameRequest usersFullNameRequest() {
@@ -315,5 +315,15 @@ public class UsersService implements Callable<List<UsersResponse>> {
             }
         else
             return new ArrayList<>();
+    }
+
+    @Override
+    public void setCache(@Autowired RedisService redisService) {
+        this.redisService = redisService;
+    }
+
+    @Override
+    public void setEncodeCacheKey(@Autowired PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
     }
 }

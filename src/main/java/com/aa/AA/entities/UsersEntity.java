@@ -19,7 +19,7 @@ public class UsersEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
-    private Long usersId;
+    private Long id;
     @JoinColumn(name = "pkPrivilegeId", nullable = true)
     @OneToOne
     private PrivilegeEntity fkPrivilegeId;
@@ -49,8 +49,8 @@ public UsersEntity(){
         this.usersPassword = usersPassword;
     }
 
-    public UsersEntity(Long usersId, PrivilegeEntity fkPrivilegeId, String usersIdentityNo, Integer noPromotionToken, Short usersStatus, Short usersAge, String usersFullName, String usersEmailAddress, String usersPassword, String usersRegistrationDate, String usersModifiedDate, String token) {
-        this.usersId = usersId;
+    public UsersEntity(Long id, PrivilegeEntity fkPrivilegeId, String usersIdentityNo, Integer noPromotionToken, Short usersStatus, Short usersAge, String usersFullName, String usersEmailAddress, String usersPassword, String usersRegistrationDate, String usersModifiedDate, String token) {
+        this.id = id;
         this.fkPrivilegeId = fkPrivilegeId;
         this.usersIdentityNo = usersIdentityNo;
         this.noPromotionToken = noPromotionToken;
@@ -66,12 +66,12 @@ public UsersEntity(){
 
     private String token;
 
-    public Long getUsersId() {
-        return usersId;
+    public Long getId() {
+        return id;
     }
 
-    public void setUsersId(Long usersId) {
-        this.usersId = usersId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public PrivilegeEntity getFkPrivilegeId() {
