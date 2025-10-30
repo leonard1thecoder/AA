@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.aa.AA.services.UsersService.serviceHandler;
+
 
 @RestController
 @RequestMapping("dev/retail/v1")
@@ -33,7 +33,7 @@ public class RetailCompanyController {
 
     @PostMapping
     public ResponseEntity<List<? extends ResponseContract>> registerRetailCompany(@RequestBody RegisterRetailCompanyRequest request){
-        serviceHandler = "registerRetailCompany";
+        RetailCompanyService.serviceHandler = "registerRetailCompany";
         retailCompanyService.setRegisterLiquorStoreRequest(request);
         var response = serviceConcurrentExecutor.buildServiceExecutor(retailCompanyService);
         return  ResponseEntity.ok(response);
@@ -41,7 +41,7 @@ public class RetailCompanyController {
 
     @GetMapping
     public ResponseEntity<List<? extends ResponseContract>> displayRetailCompaniesByOwnerName(@RequestBody DisplayRetailCompaniesByOwnerNameRequest request){
-        serviceHandler = "displayRetailCompaniesByOwnerName";
+        RetailCompanyService.serviceHandler = "displayRetailCompaniesByOwnerName";
         retailCompanyService.setDisplayRetailCompaniesByOwnerNameRequest(request);
         var response = serviceConcurrentExecutor.buildServiceExecutor(retailCompanyService);
         return  ResponseEntity.ok(response);
@@ -49,7 +49,7 @@ public class RetailCompanyController {
 
     @GetMapping
     public ResponseEntity<List<? extends ResponseContract>> displayRetailCompanyByRetailCoRegNo(@RequestBody DisplayRetailCompanyByRetailCoRegNoRequest request){
-        serviceHandler = "displayRetailCompanyByRetailCoRegNo";
+        RetailCompanyService.serviceHandler = "displayRetailCompanyByRetailCoRegNo";
         retailCompanyService.setDisplayRetailCompanyByRetailCoRegNoRequest(request);
         var response = serviceConcurrentExecutor.buildServiceExecutor(retailCompanyService);
         return  ResponseEntity.ok(response);
@@ -57,7 +57,7 @@ public class RetailCompanyController {
 
     @GetMapping
     public ResponseEntity<List<? extends ResponseContract>> displayRetailCompanyByName(@RequestBody DisplayRetailCompanyByNameRequest request){
-        serviceHandler = "displayRetailCompanyByName";
+        RetailCompanyService.serviceHandler = "displayRetailCompanyByName";
         retailCompanyService.setDisplayRetailCompanyByNameRequest(request);
         var response = serviceConcurrentExecutor.buildServiceExecutor(retailCompanyService);
         return  ResponseEntity.ok(response);
@@ -66,7 +66,7 @@ public class RetailCompanyController {
 
     @GetMapping
     public ResponseEntity<List<? extends ResponseContract>> displayAllRetailCompanies(@RequestBody DisplayRetailCompanyByNameRequest request){
-        serviceHandler = "displayAllRetailCompanies";
+        RetailCompanyService.serviceHandler = "displayAllRetailCompanies";
         var response = serviceConcurrentExecutor.buildServiceExecutor();
         return  ResponseEntity.ok(response);
     }

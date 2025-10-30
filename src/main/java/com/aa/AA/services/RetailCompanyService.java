@@ -7,19 +7,24 @@ import com.aa.AA.utils.exceptions.RetailCompanyNotFoundException;
 import com.aa.AA.utils.executors.Execute;
 import com.aa.AA.utils.mappers.RetailCompanyMapper;
 import com.aa.AA.utils.repository.RetailCompanyRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.Callable;
+
 import java.util.concurrent.TimeUnit;
+
+import static com.aa.AA.utils.exceptions.exceptionHandler.ExceptionHandler.throwExceptionAndReport;
 
 @Service
 public class RetailCompanyService implements Execute<List<RetailCompanyResponse>> {
+    private Logger logger = LoggerFactory.getLogger(RetailCompanyService.class);
 
     private RetailCompanyRepository retailCompanyRepository;
-    private static String serviceHandler;
+    public static String serviceHandler;
     private RedisService redisService;
     private RegisterRetailCompanyRequest registerRetailCompanyRequest;
     private RetailCompanyMapper retailCompanyMapper;
@@ -51,12 +56,15 @@ public class RetailCompanyService implements Execute<List<RetailCompanyResponse>
 
     private List<RetailCompanyResponse> registerRetailCompany() {
         List<RetailCompanyResponse> retailCompanyResponseList;
-        var liquorStoreEntity = new RetailCompanyEntity(null,registerRetailCompanyRequest.getUsersEntity(), registerRetailCompanyRequest.getPrivilegeEntity(), registerRetailCompanyRequest.getLiquorStoreName(), registerRetailCompanyRequest.getCountryName(), registerRetailCompanyRequest.getCityName(), registerRetailCompanyRequest.getLiquorStoreCertNo(), registerRetailCompanyRequest.getLiquorStoreStatus());
+        var liquorStoreEntity = new RetailCompanyEntity(null, registerRetailCompanyRequest.getUsersEntity(), registerRetailCompanyRequest.getPrivilegeEntity(), registerRetailCompanyRequest.getLiquorStoreName(), registerRetailCompanyRequest.getCountryName(), registerRetailCompanyRequest.getCityName(), registerRetailCompanyRequest.getLiquorStoreCertNo(), registerRetailCompanyRequest.getLiquorStoreStatus());
         if (retailCompanyRepository.findByLiquorStoreCertNo(registerRetailCompanyRequest.getLiquorStoreCertNo()).isPresent() || retailCompanyRepository.findByLiquorStoreName(registerRetailCompanyRequest.getLiquorStoreName()).isPresent()) {
-            throw new RetailCompanyAlreadyExistException("Retail company you trying to already exists, confirm your license or name");
+            var errorMessage = "Retail company being registered already exists in our system";
+            var resolveIssue = "please confirm name of retail company and registration no";
+            throw throwExceptionAndReport(new RetailCompanyAlreadyExistException(errorMessage), errorMessage, resolveIssue);
         } else {
             retailCompanyResponseList = List.of(retailCompanyRepository.save(liquorStoreEntity))
                     .stream()
+                    .peek((s) -> logger.info("registering retail company : {} was successful data : {}", registerRetailCompanyRequest.getLiquorStoreName(), s))
                     .map(retailCompanyMapper::toDto)
                     .toList();
         }
@@ -81,10 +89,14 @@ public class RetailCompanyService implements Execute<List<RetailCompanyResponse>
                 var jpaRetailCompanyResponse = retailCompanyOptionalEntity.stream()
                         .map(retailCompanyMapper::toDto)
                         .toList();
+                logger.info("retail company : {} was successful found data : {}", displayRetailCompanyByNameRequest.getRetailCompanyName(), jpaRetailCompanyResponse);
                 redisService.set(encrypt, jpaRetailCompanyResponse, 5L, TimeUnit.HOURS);
                 return jpaRetailCompanyResponse;
-            } else
-                throw new RetailCompanyNotFoundException("Retail company not found when searching by name");
+            } else {
+                var errorMessage = "Retail company not found when searching by name, retail company name : "+ displayRetailCompanyByNameRequest.getRetailCompanyName();
+                var resolveIssue = "Please ensure that the company name provided is correct ";
+                throw throwExceptionAndReport(new RetailCompanyNotFoundException(errorMessage),errorMessage,resolveIssue);
+            }
         }
     }
 
@@ -100,9 +112,14 @@ public class RetailCompanyService implements Execute<List<RetailCompanyResponse>
                         .map(retailCompanyMapper::toDto)
                         .toList();
                 redisService.set(encrypt, jpaRetailCompanyResponse, 5L, TimeUnit.HOURS);
+                logger.info("retail company no : {} was successful found data : {}", displayRetailCompanyByRetailCoRegNoRequest.getRetailCompanyRetailRegNo(), jpaRetailCompanyResponse);
+
                 return jpaRetailCompanyResponse;
-            } else
-                throw new RetailCompanyNotFoundException("Retail company not found when searching by registration no");
+            } else {
+                var errorMessage = "Retail company not found when searching by registration no, registration no: " +displayRetailCompanyByRetailCoRegNoRequest.getRetailCompanyRetailRegNo();
+                var resolveIssue = "Please ensure that retail company registration number is correct";
+                throw throwExceptionAndReport(new RetailCompanyNotFoundException(errorMessage),errorMessage,resolveIssue);
+            }
         }
     }
 
@@ -117,10 +134,15 @@ public class RetailCompanyService implements Execute<List<RetailCompanyResponse>
                 var jpaRetailCompanyResponse = retailCompanyOptionalEntity.stream()
                         .map(retailCompanyMapper::toDto)
                         .toList();
-                redisService.set(encrypt,jpaRetailCompanyResponse,5L, TimeUnit.HOURS);
+                redisService.set(encrypt, jpaRetailCompanyResponse, 5L, TimeUnit.HOURS);
+                logger.info("retail company owner : {} was successful found data : {}", displayRetailCompaniesByOwnerNameRequest.getUsersEntity().getUsersIdentityNo(), jpaRetailCompanyResponse);
+
                 return jpaRetailCompanyResponse;
-            }else
-                throw new RetailCompanyNotFoundException("Retail company not found when searching by owner");
+            } else {
+                var errorMessage =  "Retail company not found when searching by owner, owner name : " + displayRetailCompaniesByOwnerNameRequest.getUsersEntity().getUsersIdentityNo() ;
+                var resolveIssue = "Please ensure that the identity number is correct";
+                throw throwExceptionAndReport(new RetailCompanyNotFoundException(errorMessage),errorMessage,resolveIssue);
+            }
         }
     }
 
