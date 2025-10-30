@@ -11,7 +11,7 @@
 	<groupId>com.aa</groupId>
 	<artifactId>AA</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>pom</packaging>
 	<name>AA</name>
 	<description>AA project for Spring Boot</description>
 	<url/>
@@ -21,7 +21,10 @@
 	<developers>
 		<developer/>
 	</developers>
-	<scm>
+    <modules>
+        <module>users_microservice</module>
+    </modules>
+    <scm>
 		<connection/>
 		<developerConnection/>
 		<tag/>
