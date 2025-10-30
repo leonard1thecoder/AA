@@ -1,12 +1,14 @@
 package com.aa.AA.dtos;
 
+import com.aa.AA.utils.executors.ResponseContract;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.*;
 
 import java.io.Serializable;
 
 @ToString
-public class UsersResponse {
+public class UsersResponse implements ResponseContract {
+    private Long id;
     private String usersIdentityNo;
     private Short usersStatus,usersAge;
     private String usersFullName, usersEmailAddress, usersCountryName, usersRegistrationDate, usersLanguage, usersModifiedDate;
@@ -104,5 +106,15 @@ public class UsersResponse {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Long id) {
+      this.id = id;
     }
 }

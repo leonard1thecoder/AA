@@ -6,7 +6,8 @@ import com.aa.AA.dtos.UpdatePasswordRequest;
 import com.aa.AA.dtos.UsersRegisterRequest;
 import com.aa.AA.dtos.UsersResponse;
 import com.aa.AA.services.UsersService;
-import com.aa.AA.utils.executors.UsersServiceConcurrentExecutor;
+import com.aa.AA.utils.executors.ResponseContract;
+import com.aa.AA.utils.executors.ServiceConcurrentExecutor;
 import com.aa.AA.utils.mappers.UsersMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,21 +20,21 @@ import java.util.List;
 @RequestMapping("/dev/api/auth/")
 public class UsersAuthController {
     private UsersService service;
-    private UsersServiceConcurrentExecutor usersServiceConcurrentExecutor;
+    private ServiceConcurrentExecutor serviceConcurrentExecutor;
     private UsersMapper mapper;
     @Autowired
-    public UsersAuthController(@Autowired UsersMapper mapper, @Autowired UsersService service, @Autowired UsersServiceConcurrentExecutor usersServiceConcurrentExecutor) {
-        this.usersServiceConcurrentExecutor = usersServiceConcurrentExecutor;
+    public UsersAuthController(@Autowired UsersMapper mapper, @Autowired UsersService service, @Autowired ServiceConcurrentExecutor serviceConcurrentExecutor) {
+        this.serviceConcurrentExecutor = serviceConcurrentExecutor;
         this.service = service;
         this.mapper = mapper;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<List<UsersResponse>> userRegisters(@RequestBody UsersRegisterRequest request, UriComponentsBuilder uriBuilder){
+    public ResponseEntity<List<? extends ResponseContract>> userRegisters(@RequestBody UsersRegisterRequest request, UriComponentsBuilder uriBuilder){
 
         service.setUsersRegisterRequest(request);
         UsersService.setServiceHandler("registerUsers");
-        var set = usersServiceConcurrentExecutor.buildServiceExecutor(service);
+        var set = serviceConcurrentExecutor.buildServiceExecutor(service);
 
         if (set.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -45,10 +46,10 @@ public class UsersAuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<List<UsersResponse>> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<List<? extends ResponseContract>> login(@RequestBody LoginRequest request) {
         UsersService.setServiceHandler("userLogin");
         service.setLoginRequest(request);
-        var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
+        var list = this.serviceConcurrentExecutor.buildServiceExecutor(service);
 
         if (list.isEmpty())
             return ResponseEntity.notFound().build();
@@ -64,7 +65,7 @@ public class UsersAuthController {
         service.setUpdatePasswordRequest(request);
 
         if(request.getUsersPassword().equals(request.getUsersConfirmPassword())) {
-            var list = this.usersServiceConcurrentExecutor.buildServiceExecutor(service);
+            var list = this.serviceConcurrentExecutor.buildServiceExecutor(service);
 
             if (list.isEmpty())
                 return ResponseEntity.notFound().build();

@@ -2,11 +2,13 @@ package com.aa.AA.dtos;
 
 import com.aa.AA.entities.PrivilegeEntity;
 import com.aa.AA.entities.UsersEntity;
+import com.aa.AA.services.RetailCompanyService;
+import com.aa.AA.utils.executors.ResponseContract;
 
 
-public class RetailCompanyResponse {
+public class RetailCompanyResponse implements ResponseContract {
 
-    private Long liquorStoreId;
+    private Long id;
 
 
     private UsersEntity usersEntity;
@@ -18,8 +20,8 @@ public class RetailCompanyResponse {
 
     private Byte liquorStoreStatus;
 
-    public RetailCompanyResponse(Long liquorStoreId, PrivilegeEntity privilegeEntity, UsersEntity usersEntity, String liquorStoreName, String countryName, String cityName, String liquorStoreCertNo, Byte liquorStoreStatus) {
-        this.liquorStoreId = liquorStoreId;
+    public RetailCompanyResponse(Long id, PrivilegeEntity privilegeEntity, UsersEntity usersEntity, String liquorStoreName, String countryName, String cityName, String liquorStoreCertNo, Byte liquorStoreStatus) {
+        this.id = id;
         this.privilegeEntity = privilegeEntity;
         this.usersEntity = usersEntity;
         this.liquorStoreName = liquorStoreName;
@@ -29,13 +31,6 @@ public class RetailCompanyResponse {
         this.liquorStoreStatus = liquorStoreStatus;
     }
 
-    public Long getLiquorStoreId() {
-        return liquorStoreId;
-    }
-
-    public void setLiquorStoreId(Long liquorStoreId) {
-        this.liquorStoreId = liquorStoreId;
-    }
 
     public PrivilegeEntity getPrivilegeEntity() {
         return privilegeEntity;
@@ -91,5 +86,15 @@ public class RetailCompanyResponse {
 
     public void setLiquorStoreStatus(Byte liquorStoreStatus) {
         this.liquorStoreStatus = liquorStoreStatus;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
     }
 }
