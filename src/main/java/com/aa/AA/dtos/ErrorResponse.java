@@ -3,23 +3,22 @@ package com.aa.AA.dtos;
 import java.time.LocalDateTime;
 
 public class ErrorResponse{
-    private LocalDateTime errorOccurredDate;
+    private String errorOccurredDate;
     private String  message;
     private String resolveIssueDetails;
 
 
-    public ErrorResponse(LocalDateTime errorOccurredDate, String resolveIssueDetails, String message) {
+    public ErrorResponse(String errorOccurredDate, String resolveIssueDetails, String message) {
         this.errorOccurredDate = errorOccurredDate;
         this.resolveIssueDetails = resolveIssueDetails;
         this.message = message;
     }
 
-
-    public LocalDateTime getErrorOccurredDate() {
+    public String getErrorOccurredDate() {
         return errorOccurredDate;
     }
 
-    public void setErrorOccurredDate(LocalDateTime errorOccurredDate) {
+    public void setErrorOccurredDate(String errorOccurredDate) {
         this.errorOccurredDate = errorOccurredDate;
     }
 
