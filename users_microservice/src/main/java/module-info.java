@@ -1,0 +1,3 @@
+module users.microservice {
+
+}
