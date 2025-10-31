@@ -23,6 +23,7 @@
 	</developers>
     <modules>
         <module>users_microservice</module>
+        <module>privileges_microservice</module>
     </modules>
     <scm>
 		<connection/>
