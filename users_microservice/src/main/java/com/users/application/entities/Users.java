@@ -1,7 +1,9 @@
 package com.users.application.entities;
 
+import com.privileges.application.entity.Privileges;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,9 +21,9 @@ public class Users implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
-//    @JoinColumn(name = "pkPrivilegeId", nullable = true)
-//    @OneToOne
-//    private PrivilegeEntity fkPrivilegeId;
+    @JoinColumn(name = "id", nullable = false)
+    @OneToOne
+    private Privileges privileges;
 
     @Column(unique = true)
 
@@ -40,8 +42,11 @@ public class Users implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-      //  return List.of(new SimpleGrantedAuthority(fkPrivilegeId.privilegeName()));
-      return null;
+        return List.of(new SimpleGrantedAuthority(privileges.getPrivilegeName()));
+    }
+    @Autowired
+    public void setPrivileges( @Autowired Privileges privileges) {
+        this.privileges = privileges;
     }
 
     @Override
