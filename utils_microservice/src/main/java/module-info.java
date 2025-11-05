@@ -8,4 +8,7 @@ module utils.microservice {
     requires spring.context;
     requires spring.data.redis;
     requires org.slf4j;
+    requires spring.security.crypto;
+    requires spring.web;
+    requires users.microservice;
 }

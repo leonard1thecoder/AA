@@ -1,6 +1,9 @@
 package com.utils.application;
 
 
+import com.utils.application.controllerAdvice.UsersControllerAdvice;
+import com.utils.application.globalExceptions.ServiceExecutionException;
+import com.utils.application.globalExceptions.ServiceInterruptedException;
 import com.utils.application.globalExceptions.ServiceTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

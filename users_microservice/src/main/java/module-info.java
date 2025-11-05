@@ -24,4 +24,5 @@ module users.microservice {
     opens com.users.application.entities;
     opens com.users.application;
     opens com.users.application.repository;
+    exports com.users.application.exceptions;
 }
