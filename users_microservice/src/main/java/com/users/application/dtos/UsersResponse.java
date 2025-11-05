@@ -1,10 +1,10 @@
 package com.users.application.dtos;
 
-import com.aa.AA.utils.executors.ResponseContract;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.*;
 
-import java.io.Serializable;
+
 
 @ToString
 public class UsersResponse implements ResponseContract {
