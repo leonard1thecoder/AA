@@ -297,7 +297,6 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 return List.of(jpaUserResponse);
             }
         } catch (AuthenticationException e) {
-            e.printStackTrace();
             if (redisStatus) {
                 var errorMessage = "cached data shows change of password ";
                 var resolveIssue = "please log in again";
