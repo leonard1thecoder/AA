@@ -1,0 +1,35 @@
+package com.users.application.dtos;
+
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Getter
+@NoArgsConstructor
+@ToString
+public class LoginRequest {
+    private String usersEmailAddress;
+    private String usersPassword;
+
+    public LoginRequest(String usersEmailAddress, String usersPassword) {
+        this.usersEmailAddress = usersEmailAddress;
+        this.usersPassword = usersPassword;
+    }
+
+    public String getUsersEmailAddress() {
+        return usersEmailAddress;
+    }
+
+    public String getUsersPassword() {
+        return usersPassword;
+    }
+
+    public void setUsersEmailAddress(String usersEmailAddress) {
+        this.usersEmailAddress = usersEmailAddress;
+    }
+
+    public void setUsersPassword(String usersPassword) {
+        this.usersPassword = usersPassword;
+    }
+}
