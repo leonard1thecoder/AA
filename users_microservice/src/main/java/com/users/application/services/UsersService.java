@@ -3,13 +3,13 @@ package com.users.application.services;
 
 
 import com.users.application.exceptions.*;
-import com.users.application.exceptions.controllerAdvice.UsersControllerAdvice;
+import com.utils.application.controllerAdvice.UsersControllerAdvice;
 import com.utils.application.RedisService;
 import com.users.application.dtos.*;
 import com.users.application.entities.Users;
 import com.users.application.mappers.UsersMapper;
 import com.users.application.repository.UsersRepository;
-import com.users.application.threadsExecutors.Execute;
+import com.utils.application.Execute;
 import com.utils.application.globalExceptions.ServiceHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

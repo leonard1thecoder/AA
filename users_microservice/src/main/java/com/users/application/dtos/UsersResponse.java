@@ -2,6 +2,7 @@ package com.users.application.dtos;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.utils.application.ResponseContract;
 import lombok.*;
 
 

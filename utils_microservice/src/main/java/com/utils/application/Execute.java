@@ -1,6 +1,5 @@
-package com.users.application.threadsExecutors;
+package com.utils.application;
 
-import com.utils.application.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
