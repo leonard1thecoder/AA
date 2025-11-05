@@ -1,4 +1,4 @@
-package com.users.application.exceptions.controllerAdvice;
+package com.utils.application.controllerAdvice;
 
 
 import com.utils.application.globalExceptions.errorResponse.*;
@@ -12,10 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import java.time.LocalDateTime;
-
-import static com.utils.application.ExceptionHandlerReporter.getIssueDateFormatted;
 
 @ControllerAdvice
 public class UsersControllerAdvice extends ExceptionHandlerReporter {

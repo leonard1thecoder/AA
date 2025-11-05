@@ -1,4 +1,4 @@
-package com.users.application.dtos;
+package com.utils.application;
 
 public interface ResponseContract {
     Long getId();
