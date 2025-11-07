@@ -25,6 +25,7 @@
         <module>users_microservice</module>
         <module>privileges_microservice</module>
         <module>utils_microservice</module>
+        <module>retail_companies_microservice</module>
     </modules>
     <scm>
 		<connection/>
