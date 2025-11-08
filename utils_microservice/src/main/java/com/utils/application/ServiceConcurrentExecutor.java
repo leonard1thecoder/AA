@@ -1,7 +1,8 @@
 package com.utils.application;
 
 
-import com.utils.application.controllerAdvice.UsersControllerAdvice;
+
+import com.utils.application.controllerAdvice.ExecutorControllerAdvice;
 import com.utils.application.globalExceptions.ServiceExecutionException;
 import com.utils.application.globalExceptions.ServiceInterruptedException;
 import com.utils.application.globalExceptions.ServiceTimeoutException;
@@ -30,16 +31,16 @@ public class ServiceConcurrentExecutor {
         try {
             return future.get(15, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            var errorMessage = UsersControllerAdvice.setMessage("Interruption occurred while executing service : " + service +" reason "+ e.getMessage());
-            UsersControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
+            var errorMessage = ExecutorControllerAdvice.setMessage("Interruption occurred while executing service : " + service +" reason "+ e.getMessage());
+            ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
             throw new ServiceInterruptedException(errorMessage);
         } catch (ExecutionException e) {
-            var errorMessage = UsersControllerAdvice.setMessage("Execution failed while executing service : " + service +" reason "+ e.getMessage());
-            UsersControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
+            var errorMessage = ExecutorControllerAdvice.setMessage("Execution failed while executing service : " + service +" reason "+ e.getMessage());
+            ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
             throw new ServiceExecutionException(errorMessage);
         } catch (TimeoutException e) {
-            var errorMessage = UsersControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
-            UsersControllerAdvice.setResolveIssueDetails("please try again later");
+            var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
+            ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
             throw new ServiceTimeoutException(errorMessage);
         }
     }
@@ -49,16 +50,16 @@ public class ServiceConcurrentExecutor {
         try {
             return future.get(15, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            var errorMessage = UsersControllerAdvice.setMessage("Interruption occurred while executing service : " + service +" reason "+ e.getMessage());
-            UsersControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
+            var errorMessage = ExecutorControllerAdvice.setMessage("Interruption occurred while executing service : " + service +" reason "+ e.getMessage());
+            ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
             throw new ServiceInterruptedException(errorMessage);
         } catch (ExecutionException e) {
-            var errorMessage = UsersControllerAdvice.setMessage("Execution failed while executing service : " + service +" reason "+ e.getMessage());
-            UsersControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
+            var errorMessage = ExecutorControllerAdvice.setMessage("Execution failed while executing service : " + service +" reason "+ e.getMessage());
+            ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
             throw new ServiceExecutionException(errorMessage);
         } catch (TimeoutException e) {
-            var errorMessage = UsersControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
-            UsersControllerAdvice.setResolveIssueDetails("please try again later");
+            var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
+            ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
             throw new ServiceTimeoutException(errorMessage);
         }
     }
