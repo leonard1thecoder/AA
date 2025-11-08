@@ -3,7 +3,7 @@ package com.users.application.services;
 
 
 import com.users.application.exceptions.*;
-import com.utils.application.controllerAdvice.UsersControllerAdvice;
+import com.users.application.exceptions.controllerAdvice.UsersControllerAdvice;
 import com.utils.application.RedisService;
 import com.users.application.dtos.*;
 import com.users.application.entities.Users;
