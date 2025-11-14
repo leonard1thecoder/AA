@@ -20,24 +20,24 @@ import java.util.List;
 public class Users implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
+    @Column(nullable = false)
     private Long id;
     @JoinColumn(name = "id", nullable = false)
     @OneToOne
     private Privileges privileges;
 
-    @Column(unique = true)
+    @Column(unique = true,nullable = false)
 
+    private String userIdentityNo, cellphoneNo;
 
-    private String userIdentityNo;
-
-    @Column(unique = true)
-
+    @Column(unique = true,nullable = false)
     private String userEmailAddress;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT",nullable = false)
     private String userPassword;
-
+    @Column(nullable = false)
     private Short userStatus, userAge;
+    @Column(nullable = false)
     private String userFullName, userRegistrationDate, userModifiedDate;
 
     @Override
