@@ -4,6 +4,7 @@ package com.users.application.services;
 
 import com.users.application.exceptions.*;
 import com.users.application.exceptions.controllerAdvice.UsersControllerAdvice;
+import com.users.application.validators.UsersFieldsDataValidator;
 import com.utils.application.RedisService;
 import com.users.application.dtos.*;
 import com.users.application.entities.Users;
@@ -11,6 +12,7 @@ import com.users.application.mappers.UsersMapper;
 import com.users.application.repository.UsersRepository;
 import com.utils.application.Execute;
 import com.utils.application.globalExceptions.ServiceHandlerException;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private UsersMapper usersMapper;
     private PasswordEncoder passwordEncoder;
     private RedisService redisService;
+    private UsersFieldsDataValidator validator;
 
     @Autowired
     public UsersService(@Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
@@ -115,30 +118,24 @@ public class UsersService implements Execute<List<UsersResponse>> {
         UsersService.serviceHandler = serviceHandler;
     }
 
+    @Transactional
     private List<UsersResponse> registerUsers() {
 
         var request = this.usersRegisterRequest();
         var users = usersMapper.toEntity(request);
-        var entitiesList = usersRepository.findByUserIdentityNo(request.getUsersIdentityNo());
+        var entitiesList = usersRepository.findByUserIdentityNo(validator.validateIdentityNo(request.getUsersIdentityNo()));
         if (entitiesList.isPresent()) {
-
-            if (request.getUsersAge() < 18) {
-                var errorMessage = "Users under age 18 can't register";
-                var resolveIssue = "Please ensure you inserting correct identity number";
-                throw throwExceptionAndReport(new UserUnderAgeOf18Exception(errorMessage),errorMessage,resolveIssue);
-            } else {
                 var errorMessage = "User has already been registered";
                 var resolveIssue ="Identity number already registered, please login";
                 throw throwExceptionAndReport(new UsersExistsException(errorMessage),errorMessage,resolveIssue);
-            }
-
         } else {
+            users.setUserIdentityNo(validator.validateIdentityNo(request.getUsersIdentityNo()));
             users.setUserPassword(passwordEncoder.encode(usersRegisterRequest().getUsersPassword()));
+            users.setCellphoneNo(validator.validateIdentityNo(request.getUsersCellphoneNo()));
+            users.setUserAge(validator.getValidatedAge());
             var entity = usersRepository.save(users);
-
-            var entityWithToken = usersRepository.save(entity);
             var entityList = new ArrayList<Users>();
-            entityList.add(entityWithToken);
+            entityList.add(entity);
             var responseList = entityList.stream().map(usersMapper::toDto).toList();
             logger.info("User : {} successfully registered data : {}", usersRegisterRequest().getUsersFullName(), responseList);
             return responseList;
@@ -170,6 +167,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
     }
 
+    @Transactional
     private List<UsersResponse> updateUsersPassword() {
 
 
@@ -255,6 +253,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private boolean redisStatus, passwordStatus;
 
 
+    @Transactional
     private List<UsersResponse> login() {
         var encrypt = passwordEncoder.encode(loginRequest().getUsersEmailAddress());
         UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
