@@ -4,6 +4,7 @@ import com.privileges.application.entity.Privileges;
 import com.users.application.entities.Users;
 import jakarta.transaction.Transactional;
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,11 @@ class UsersRepositoryTest {
                 .privileges(new Privileges(1, "users", (byte) 2))
                 .userIdentityNo("9711225553083")
                 .build());
+    }
+
+    @AfterEach
+    public void detach(){
+        tem.clear();
     }
 
     @Transactional

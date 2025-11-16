@@ -18,8 +18,8 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
         return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(UserUnderAgeOf18Exception.class)
-    public ResponseEntity<ErrorResponse> manageUserUnderAgeOf18Exception(){
+    @ExceptionHandler(UserAgeException.class)
+    public ResponseEntity<ErrorResponse> manageUserAgeException(){
         return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.FORBIDDEN);
     }
 
