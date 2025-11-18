@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import java.time.*;
 import java.util.regex.Pattern;
 
 @Component
@@ -25,29 +25,27 @@ public class UsersFieldsDataValidator {
         if (validateIdentityNo.length() == 13) {
             var firstTwoDigitOfId = validateIdentityNo.substring(0, 2);
             var currentYear = currentYearDate.getYear();
-            int customerYearFormIdentityNo;
+            int customerYearFromIdentityNo;
             if (firstTwoDigitOfId.startsWith("0")) {
                 try {
-                    customerYearFormIdentityNo = Integer.parseInt("20" + firstTwoDigitOfId);
-                    var calculateAge = currentYear - customerYearFormIdentityNo;
+                    customerYearFromIdentityNo = Integer.parseInt("20" + firstTwoDigitOfId);
+                    var calculateAge = currentYear - customerYearFromIdentityNo;
                     validAge((short) calculateAge);
                     validSpecialCharactersAndAlphabets(validateIdentityNo.substring(2));
-                    logger.info("Months from id {} and days from id {} for 2000",validateIdentityNo.substring(2,4), validateIdentityNo.substring(4,6));
-                    this.validIdNumbersDays(validateIdentityNo.substring(4, 6), this.validIdNumbersMonths(validateIdentityNo.substring(2, 4)));
+                    validatesDaysOfMonth((short)customerYearFromIdentityNo,Byte.parseByte(validateIdentityNo.substring(4, 6)),Byte.parseByte(validateIdentityNo.substring(2, 4)));
                     return validateIdentityNo;
                 } catch (NumberFormatException e) {
-                     throw new NumberFormatException("Identity contains characters or alphabets");
+                    throw new NumberFormatException("Identity contains characters or alphabets");
                 }
             } else if (firstTwoDigitOfId.startsWith("9") || firstTwoDigitOfId.startsWith("8") || firstTwoDigitOfId.startsWith("7") || firstTwoDigitOfId.startsWith("6") || firstTwoDigitOfId.startsWith("5")) {
                 try {
-                    customerYearFormIdentityNo = Integer.parseInt("19" + firstTwoDigitOfId);
-                    var calculateAge = currentYear - customerYearFormIdentityNo;
+                    customerYearFromIdentityNo = Integer.parseInt("19" + firstTwoDigitOfId);
+                    var calculateAge = currentYear - customerYearFromIdentityNo;
                     validAge((short) calculateAge);
                     logger.info("Months from id {} and days from id {} for 90s ");
 
                     validSpecialCharactersAndAlphabets(validateIdentityNo.substring(2));
-                    this.validIdNumbersDays(validateIdentityNo.substring(4, 6), this.validIdNumbersMonths(validateIdentityNo.substring(2, 4)));
-
+                    validatesDaysOfMonth((short)customerYearFromIdentityNo,Byte.parseByte(validateIdentityNo.substring(4, 6)),(byte)this.validateMonths(Byte.parseByte(validateIdentityNo.substring(2, 4))));
                     return validateIdentityNo;
                 } catch (NumberFormatException e) {
                     throw new NumberFormatException("Identity contains characters or alphabets");
@@ -61,6 +59,53 @@ public class UsersFieldsDataValidator {
         }
     }
 
+    private int validateMonths(byte month) {
+        try {
+            return Month.of(month).getValue();
+        } catch (DateTimeException e) {
+            throw new DateTimeException("Month are out of bound, there is not month in " + month);
+        }
+    }
+
+    private void validatesDaysOfMonth(short year, byte days, byte month) {
+            if (Year.isLeap(year)) {
+                if (Month.of(month).getValue() == 2) {
+                    try {
+                        MonthDay.of(month, days);
+                    } catch (DateTimeException e) {
+                        throw new DateTimeException("In February days of month should not be greater 29 in leap year");
+                    }
+                } else {
+                    try {
+                        MonthDay.of(month, days);
+                    } catch (DateTimeException e) {
+                        throw new DateTimeException(e.getMessage());
+                    }
+                }
+            } else {
+                if (Month.of(month).getValue() == 2) {
+                    try {
+                        MonthDay.of(month, days);
+                    } catch (DateTimeException e) {
+                        throw new DateTimeException("In February days of month should not be greater 28");
+                    }
+                } else {
+                    try {
+                        MonthDay.of(month, days);
+                    } catch (DateTimeException e) {
+                        throw new DateTimeException(e.getMessage());
+                    }
+                }
+            }
+    }
+    
+    private void validateMonth(byte month){
+        try{
+            Month.of(month);
+        }catch(DateTimeException e){
+            throw new DateTimeException(e.getMessage());
+        }
+    }
 
     private short validAge(Short nonValidateAge) throws UserAgeException {
         logger.info("Age inserted by user is {}", nonValidateAge);
@@ -74,30 +119,6 @@ public class UsersFieldsDataValidator {
         }
     }
 
-    private String validIdNumbersMonths(String months) {
-        var month = Byte.parseByte(months);
-
-        if (month <= 0) {
-            throw new IllegalArgumentException("Months can't be 00");
-        } else if (month > 12) {
-            throw new IllegalArgumentException("Months can't be greater than 12");
-        } else {
-            return String.valueOf(month);
-        }
-    }
-
-    private void validIdNumbersDays(String days, String months) {
-        var day = Byte.parseByte(days);
-        var month = Byte.parseByte(months);
-
-        if (day <= 00) {
-            throw new IllegalArgumentException("day can't be 00");
-        } else if (day > 29 && month == 2) {
-            throw new IllegalArgumentException("day can't be greater than 29 if it's February ");
-        } else if (day > 31) {
-            throw new IllegalArgumentException("day can't be greater than 31");
-        }
-    }
 
     private void validSpecialCharactersAndAlphabets(String nonValidateId) {
         try {
@@ -140,13 +161,13 @@ public class UsersFieldsDataValidator {
 
     //#LLL1231@
     public static boolean checkPasswordValidity(String password) {
-// Regular expression for password validation
+        // Regular expression for password validation
         String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%&*_])[A-Za-z\\d!@#$%&*_]{8,20}$";
 
-// Compile the regex pattern
+        // Compile the regex pattern
         Pattern pattern = Pattern.compile(regex);
 
-// Return true if the password matches the regex, otherwise false
+        // Return true if the password matches the regex, otherwise false
         return password != null && pattern.matcher(password).matches();
     }
 }
