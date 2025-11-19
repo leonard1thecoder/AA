@@ -36,7 +36,7 @@ class UsersRepositoryTest {
     public void persist() {
         user = tem.persist(Users.builder()
                 .userAge((short) 30)
-                .cellphoneNo("0788725439")
+                .userCellphoneNo("0788725439")
                 .userFullName("Sizolwakhe Leonard Mthimunye")
                 .userPassword("12345")
                 .userModifiedDate(LocalDateTime.now().toString())
@@ -44,7 +44,7 @@ class UsersRepositoryTest {
                 .userStatus((short) 0)
                 .userEmailAddress("localhost@gmail.com")
                 .privileges(new Privileges(1, "users", (byte) 2))
-                .userIdentityNo("9711225553083")
+                .userIdentityNo("97112259743083")
                 .build());
     }
 
@@ -60,7 +60,7 @@ class UsersRepositoryTest {
         var savedEntity = usersRepository.save(user);
 
         //given
-        var entity = usersRepository.findByUserIdentityNo("9711225553083");
+        var entity = usersRepository.findByUserIdentityNo("97112259743083");
         logger.info("entity saved: {}\n, entity got: {} ", savedEntity, entity);
         //assert
         Assert.assertTrue(entity.isPresent());
@@ -74,7 +74,7 @@ class UsersRepositoryTest {
         usersRepository.save(user);
 
         //given
-        var entity = usersRepository.findByUserIdentityNo("9711525553083");
+        var entity = usersRepository.findByUserIdentityNo("9711527553083");
         //assert
         Assertions.assertTrue(entity.isEmpty());
     }
@@ -144,5 +144,28 @@ class UsersRepositoryTest {
 
         //assert
         Assertions.assertTrue(entity.isPresent());
+    }
+
+    @Test
+    void testFindByUserFullName_ExistingCellphone() {
+        //when
+        var savedEntity = usersRepository.save(user);
+        //given
+        var entity = usersRepository.findByUserCellphoneNo("0788725439");
+
+        //assert
+        Assertions.assertTrue(entity.isPresent());
+        Assertions.assertEquals(savedEntity.getUserFullName(),entity.get().getUserFullName());
+    }
+
+    @Test
+    void testFindByUserFullName_NonCellphoneNu() {
+        //when
+        var savedEntity = usersRepository.save(user);
+        //given
+        var entity = usersRepository.findByUserCellphoneNo("0755375");
+
+        //assert
+        Assertions.assertTrue(entity.isEmpty());
     }
 }
