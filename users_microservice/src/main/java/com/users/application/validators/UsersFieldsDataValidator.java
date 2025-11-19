@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Component
@@ -22,7 +24,11 @@ public class UsersFieldsDataValidator {
     public String validateIdentityNo(@NotNull String identityNo) {
         currentYearDate = LocalDate.now();
         var validateIdentityNo = identityNo.trim();
-        if (validateIdentityNo.length() == 13) {
+        if (validateIdentityNo == null) {
+            throw new NullPointerException("validated id instance is null");
+        }else if(validateIdentityNo.isEmpty()){
+          throw new IllegalArgumentException("identity number is empty");
+        } else if (validateIdentityNo.length() == 13) {
             var firstTwoDigitOfId = validateIdentityNo.substring(0, 2);
             var currentYear = currentYearDate.getYear();
             int customerYearFromIdentityNo;
@@ -32,7 +38,7 @@ public class UsersFieldsDataValidator {
                     var calculateAge = currentYear - customerYearFromIdentityNo;
                     validAge((short) calculateAge);
                     validSpecialCharactersAndAlphabets(validateIdentityNo.substring(2));
-                    validatesDaysOfMonth((short)customerYearFromIdentityNo,Byte.parseByte(validateIdentityNo.substring(4, 6)),Byte.parseByte(validateIdentityNo.substring(2, 4)));
+                    validatesDaysOfMonth((short) customerYearFromIdentityNo, Byte.parseByte(validateIdentityNo.substring(4, 6)), (byte) validateMonths(Byte.parseByte(validateIdentityNo.substring(2, 4))));
                     return validateIdentityNo;
                 } catch (NumberFormatException e) {
                     throw new NumberFormatException("Identity contains characters or alphabets");
@@ -45,7 +51,7 @@ public class UsersFieldsDataValidator {
                     logger.info("Months from id {} and days from id {} for 90s ");
 
                     validSpecialCharactersAndAlphabets(validateIdentityNo.substring(2));
-                    validatesDaysOfMonth((short)customerYearFromIdentityNo,Byte.parseByte(validateIdentityNo.substring(4, 6)),(byte)this.validateMonths(Byte.parseByte(validateIdentityNo.substring(2, 4))));
+                    validatesDaysOfMonth((short) customerYearFromIdentityNo, Byte.parseByte(validateIdentityNo.substring(4, 6)), (byte) this.validateMonths(Byte.parseByte(validateIdentityNo.substring(2, 4))));
                     return validateIdentityNo;
                 } catch (NumberFormatException e) {
                     throw new NumberFormatException("Identity contains characters or alphabets");
@@ -67,42 +73,46 @@ public class UsersFieldsDataValidator {
         }
     }
 
-    private void validatesDaysOfMonth(short year, byte days, byte month) {
-            if (Year.isLeap(year)) {
-                if (Month.of(month).getValue() == 2) {
-                    try {
-                        MonthDay.of(month, days);
-                    } catch (DateTimeException e) {
-                        throw new DateTimeException("In February days of month should not be greater 29 in leap year");
-                    }
-                } else {
-                    try {
-                        MonthDay.of(month, days);
-                    } catch (DateTimeException e) {
-                        throw new DateTimeException(e.getMessage());
-                    }
+    private MonthDay validatesDaysOfMonth(Short year, Byte days, Byte month) {
+        if (Year.isLeap(year)) {
+            if (Month.of(month).getValue() == 2) {
+                try {
+                    return MonthDay.of(month, days);
+                } catch (DateTimeException e) {
+                    throw new DateTimeException("In February days of month should not be greater 29 in leap year");
                 }
             } else {
-                if (Month.of(month).getValue() == 2) {
-                    try {
-                        MonthDay.of(month, days);
-                    } catch (DateTimeException e) {
-                        throw new DateTimeException("In February days of month should not be greater 28");
-                    }
-                } else {
-                    try {
-                        MonthDay.of(month, days);
-                    } catch (DateTimeException e) {
-                        throw new DateTimeException(e.getMessage());
-                    }
+                try {
+                    return MonthDay.of(month, days);
+                } catch (DateTimeException e) {
+                    throw new DateTimeException(e.getMessage());
                 }
             }
+        } else {
+            if (Month.of(month).getValue() == 2) {
+                try {
+                    if (MonthDay.of(month, days).getDayOfMonth() == 29) {
+                        throw new DateTimeException("In February days of month should not be greater 28");
+                    }
+                    return MonthDay.of(month, days);
+                } catch (DateTimeException e) {
+                    throw new DateTimeException(e.getMessage());
+                }
+            } else {
+                try {
+                    return MonthDay.of(month, days);
+                } catch (DateTimeException e) {
+                    throw new DateTimeException(e.getMessage());
+                }
+            }
+        }
     }
-    
-    private void validateMonth(byte month){
-        try{
-            Month.of(month);
-        }catch(DateTimeException e){
+
+
+    private Month validateMonth(Byte month) {
+        try {
+            return Month.of(month);
+        } catch (DateTimeException e) {
             throw new DateTimeException(e.getMessage());
         }
     }
@@ -130,29 +140,34 @@ public class UsersFieldsDataValidator {
 
     public String validateCellphoneNo(@NotNull String nonValidatedCellphoneNo) {
         var validateCellphoneNo = nonValidatedCellphoneNo.trim();
-        if (validateCellphoneNo.startsWith("0")) {
+        if (validateCellphoneNo == null) {
+            throw new NullPointerException("Password instance is null");
+        } else if (validateCellphoneNo.isEmpty()) {
+            throw new IllegalArgumentException("Cellphone Number  is empty");
+        } else if (validateCellphoneNo.startsWith("0")) {
             if (validateCellphoneNo.length() == 10) {
                 checkCellphoneNoHasSpecialCharactersOrAlphabets(validateCellphoneNo);
                 return "+27" + validateCellphoneNo.substring(1);
             } else {
-                throw new RuntimeException("Number inserted length should be 10, when start with 0 in cellphone number");
+                throw new IllegalArgumentException("Number inserted length should be 10, when start with 0 in cellphone number");
             }
         } else if (validateCellphoneNo.startsWith("+27")) {
             if (validateCellphoneNo.length() == 12) {
                 checkCellphoneNoHasSpecialCharactersOrAlphabets(validateCellphoneNo.substring(1));
                 return validateCellphoneNo;
             } else {
-                throw new RuntimeException("Number inserted length should be 12 or use 0 instead of +27");
+                throw new IllegalArgumentException("Number inserted length should be 12 or use 0 instead of +27");
             }
         } else {
-            throw new RuntimeException("cellphone number inserted, is not RSA cellphone number. Make sure number start with +27 or 0");
+            throw new IllegalArgumentException("cellphone number inserted, is not RSA cellphone number. Make sure number start with +27 or 0");
         }
 
     }
 
-    private void checkCellphoneNoHasSpecialCharactersOrAlphabets(String validateCellphoneNo) {
+    private String checkCellphoneNoHasSpecialCharactersOrAlphabets(String validateCellphoneNo) {
         try {
-            Long.parseLong(validateCellphoneNo);
+            var cellphoneNumber = Long.parseLong(validateCellphoneNo);
+            return String.valueOf(cellphoneNumber);
         } catch (NumberFormatException e) {
             throw new NumberFormatException("Cellphone number inserted has characters or alphabets");
         }
@@ -160,14 +175,51 @@ public class UsersFieldsDataValidator {
     }
 
     //#LLL1231@
-    public static boolean checkPasswordValidity(String password) {
-        // Regular expression for password validation
-        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%&*_])[A-Za-z\\d!@#$%&*_]{8,20}$";
+    public  String checkPasswordValidity(String password) {
 
-        // Compile the regex pattern
-        Pattern pattern = Pattern.compile(regex);
+        String passwordSpecialCharacters = "!@#$%^&*()?><;'{}|";
+        var passwordMinLength = 8;
+        var passwordMaxLength = 16;
+        String passwordLowerAlphabets="qwertyuioplkjhgfdsazxcvbnm";
+        String passwordUpperAlphabets="QWERTYUIOPLKJHGFDSAZXCVBNM";
+        String passwordNumbers = "1234567890";
 
-        // Return true if the password matches the regex, otherwise false
-        return password != null && pattern.matcher(password).matches();
+
+        if(password == null) {
+            throw new NullPointerException("password is null");
+        }else if(!checkPasswordContainsValidators(splitPasswordValidators(passwordSpecialCharacters),password)){
+            throw new IllegalArgumentException("Password should have at one special characters {"+passwordSpecialCharacters+"}");
+        }else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordLowerAlphabets),password)){
+            throw new IllegalArgumentException("password should have at least one small letter");
+        }else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordUpperAlphabets),password)){
+            throw new IllegalArgumentException("password should have at least one upper case letter");
+        }else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordNumbers),password)){
+            throw new IllegalArgumentException("password should have at least one number");
+        }else if(password.length() < passwordMinLength){
+           throw new IllegalArgumentException("Password minimum length starts from 8");
+        }else if(password.length() > passwordMaxLength){
+            throw new IllegalArgumentException("Password maximum length starts from 16");
+        }
+
+        return password;
+    }
+
+    private List<String> splitPasswordValidators(String validateType){
+      List<String> list = new ArrayList<>();
+        for (int x =0; x < validateType.length(); x++){
+            list.add(String.valueOf(validateType.charAt(x)));
+      }
+        System.out.println(list);
+        return list;
+    }
+
+    private boolean checkPasswordContainsValidators(List<String> listValidators,String password){
+        for(int x =0; x < listValidators.size();x++){
+            if(password.contains(listValidators.get(x))){
+                System.out.println("Contained : " + password.contains(listValidators.get(x)));
+                return true;
+            }
+        }
+        return false;
     }
 }
