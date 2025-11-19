@@ -131,7 +131,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
         } else {
             users.setUserIdentityNo(validator.validateIdentityNo(request.getUsersIdentityNo()));
             users.setUserPassword(passwordEncoder.encode(usersRegisterRequest().getUsersPassword()));
-            users.setCellphoneNo(validator.validateIdentityNo(request.getUsersCellphoneNo()));
+            users.setUserCellphoneNo(validator.validateIdentityNo(request.getUsersCellphoneNo()));
             users.setUserAge(validator.getValidatedAge());
             var entity = usersRepository.save(users);
             var entityList = new ArrayList<Users>();
