@@ -28,7 +28,7 @@ public class Users implements UserDetails {
 
     @Column(unique = true,nullable = false)
 
-    private String userIdentityNo, cellphoneNo;
+    private String userIdentityNo, userCellphoneNo;
 
     @Column(unique = true,nullable = false)
     private String userEmailAddress;
