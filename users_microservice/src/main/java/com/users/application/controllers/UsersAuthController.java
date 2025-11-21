@@ -38,7 +38,7 @@ public class UsersAuthController {
             return ResponseEntity.badRequest().build();
         } else {
             // creating status 201
-            var uri = uriBuilder.path("/dev/api/findUserByIdentityNumber/{id}").buildAndExpand(request.getUsersIdentityNo()).toUri();
+            var uri = uriBuilder.path("/dev/api/findUserByIdentityNumber/{id}").buildAndExpand(request.getUserIdentityNo()).toUri();
             return ResponseEntity.created(uri).body(set);
         }
     }
