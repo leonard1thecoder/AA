@@ -5,22 +5,23 @@ import com.privileges.application.entity.Privileges;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.stereotype.Component;
 
 @Data
 @Builder
 @AllArgsConstructor
+@Component
 public class UsersRegisterRequest {
 
-    private String usersCellphoneNo;
-    private Privileges fkPrivilegeId;
+    private String userCellphoneNo;
+    private Privileges privileges;
     
-    private String usersIdentityNo;
+    private String userIdentityNo;
 
-    private Integer noPromotionToken;
   
-    private Short usersStatus, usersAge;
+    private Short userStatus;
   
-    private String usersFullName, usersEmailAddress, usersPassword, usersRegistrationDate, usersModifiedDate;
+    private String userFullName, userEmailAddress, userPassword;
 
 
 
