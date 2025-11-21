@@ -3,31 +3,44 @@ package com.users.application.validators;
 import com.users.application.exceptions.IdentificationNumberIsNot13DigitsException;
 import com.users.application.exceptions.UserAgeException;
 import lombok.Getter;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
+
 
 @Component
 public class UsersFieldsDataValidator {
+    private static UsersFieldsDataValidator instance = new UsersFieldsDataValidator();
     private static Logger logger = LoggerFactory.getLogger(UsersFieldsDataValidator.class);
     @Getter
     private Short validatedAge;
-    private LocalDate currentYearDate;
     private String validateCellphoneNo;
 
-    public String validateIdentityNo(@NotNull String identityNo) {
-        currentYearDate = LocalDate.now();
+    private UsersFieldsDataValidator() {
+        super();
+    }
+
+    public static UsersFieldsDataValidator getInstance() {
+        return instance;
+    }
+
+    public String validateIdentityNo(String identityNo) {
+        logger.info("validating id number: {}", identityNo);
+        LocalDate currentYearDate = LocalDate.now();
+
+        logger.info("validating id number: {} , on date : {}", identityNo, currentYearDate);
         var validateIdentityNo = identityNo.trim();
+        logger.info("removing empty spaces  id number: {} ", identityNo);
+
         if (validateIdentityNo == null) {
             throw new NullPointerException("validated id instance is null");
-        }else if(validateIdentityNo.isEmpty()){
-          throw new IllegalArgumentException("identity number is empty");
+        } else if (validateIdentityNo.isEmpty()) {
+            throw new IllegalArgumentException("identity number is empty");
         } else if (validateIdentityNo.length() == 13) {
             var firstTwoDigitOfId = validateIdentityNo.substring(0, 2);
             var currentYear = currentYearDate.getYear();
@@ -63,6 +76,8 @@ public class UsersFieldsDataValidator {
         } else {
             throw new IdentificationNumberIsNot13DigitsException("users entered identity number which is not equals to length of 13");
         }
+
+
     }
 
     private int validateMonths(byte month) {
@@ -108,15 +123,6 @@ public class UsersFieldsDataValidator {
         }
     }
 
-
-    private Month validateMonth(Byte month) {
-        try {
-            return Month.of(month);
-        } catch (DateTimeException e) {
-            throw new DateTimeException(e.getMessage());
-        }
-    }
-
     private short validAge(Short nonValidateAge) throws UserAgeException {
         logger.info("Age inserted by user is {}", nonValidateAge);
         if (nonValidateAge >= (short) 18) {
@@ -138,7 +144,7 @@ public class UsersFieldsDataValidator {
         }
     }
 
-    public String validateCellphoneNo(@NotNull String nonValidatedCellphoneNo) {
+    public String validateCellphoneNo(String nonValidatedCellphoneNo) {
         var validateCellphoneNo = nonValidatedCellphoneNo.trim();
         if (validateCellphoneNo == null) {
             throw new NullPointerException("Password instance is null");
@@ -175,47 +181,52 @@ public class UsersFieldsDataValidator {
     }
 
     //#LLL1231@
-    public  String checkPasswordValidity(String password) {
+    public String checkPasswordValidity(String password) {
 
         String passwordSpecialCharacters = "!@#$%^&*()?><;'{}|";
         var passwordMinLength = 8;
         var passwordMaxLength = 16;
-        String passwordLowerAlphabets="qwertyuioplkjhgfdsazxcvbnm";
-        String passwordUpperAlphabets="QWERTYUIOPLKJHGFDSAZXCVBNM";
+        String passwordLowerAlphabets = "qwertyuioplkjhgfdsazxcvbnm";
+        String passwordUpperAlphabets = "QWERTYUIOPLKJHGFDSAZXCVBNM";
         String passwordNumbers = "1234567890";
 
 
-        if(password == null) {
+        if (password == null) {
             throw new NullPointerException("password is null");
-        }else if(!checkPasswordContainsValidators(splitPasswordValidators(passwordSpecialCharacters),password)){
-            throw new IllegalArgumentException("Password should have at one special characters {"+passwordSpecialCharacters+"}");
-        }else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordLowerAlphabets),password)){
+        } else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordSpecialCharacters), password)) {
+            throw new IllegalArgumentException("Password should have at one special characters {" + passwordSpecialCharacters + "}");
+        } else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordLowerAlphabets), password)) {
             throw new IllegalArgumentException("password should have at least one small letter");
-        }else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordUpperAlphabets),password)){
+        } else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordUpperAlphabets), password)) {
             throw new IllegalArgumentException("password should have at least one upper case letter");
-        }else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordNumbers),password)){
+        } else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordNumbers), password)) {
             throw new IllegalArgumentException("password should have at least one number");
-        }else if(password.length() < passwordMinLength){
-           throw new IllegalArgumentException("Password minimum length starts from 8");
-        }else if(password.length() > passwordMaxLength){
+        } else if (password.length() < passwordMinLength) {
+            throw new IllegalArgumentException("Password minimum length starts from 8");
+        } else if (password.length() > passwordMaxLength) {
             throw new IllegalArgumentException("Password maximum length starts from 16");
         }
 
         return password;
     }
 
-    private List<String> splitPasswordValidators(String validateType){
-      List<String> list = new ArrayList<>();
-        for (int x =0; x < validateType.length(); x++){
+    public String formatDateTime(LocalDateTime issueDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return issueDate.format(formatter);
+    }
+
+    private List<String> splitPasswordValidators(String validateType) {
+        List<String> list = new ArrayList<>();
+        for (int x = 0; x < validateType.length(); x++) {
             list.add(String.valueOf(validateType.charAt(x)));
-      }
+        }
         System.out.println(list);
         return list;
     }
 
-    private boolean checkPasswordContainsValidators(List<String> listValidators,String password){
-        for(int x =0; x < listValidators.size();x++){
-            if(password.contains(listValidators.get(x))){
+    private boolean checkPasswordContainsValidators(List<String> listValidators, String password) {
+        for (int x = 0; x < listValidators.size(); x++) {
+            if (password.contains(listValidators.get(x))) {
                 System.out.println("Contained : " + password.contains(listValidators.get(x)));
                 return true;
             }
