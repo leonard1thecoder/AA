@@ -13,6 +13,8 @@ import java.time.DateTimeException;
 import java.time.Month;
 import java.time.MonthDay;
 
+import static com.users.application.validators.UsersFieldsDataValidator.getInstance;
+
 
 class UsersFieldsDataValidatorTest {
 
@@ -20,7 +22,7 @@ class UsersFieldsDataValidatorTest {
 
     @BeforeEach
     public void setValidator() {
-        this.validator = new UsersFieldsDataValidator();
+        this.validator = getInstance();
     }
 
     @Test
