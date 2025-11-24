@@ -1,14 +1,19 @@
 package com.users.application.service;
 
 import com.privileges.application.entity.Privileges;
+import com.users.application.configurations.ApplicationConfig;
+import com.users.application.configurations.JwtAuthFilterConfig;
+import com.users.application.configurations.SecurityConfig;
 import com.users.application.dtos.UsersRegisterRequest;
 import com.users.application.entities.Users;
 import com.users.application.exceptions.UsersExistsException;
 import com.users.application.mappers.UsersMapper;
 import com.users.application.repository.UsersRepository;
+import com.users.application.services.JwtService;
 import com.users.application.services.UsersService;
 import com.users.application.validators.UsersFieldsDataValidator;
 import com.utils.application.RedisService;
+import io.lettuce.core.AbstractRedisAsyncCommands;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -20,46 +25,33 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-@ExtendWith(MockitoExtension.class)
+
+
+@SpringBootTest
 public class TestUsersService {
 
-    @Mock
-    private RedisTemplate redisTemplate;
-    @Mock
-    private RedisService redisService;
 
-    @Mock
-    private AuthenticationManager authenticationManager;
-
-
-    @Mock
-    private UsersRepository repository;
-    private Users users;
-
-
+    private UsersMapper mapper;
 
     @Nested
     class TestSignUp {
 
+
         @Mock
-        private PasswordEncoder passwordEncoder;
-        @Mock
+        private UsersRepository rep;
         private UsersRegisterRequest request;
-        @Mock
-        private UsersRepository repository;
-        @Mock
-        private UsersFieldsDataValidator validator;
-        @InjectMocks
+
+        @Autowired
         private UsersService service;
 
         @Mock
@@ -67,12 +59,13 @@ public class TestUsersService {
 
         @BeforeEach
         public void initRegisterRequest(){
+            
            request = UsersRegisterRequest.builder()
                    .privileges(new Privileges(1,"users",(byte)1))
-                   .userCellphoneNo("0788725433")
-                   .userEmailAddress("email@email.com")
+                   .userCellphoneNo("0788924833")
+                   .userEmailAddress("emai811l@email.com")
                    .userFullName("Sizolwakhe Leonard Mthimunye")
-                   .userIdentityNo("9711225453083")
+                   .userIdentityNo("9711229953088")
                    .userPassword("#AA@mail1.com")
                    .userStatus((short) 1)
                    .build();
@@ -123,7 +116,7 @@ public class TestUsersService {
         void testRegisterUsersMethod_userAlreadyRegistered() throws NoSuchMethodException, IllegalAccessException {
             //when
             var map = mapper.toEntity(request);
-            repository.save(map);
+//            repository.save(map);
 
 
             //Given
