@@ -21,8 +21,8 @@ public class UsersAuthController {
     private ServiceConcurrentExecutor serviceConcurrentExecutor;
     private UsersMapper mapper;
     @Autowired
-    public UsersAuthController(@Autowired UsersMapper mapper, @Autowired UsersService service, @Autowired ServiceConcurrentExecutor serviceConcurrentExecutor) {
-        this.serviceConcurrentExecutor = serviceConcurrentExecutor;
+    public UsersAuthController(@Autowired UsersMapper mapper, @Autowired UsersService service) {
+        this.serviceConcurrentExecutor = ServiceConcurrentExecutor.getInstance();
         this.service = service;
         this.mapper = mapper;
     }
