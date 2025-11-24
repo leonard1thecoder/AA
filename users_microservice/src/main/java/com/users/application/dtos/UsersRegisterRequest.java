@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 @Data
 @Builder
 @AllArgsConstructor
-@Component
 public class UsersRegisterRequest {
 
     private String userCellphoneNo;

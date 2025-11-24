@@ -22,8 +22,8 @@ public class UsersController {
 
     @Autowired
 
-    public UsersController( @Autowired UsersService service, @Autowired ServiceConcurrentExecutor serviceConcurrentExecutor) {
-        this.serviceConcurrentExecutor = serviceConcurrentExecutor;
+    public UsersController( @Autowired UsersService service) {
+        this.serviceConcurrentExecutor = ServiceConcurrentExecutor.getInstance();
         this.service = service;
 
     }

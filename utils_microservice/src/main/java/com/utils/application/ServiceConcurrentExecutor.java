@@ -6,22 +6,22 @@ import com.utils.application.controllerAdvice.ExecutorControllerAdvice;
 import com.utils.application.globalExceptions.ServiceExecutionException;
 import com.utils.application.globalExceptions.ServiceInterruptedException;
 import com.utils.application.globalExceptions.ServiceTimeoutException;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.*;
 
-@Component
 public class ServiceConcurrentExecutor {
 
+    @Getter
+    private final static ServiceConcurrentExecutor instance = new ServiceConcurrentExecutor();
     private ExecutorService executorService;
 
     private Execute service;
 
-    @Autowired
-    public ServiceConcurrentExecutor(@Autowired Execute service) {
-        this.service = service;
+    private ServiceConcurrentExecutor() {
         int threads = Runtime.getRuntime().availableProcessors();
         this.executorService = Executors.newFixedThreadPool(threads);
     }
