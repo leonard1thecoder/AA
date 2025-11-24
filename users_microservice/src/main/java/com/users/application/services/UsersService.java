@@ -35,29 +35,31 @@ import static com.utils.application.HandlingLoadingService.handleServiceHandler;
 
 @Service
 public class UsersService implements Execute<List<UsersResponse>> {
-    private Logger logger = LoggerFactory.getLogger(UsersService.class);
+    private static Logger logger = LoggerFactory.getLogger(UsersService.class);
 
 
     public static String serviceHandler;
 
     private UsersFullNameRequest usersFullNameRequest;
-    private UsersRepository usersRepository;
+    @Setter
+    private static UsersRepository usersRepository;
     private UsersRegisterRequest usersRegisterRequest;
     private UpdatePasswordRequest updatePasswordRequest;
     private LoginRequest loginRequest;
     private IdentityNoRequest identityNoRequest;
     private FindByIdRequest findByIdRequest;
-    private JwtService jwtService;
+    private static JwtService jwtService;
     private AuthenticationManager authenticationManager;
     @Setter
-    private UsersMapper usersMapper;
-    private PasswordEncoder passwordEncoder;
+    private static UsersMapper usersMapper;
+    private  static  PasswordEncoder passwordEncoder;
     private RedisService redisService;
     private UsersFieldsDataValidator validator;
 
     @Autowired
-    public UsersService(@Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
-        this.usersRepository = usersRepository;
+    public UsersService(PasswordEncoder passwordEncoder,@Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
+        setUsersRepository(usersRepository);
+        this.passwordEncoder = passwordEncoder;
         this.usersMapper = usersMapper;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -133,7 +135,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
         try {
             entitiesList = usersRepository.findByUserIdentityNo(getInstance().validateIdentityNo(request.getUserIdentityNo()));
         } catch (Exception e) {
-            throw e;
+            entitiesList   = null;
+            e.printStackTrace();
         }
 
         if (entitiesList.isPresent()) {
