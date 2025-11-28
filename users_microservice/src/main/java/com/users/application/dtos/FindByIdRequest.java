@@ -1,18 +1,15 @@
 package com.users.application.dtos;
 
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+@AllArgsConstructor
 public class FindByIdRequest {
 
-    private Long pkUsersId;
+    private Long id;
 
-    public FindByIdRequest(Long pkUsersId) {
-        this.pkUsersId = pkUsersId;
-    }
-
-    public Long getPkUsersId() {
-        return pkUsersId;
-    }
-
-    public void setPkUsersId(Long pkUsersId) {
-        this.pkUsersId = pkUsersId;
-    }
 }

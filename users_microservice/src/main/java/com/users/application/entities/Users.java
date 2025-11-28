@@ -1,9 +1,7 @@
 package com.users.application.entities;
 
-import com.privileges.application.entity.Privileges;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,9 +20,8 @@ public class Users implements UserDetails {
     @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(nullable = false)
     private Long id;
-    @JoinColumn(name = "id", nullable = false)
-    @OneToOne
-    private Privileges privileges;
+    @Column( nullable = false)
+    private Integer fk_privilege_id;
 
     @Column(unique = true,nullable = false)
 
@@ -32,7 +29,7 @@ public class Users implements UserDetails {
 
     @Column(unique = true,nullable = false)
     private String userEmailAddress;
-
+     
     @Column(columnDefinition = "TEXT",nullable = false)
     private String userPassword;
     @Column(nullable = false)
@@ -42,11 +39,16 @@ public class Users implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(privileges.getPrivilegeName()));
-    }
-    @Autowired
-    public void setPrivileges( @Autowired Privileges privileges) {
-        this.privileges = privileges;
+        if(fk_privilege_id == 1)
+        return List.of(new SimpleGrantedAuthority("Alcohol Agent"));
+        else if (fk_privilege_id == 2)
+             return List.of(new SimpleGrantedAuthority("Alcohol Agent Artists"));
+        else if (fk_privilege_id == 3)
+            return List.of(new SimpleGrantedAuthority("Alcohol Agent Event hosts"));
+        else if(fk_privilege_id == 4)
+             return List.of(new SimpleGrantedAuthority("Alcohol Agent Retails"));
+        else
+            throw new IllegalArgumentException("Incorrect privilege");
     }
 
     @Override
