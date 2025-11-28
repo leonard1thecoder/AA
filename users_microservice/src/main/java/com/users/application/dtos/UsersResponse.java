@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UsersResponse implements ResponseContract {
     private Long id;
-    private Privileges privileges;
+    private Integer privileges;
     private String usersIdentityNo;
     private Short usersStatus,usersAge;
     private String usersFullName,cellphoneNo, usersEmailAddress, usersRegistrationDate, usersModifiedDate;
