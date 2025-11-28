@@ -12,6 +12,7 @@ import com.users.application.repository.UsersRepository;
 import com.utils.application.Execute;
 import com.utils.application.globalExceptions.ServiceHandlerException;
 import jakarta.transaction.Transactional;
+import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.encrypt.RsaSecretEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,12 +48,13 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private static UsersRepository usersRepository;
     private UsersRegisterRequest usersRegisterRequest;
     private UpdatePasswordRequest updatePasswordRequest;
-    private LoginRequest loginRequest;
+    private static LoginRequest loginRequest;
     private static IdentityNoRequest identityNoRequest;
+    @Getter
     private FindByIdRequest findByIdRequest;
     private static JwtService jwtService;
-    private static RsaSecretEncryptor rsaSecretEncryptor;
-    private AuthenticationManager authenticationManager;
+
+    private static  AuthenticationManager authenticationManager;
     @Setter
     private static UsersMapper usersMapper;
     private  static  PasswordEncoder passwordEncoder;
@@ -61,14 +62,14 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private UsersFieldsDataValidator validator;
 
     @Autowired
-    public UsersService(@Autowired RedisTemplate redisTemplate, @Autowired RsaSecretEncryptor rsaSecretEncryptor, PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
+    public UsersService(@Autowired RedisTemplate redisTemplate, PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         setUsersRepository(usersRepository);
-        UsersService.rsaSecretEncryptor = rsaSecretEncryptor;
+
         UsersService.passwordEncoder = passwordEncoder;
         UsersService.usersMapper = usersMapper;
         UsersService.jwtService = jwtService;
         UsersService.redisService = new RedisService(redisTemplate);
-        this.authenticationManager = authenticationManager;
+        UsersService.authenticationManager = authenticationManager;
     }
 
     public UsersFullNameRequest usersFullNameRequest() {
@@ -80,10 +81,6 @@ public class UsersService implements Execute<List<UsersResponse>> {
         return this;
     }
 
-    public FindByIdRequest getFindByIdRequest() {
-        return findByIdRequest;
-    }
-
     public void setFindByIdRequest(FindByIdRequest findByIdRequest) {
         this.findByIdRequest = findByIdRequest;
     }
@@ -92,9 +89,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
         return usersRegisterRequest;
     }
 
-    public UsersService setUsersRegisterRequest(UsersRegisterRequest usersRegisterRequest) {
+    public void setUsersRegisterRequest(UsersRegisterRequest usersRegisterRequest) {
         this.usersRegisterRequest = usersRegisterRequest;
-        return this;
     }
 
     public LoginRequest loginRequest() {
@@ -105,23 +101,20 @@ public class UsersService implements Execute<List<UsersResponse>> {
         return identityNoRequest;
     }
 
-    public UsersService setIdentityNoRequest(IdentityNoRequest identityNoRequest) {
+    public void setIdentityNoRequest(IdentityNoRequest identityNoRequest) {
         this.identityNoRequest = identityNoRequest;
-        return this;
     }
 
-    public UsersService setLoginRequest(LoginRequest loginRequest) {
+    public void setLoginRequest(LoginRequest loginRequest) {
         this.loginRequest = loginRequest;
-        return this;
     }
 
     public UpdatePasswordRequest updatePasswordRequest() {
         return updatePasswordRequest;
     }
 
-    public UsersService setUpdatePasswordRequest(UpdatePasswordRequest updatePasswordRequest) {
+    public void setUpdatePasswordRequest(UpdatePasswordRequest updatePasswordRequest) {
         this.updatePasswordRequest = updatePasswordRequest;
-        return this;
     }
 
 
@@ -207,14 +200,14 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
 
     private List<UsersResponse> findUserByUsersIdentityNo() {
-        String encrypt = rsaSecretEncryptor.encrypt(getInstance().validateIdentityNo(identityNoRequest.getUsersIdentityNo()));
+        String encrypt = getInstance().validateIdentityNo(identityNoRequest.getUsersIdentityNo());
         UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
 
         if (redisUserResponse != null) {
             logger.info("User with identity no : {} successfully found from cache, data is {}  ", redisUserResponse.getUsersIdentityNo(), redisUserResponse);
             return List.of(redisUserResponse);
         } else {
-            var responseList = usersRepository.findByUserIdentityNo(rsaSecretEncryptor.encrypt(identityNoRequest.getUsersIdentityNo())).stream().map(usersMapper::toDto).toList();
+            var responseList = usersRepository.findByUserIdentityNo(identityNoRequest.getUsersIdentityNo()).stream().map(usersMapper::toDto).toList();
 
             if (responseList.size() == 1) {
                 var jpaUserResponse = responseList.get(0);
@@ -334,8 +327,9 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
     @Transactional
     private List<UsersResponse> login() {
-        var encrypt = passwordEncoder.encode(loginRequest().getUsersEmailAddress());
+        var encrypt = loginRequest().getUsersEmailAddress();
         UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
+
         UsersResponse jpaUserResponse;
         if (redisUserResponse != null) {
             System.out.println("redis");
@@ -345,16 +339,35 @@ public class UsersService implements Execute<List<UsersResponse>> {
         } else {
             System.out.println("Jpa");
             redisStatus = false;
-            var entity = usersMapper.toEntity(loginRequest());
-            jwtService.generateToken(entity);
-
-            var responseList = usersRepository.findByUserEmailAddress(entity.getUserEmailAddress()).stream().map(usersMapper::toDto).toList();
 
 
-            if (responseList.size() == 1) {
+            var optionalEntity = usersRepository.findByUserEmailAddress(loginRequest().getUsersEmailAddress());
+
+
+            if (optionalEntity.isPresent()) {
+
+                var users = optionalEntity.get();
+                List<Users> list = new ArrayList<>();
+                list.add(users);
+                 jpaUserResponse = list.stream().map(s -> UsersResponse
+                        .builder()
+                        .usersAge(users.getUserAge())
+                        .id(users.getId())
+                        .usersStatus(users.getUserStatus())
+                        .usersEmailAddress(users.getUserEmailAddress())
+                        .usersRegistrationDate(users.getUserRegistrationDate())
+                        .usersModifiedDate(users.getUserModifiedDate())
+                        .usersFullName(users.getUserFullName())
+                        .usersIdentityNo(users.getUserIdentityNo())
+                        .cellphoneNo(users.getUserCellphoneNo())
+                        .privileges(users.getFk_privilege_id())
+                        .build()).toList()
+                         .get(0);
+
                 passwordStatus = true;
-                jpaUserResponse = responseList.get(0);
-                redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
+                jwtService.generateToken(optionalEntity.get());
+
+
             } else {
                 jpaUserResponse = null;
                 passwordStatus = false;
@@ -369,9 +382,13 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
                 return List.of(redisUserResponse);
             } else {
-                logger.info("user with email {} successfully logged in using jpa data : {}", loginRequest().getUsersEmailAddress(), jpaUserResponse);
 
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
+                logger.info("user with email {} successfully logged in using jpa data : {}", loginRequest().getUsersEmailAddress(), jpaUserResponse);
+                redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
+
+                logger.info("cached login data : {}", redisService.get(encrypt,UsersResponse.class));
+
                 return List.of(jpaUserResponse);
             }
         } catch (AuthenticationException e) {
@@ -385,7 +402,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                     var resolveIssue = "please provide correct password or update password";
                     throw throwExceptionAndReport(new UsersPasswordIncorrectException(errorMessage), errorMessage, resolveIssue);
                 } else {
-                    var errorMessage = UsersControllerAdvice.setMessage("email address" + loginRequest().getUsersEmailAddress() + " is not found");
+                    var errorMessage = UsersControllerAdvice.setMessage("email address " + loginRequest().getUsersEmailAddress() + " not found, verify your email or register");
                     var resolveIssue = "please provide correct password or register with the email address";
                     throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
                 }
