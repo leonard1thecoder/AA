@@ -1,6 +1,6 @@
 package com.users.application.repository;
 
-import com.privileges.application.entity.Privileges;
+
 import com.users.application.entities.Users;
 import jakarta.transaction.Transactional;
 import org.junit.Assert;
@@ -43,7 +43,7 @@ class UsersRepositoryTest {
                 .userRegistrationDate(LocalDateTime.now().toString())
                 .userStatus((short) 0)
                 .userEmailAddress("localhost@gmail.com")
-                .privileges(new Privileges(1, "users", (byte) 2))
+                .fk_privilege_id(1)
                 .userIdentityNo("97112259743083")
                 .build());
     }
