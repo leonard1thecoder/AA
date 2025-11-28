@@ -1,6 +1,7 @@
 package com.utils.application.configurations;
 
 
+import com.utils.application.RedisService;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,11 @@ public class RedisConfig {
      redisTemplate.setValueSerializer(new StringRedisSerializer());
 
      return redisTemplate;
+    }
+
+    @Bean
+    public RedisService redisService(RedisTemplate redisTemplate){
+        return new RedisService(redisTemplate);
     }
 
 }
