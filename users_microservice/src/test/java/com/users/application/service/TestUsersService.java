@@ -4,10 +4,7 @@ import com.privileges.application.entity.Privileges;
 import com.users.application.configurations.ApplicationConfig;
 import com.users.application.configurations.JwtAuthFilterConfig;
 import com.users.application.configurations.SecurityConfig;
-import com.users.application.dtos.FindByIdRequest;
-import com.users.application.dtos.IdentityNoRequest;
-import com.users.application.dtos.UsersRegisterRequest;
-import com.users.application.dtos.UsersResponse;
+import com.users.application.dtos.*;
 import com.users.application.entities.Users;
 import com.users.application.exceptions.UserNotFoundException;
 import com.users.application.exceptions.UsersExistsException;
@@ -60,10 +57,10 @@ public class TestUsersService {
 
             request = UsersRegisterRequest.builder()
                     .privileges(new Privileges(1, "users", (byte) 1))
-                    .userCellphoneNo("0851231230")
-                    .userEmailAddress("email2@email.com")
+                    .userCellphoneNo("0891231230")
+                    .userEmailAddress("em2ail2@email.com")
                     .userFullName("Sizolwakhe Leonard Mthimunye")
-                    .userIdentityNo("9708216953188")
+                    .userIdentityNo("9708316953188")
                     .userPassword("#AA@mail1.com")
                     .userStatus((short) 1)
                     .build();
@@ -169,6 +166,87 @@ public class TestUsersService {
 
 
     }
+
+    @Nested
+    class TestLogin{
+        @Test
+        void  testLoginMethod_successfulLogin() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+            //when
+            LoginRequest request = LoginRequest.builder()
+                    .usersEmailAddress("em2ail2@email.com")
+                    .usersPassword("#AA@mail1.com")
+                    .build();
+            service.setLoginRequest(request);
+
+            //Given
+
+            Method loginMethod = UsersService.class.getDeclaredMethod("login");
+            loginMethod.setAccessible(true);
+
+            var list = (List<UsersResponse>)loginMethod.invoke(service);
+
+            //Assert
+            Assertions.assertEquals(1, list.size());
+        }
+
+        @Test
+        void  testLoginMethod_unsuccessfulLoginIncorrectPassword() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+            //when
+            LoginRequest request = LoginRequest.builder()
+                    .usersEmailAddress("em2ail2@email.com")
+                    .usersPassword("#AA2@mail1.com")
+                    .build();
+            service.setLoginRequest(request);
+
+            //Given
+
+            Method loginMethod = UsersService.class.getDeclaredMethod("login");
+            loginMethod.setAccessible(true);
+
+
+            try {
+                loginMethod.invoke(service);
+            } catch (InvocationTargetException e) {
+                UserNotFoundException throwable = Assertions.assertThrows(UserNotFoundException.class, () -> {
+                    throw new UserNotFoundException("password inserted is incorrect");
+                });
+
+                Assertions.assertEquals(throwable.getMessage(), getMessageFromCause(e.getCause().toString()));
+            }
+
+
+        }
+
+        @Test
+        void  testLoginMethod_unsuccessfulLoginIncorrectEmailAddress() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+            //when
+            LoginRequest request = LoginRequest.builder()
+                    .usersEmailAddress("em222ail2@email.com")
+                    .usersPassword("#AA2@mail1.com")
+                    .build();
+            service.setLoginRequest(request);
+
+            //Given
+
+            Method loginMethod = UsersService.class.getDeclaredMethod("login");
+            loginMethod.setAccessible(true);
+
+
+            try {
+                loginMethod.invoke(service);
+            } catch (InvocationTargetException e) {
+                UserNotFoundException throwable = Assertions.assertThrows(UserNotFoundException.class, () -> {
+                    throw new UserNotFoundException("email address " + request.getUsersEmailAddress() + " not found, verify your email or register");
+                });
+
+                Assertions.assertEquals(throwable.getMessage(), getMessageFromCause(e.getCause().toString()));
+            }
+
+
+        }
+    }
+
+
 
 
     private String getMessageFromCause(String cause) {
