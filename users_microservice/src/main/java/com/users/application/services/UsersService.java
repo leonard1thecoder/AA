@@ -16,9 +16,12 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.encrypt.RsaSecretEncryptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,22 +49,25 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private UsersRegisterRequest usersRegisterRequest;
     private UpdatePasswordRequest updatePasswordRequest;
     private LoginRequest loginRequest;
-    private IdentityNoRequest identityNoRequest;
+    private static IdentityNoRequest identityNoRequest;
     private FindByIdRequest findByIdRequest;
     private static JwtService jwtService;
+    private static RsaSecretEncryptor rsaSecretEncryptor;
     private AuthenticationManager authenticationManager;
     @Setter
     private static UsersMapper usersMapper;
     private  static  PasswordEncoder passwordEncoder;
-    private RedisService redisService;
+    private static RedisService redisService;
     private UsersFieldsDataValidator validator;
 
     @Autowired
-    public UsersService(PasswordEncoder passwordEncoder,@Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
+    public UsersService(@Autowired RedisTemplate redisTemplate, @Autowired RsaSecretEncryptor rsaSecretEncryptor, PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         setUsersRepository(usersRepository);
-        this.passwordEncoder = passwordEncoder;
-        this.usersMapper = usersMapper;
-        this.jwtService = jwtService;
+        UsersService.rsaSecretEncryptor = rsaSecretEncryptor;
+        UsersService.passwordEncoder = passwordEncoder;
+        UsersService.usersMapper = usersMapper;
+        UsersService.jwtService = jwtService;
+        UsersService.redisService = new RedisService(redisTemplate);
         this.authenticationManager = authenticationManager;
     }
 
@@ -122,7 +128,9 @@ public class UsersService implements Execute<List<UsersResponse>> {
     public static void setServiceHandler(String serviceHandler) {
         UsersService.serviceHandler = serviceHandler;
     }
-
+        /*
+            Need to implement redis cache
+         */
     @Transactional
     private List<UsersResponse> registerUsers() {
 
@@ -133,13 +141,14 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
         Optional<Users> entitiesList;
         try {
-            entitiesList = usersRepository.findByUserIdentityNo(getInstance().validateIdentityNo(request.getUserIdentityNo()));
+            entitiesList = usersRepository.findByUserCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo()));
+
         } catch (Exception e) {
             entitiesList   = null;
             e.printStackTrace();
         }
 
-        if (entitiesList.isPresent()) {
+        if (false) {
             if (entitiesList.get().getUserStatus() == 0) {
                 var errorMessage = "User has already been registered, email or cellphone number not verified";
                 var resolveIssue = "click the verify or go to nearest AA registered company";
@@ -157,7 +166,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                     .userPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword())))
                     .userRegistrationDate(getInstance().formatDateTime(LocalDateTime.now()))
                     .userModifiedDate(getInstance().formatDateTime(LocalDateTime.now()))
-                    .privileges(request.getPrivileges())
+                    .fk_privilege_id(request.getPrivileges().getId())
                     .userStatus((short) 0)
                     .userCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo()))
                     .userFullName(request.getUserFullName())
@@ -165,40 +174,47 @@ public class UsersService implements Execute<List<UsersResponse>> {
                     .userAge(getInstance().getValidatedAge())
                     .build();
 
+            try {
+                logger.info("users was successfully registered : data : {}", usersRepository.save(users));
+                var entityList = new ArrayList<Users>();
+                entityList.add(users);
+                var responseList = entityList
+                        .stream()
+                        .map(s -> UsersResponse
+                                .builder()
+                                .usersAge(users.getUserAge())
+                                .id(users.getId())
+                                .usersStatus(users.getUserStatus())
+                                .usersEmailAddress(users.getUserEmailAddress())
+                                .usersRegistrationDate(users.getUserRegistrationDate())
+                                .usersModifiedDate(users.getUserModifiedDate())
+                                .usersFullName(users.getUserFullName())
+                                .usersIdentityNo(users.getUserIdentityNo())
+                                .cellphoneNo(users.getUserCellphoneNo())
+                                .privileges(users.getFk_privilege_id())
+                                .build())
+                        .toList();
+                logger.info("User : {} successfully registered data : {}", usersRegisterRequest().getUserFullName(), responseList);
+                return responseList;
 
-            final var entity = usersRepository.save(users);
-            var entityList = new ArrayList<Users>();
-            entityList.add(users);
-            var responseList = entityList
-                    .stream()
-                    .map(s -> UsersResponse
-                            .builder()
-                            .usersAge(users.getUserAge())
-                            .id(users.getId())
-                            .usersStatus(users.getUserStatus())
-                            .usersEmailAddress(users.getUserEmailAddress())
-                            .usersRegistrationDate(users.getUserRegistrationDate())
-                            .usersModifiedDate(users.getUserModifiedDate())
-                            .usersFullName(users.getUserFullName())
-                            .usersIdentityNo(users.getUserIdentityNo())
-                            .cellphoneNo(users.getUserCellphoneNo())
-                            .privileges(users.getPrivileges())
-                            .build())
-                    .toList();
-            logger.info("User : {} successfully registered data : {}", usersRegisterRequest().getUserFullName(), responseList);
-            return responseList;
+            }catch(DataIntegrityViolationException e){
+                var errorMessage = "User has already been registered";
+                var resolveIssue = "Some of your data is registered, contact AA for verification";
+                throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+            }
         }
     }
 
+
     private List<UsersResponse> findUserByUsersIdentityNo() {
-        String encrypt = passwordEncoder.encode(identityNoRequest.usersIdentityNo());
+        String encrypt = rsaSecretEncryptor.encrypt(getInstance().validateIdentityNo(identityNoRequest.getUsersIdentityNo()));
         UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
 
         if (redisUserResponse != null) {
             logger.info("User with identity no : {} successfully found from cache, data is {}  ", redisUserResponse.getUsersIdentityNo(), redisUserResponse);
             return List.of(redisUserResponse);
         } else {
-            var responseList = usersRepository.findByUserIdentityNo(identityNoRequest.usersIdentityNo()).stream().map(usersMapper::toDto).toList();
+            var responseList = usersRepository.findByUserIdentityNo(rsaSecretEncryptor.encrypt(identityNoRequest.getUsersIdentityNo())).stream().map(usersMapper::toDto).toList();
 
             if (responseList.size() == 1) {
                 var jpaUserResponse = responseList.get(0);
@@ -207,7 +223,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
                 return responseList;
             } else {
-                var errorMessage = "User with identity no ending with XXX-XXX-XXX-" + identityNoRequest.usersIdentityNo().substring(9) + "not found";
+                var errorMessage = "User with identity no ending with XXX-XXX-XXX-" + identityNoRequest.getUsersIdentityNo().substring(9) + "not found";
                 var resolveIssue = "Please review the identity number inserted";
                 throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
             }
@@ -239,10 +255,9 @@ public class UsersService implements Execute<List<UsersResponse>> {
         }
     }
 
-
     private List<UsersResponse> findUserById() {
 
-        String encrypt = passwordEncoder.encode(this.getFindByIdRequest().getPkUsersId().toString());
+        String encrypt = this.getFindByIdRequest().getId().toString();
         UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
 
         if (redisUserResponse != null) {
@@ -250,16 +265,32 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
             return List.of(redisUserResponse);
         } else {
-            var responseList = usersRepository.findById(this.getFindByIdRequest().getPkUsersId()).stream().map(usersMapper::toDto).toList();
+            var responseList = usersRepository.findById(this.getFindByIdRequest().getId());
 
-            if (responseList.size() == 1) {
-                var jpaUserResponse = responseList.get(0);
-                redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
-                logger.info("user with id {} successfully retrieved from jpa data : {}", jpaUserResponse.getId(), jpaUserResponse);
+            if (responseList.isPresent()) {
+                var users = responseList.get();
+                List<Users> list = new ArrayList<>();
+                list.add(users);
+                var jpaUserResponse = list.stream().map(s -> UsersResponse
+                        .builder()
+                        .usersAge(users.getUserAge())
+                        .id(users.getId())
+                        .usersStatus(users.getUserStatus())
+                        .usersEmailAddress(users.getUserEmailAddress())
+                        .usersRegistrationDate(users.getUserRegistrationDate())
+                        .usersModifiedDate(users.getUserModifiedDate())
+                        .usersFullName(users.getUserFullName())
+                        .usersIdentityNo(users.getUserIdentityNo())
+                        .cellphoneNo(users.getUserCellphoneNo())
+                        .privileges(users.getFk_privilege_id())
+                        .build()).toList();
 
-                return responseList;
+                redisService.set(encrypt, jpaUserResponse.get(0), 6L, TimeUnit.HOURS);
+                logger.info("cached data : {}", redisService.get(encrypt,UsersResponse.class));
+                logger.info("user with id {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getId(), jpaUserResponse);
+                return jpaUserResponse;
             } else {
-                var errorMessage = "user id : " + this.getFindByIdRequest().getPkUsersId() + " not found";
+                var errorMessage = "user id : " + this.getFindByIdRequest().getId() + " not found";
                 var resolveIssue = "Please review id inserted";
                 throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
             }
