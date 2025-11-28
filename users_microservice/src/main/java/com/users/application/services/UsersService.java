@@ -329,7 +329,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private List<UsersResponse> login() {
         var encrypt = loginRequest().getUsersEmailAddress();
         UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
-redisUserResponse = null;
+
         UsersResponse jpaUserResponse;
         if (redisUserResponse != null) {
             System.out.println("redis");
