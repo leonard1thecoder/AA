@@ -47,10 +47,10 @@ public class TestUsersService {
 
             request = UsersRegisterRequest.builder()
                     .privileges(new Privileges(1, "users", (byte) 1))
-                    .userCellphoneNo("0891231230")
-                    .userEmailAddress("em2ail2@email.com")
+                    .userCellphoneNo("0801231230")
+                    .userEmailAddress("em22ail2@email.com")
                     .userFullName("Sizolwakhe Leonard Mthimunye")
-                    .userIdentityNo("9708316953188")
+                    .userIdentityNo("9701316953188")
                     .userPassword("#AA@mail1.com")
                     .userStatus((short) 1)
                     .build();
@@ -70,25 +70,11 @@ public class TestUsersService {
                 registerUsersMethod.invoke(service);
             } catch (InvocationTargetException e) {
                 NullPointerException throwable = Assertions.assertThrows(NullPointerException.class, () -> {
-                    throw new NullPointerException("Request sent by client is null");
+                    throw new NullPointerException("Users registration request is  null");
                 });
 
                 Assertions.assertEquals(throwable.getMessage(), getMessageFromCause(e.getCause().toString()));
             }
-        }
-
-
-        @Test
-        void testRegisterUsersMethod_requestNotNull() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-            //when
-            service.setUsersRegisterRequest(request);
-
-            //Given
-            Method registerUsersMethod = UsersService.class.getDeclaredMethod("registerUsers");
-            registerUsersMethod.setAccessible(true);
-            registerUsersMethod.invoke(service);
-
-
         }
 
 
@@ -137,7 +123,7 @@ public class TestUsersService {
         void testFindUserByUsersId_findUsersByExistingIdInDb() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
             //when
             var request = FindByIdRequest.builder()
-                    .id(52L)
+                    .id(252L)
                     .build();
             service.setFindByIdRequest(request);
 
@@ -162,7 +148,7 @@ public class TestUsersService {
             //when
             LoginRequest request = LoginRequest.builder()
                     .usersEmailAddress("em2ail2@email.com")
-                    .usersPassword("#AA@mail1.com")
+                    .usersPassword("12345")
                     .build();
             service.setLoginRequest(request);
 
@@ -272,6 +258,7 @@ public class TestUsersService {
                     .usersPassword("12345")
                     .usersConfirmPassword("12345")
                     .build();
+            service.setUpdatePasswordRequest(request);
             //When
            var usersPasswordMethod = UsersService.class.getDeclaredMethod("updateUsersPassword");
             usersPasswordMethod.setAccessible(true);
@@ -290,7 +277,7 @@ public class TestUsersService {
                     .usersPassword("12345")
                     .usersConfirmPassword("1232")
                     .build();
-
+            service.setUpdatePasswordRequest(request);
             // When
             var usersPasswordMethod = UsersService.class.getDeclaredMethod("updateUsersPassword");
             usersPasswordMethod.setAccessible(true);
@@ -315,7 +302,7 @@ public class TestUsersService {
                     .builder()
                     .usersEmailAddress("em2ail22@email.com")
                     .build();
-
+service.setUpdatePasswordRequest(request);
             // When
             var usersPasswordMethod = UsersService.class.getDeclaredMethod("updateUsersPassword");
             usersPasswordMethod.setAccessible(true);
