@@ -1,35 +1,25 @@
 package com.users.application.service;
 
 import com.privileges.application.entity.Privileges;
-import com.users.application.configurations.ApplicationConfig;
-import com.users.application.configurations.JwtAuthFilterConfig;
-import com.users.application.configurations.SecurityConfig;
 import com.users.application.dtos.*;
-import com.users.application.entities.Users;
+import com.users.application.exceptions.PasswordMisMatchException;
+import com.users.application.exceptions.UserEmailDoesNotExistException;
 import com.users.application.exceptions.UserNotFoundException;
-import com.users.application.exceptions.UsersExistsException;
 import com.users.application.mappers.UsersMapper;
 import com.users.application.repository.UsersRepository;
-import com.users.application.services.JwtService;
 import com.users.application.services.UsersService;
-import com.users.application.validators.UsersFieldsDataValidator;
-import com.utils.application.RedisService;
-import io.lettuce.core.AbstractRedisAsyncCommands;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
+
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 @SpringBootTest
@@ -120,8 +110,6 @@ public class TestUsersService {
 
     @Nested
     class TestFindById {
-
-
 
         @Test
         void testFindUserByUsersId_findUsersByNonExistingIdInDb() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -246,6 +234,103 @@ public class TestUsersService {
         }
     }
 
+    @Nested
+    class FindByName{
+
+        void testFindAllUsersByNameMethod_validFullNameFind() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+            UsersFullNameRequest request = UsersFullNameRequest.builder()
+                    .usersFullName("Sizolwakhe Leonard Mthimunye")
+                    .build() ;
+            service.setUsersFullNameRequest(request);
+
+
+            //Given
+
+            Method findAllUsersByNameMethod = UsersService.class.getDeclaredMethod("findAllUsersByName");
+            findAllUsersByNameMethod.setAccessible(true);
+
+            var list = (List<UsersResponse>)findAllUsersByNameMethod.invoke(service);
+
+            //Assert
+            Assertions.assertEquals(1, list.size());
+
+        }
+    }
+
+
+
+    @Nested
+    class TestUpdateUserPassword{
+
+
+        @Test
+        void testUpdateUsersPasswordMethod_validEmailAddressAndNewPasswordMatchConfirmPassword() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+            //Given
+            UpdatePasswordRequest request = UpdatePasswordRequest
+                    .builder()
+                    .usersEmailAddress("em2ail2@email.com")
+                    .usersPassword("12345")
+                    .usersConfirmPassword("12345")
+                    .build();
+            //When
+           var usersPasswordMethod = UsersService.class.getDeclaredMethod("updateUsersPassword");
+            usersPasswordMethod.setAccessible(true);
+           var response = (List<UsersResponse>)usersPasswordMethod.invoke(service);
+
+           //Assert
+            Assertions.assertEquals(1, response.size());
+        }
+
+        @Test
+        void testUpdateUsersPasswordMethod_validEmailAddressAndNewPasswordDoesNotMatchConfirmPassword() throws NoSuchMethodException,IllegalAccessException {
+            //Given
+            UpdatePasswordRequest request = UpdatePasswordRequest
+                    .builder()
+                    .usersEmailAddress("em2ail2@email.com")
+                    .usersPassword("12345")
+                    .usersConfirmPassword("1232")
+                    .build();
+
+            // When
+            var usersPasswordMethod = UsersService.class.getDeclaredMethod("updateUsersPassword");
+            usersPasswordMethod.setAccessible(true);
+
+            try {
+                usersPasswordMethod.invoke(service);
+            }catch (InvocationTargetException e) {
+                PasswordMisMatchException throwable = Assertions.assertThrows(PasswordMisMatchException.class, () -> {
+                    throw new PasswordMisMatchException("new password and confirm password don't match");
+                });
+
+                Assertions.assertEquals(throwable.getMessage(), getMessageFromCause(e.getCause().toString()));
+            }
+
+
+        }
+
+        @Test
+        void testUpdateUsersPasswordMethod_invalidEmailAddress() throws NoSuchMethodException,IllegalAccessException {
+            //Given
+            UpdatePasswordRequest request = UpdatePasswordRequest
+                    .builder()
+                    .usersEmailAddress("em2ail22@email.com")
+                    .build();
+
+            // When
+            var usersPasswordMethod = UsersService.class.getDeclaredMethod("updateUsersPassword");
+            usersPasswordMethod.setAccessible(true);
+
+            try {
+                usersPasswordMethod.invoke(service);
+            }catch (InvocationTargetException e) {
+                UserEmailDoesNotExistException throwable = Assertions.assertThrows(UserEmailDoesNotExistException.class, () -> {
+                    throw new UserEmailDoesNotExistException("User doesn't exists, check your email address");
+                });
+
+                Assertions.assertEquals(throwable.getMessage(), getMessageFromCause(e.getCause().toString()));
+            }
+        }
+    }
 
 
 
