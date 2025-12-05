@@ -14,6 +14,7 @@ import com.utils.application.globalExceptions.ServiceHandlerException;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
+import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static com.users.application.validators.UsersFieldsDataValidator.getInstance;
 import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
@@ -54,10 +56,10 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private FindByIdRequest findByIdRequest;
     private static JwtService jwtService;
 
-    private static  AuthenticationManager authenticationManager;
+    private static AuthenticationManager authenticationManager;
     @Setter
     private static UsersMapper usersMapper;
-    private  static  PasswordEncoder passwordEncoder;
+    private static PasswordEncoder passwordEncoder;
     private static RedisService redisService;
     private UsersFieldsDataValidator validator;
 
@@ -121,317 +123,392 @@ public class UsersService implements Execute<List<UsersResponse>> {
     public static void setServiceHandler(String serviceHandler) {
         UsersService.serviceHandler = serviceHandler;
     }
-        /*
-            Need to implement redis cache
-         */
+
+    /*
+        Need to implement redis cache
+     */
     @Transactional
     private List<UsersResponse> registerUsers() {
 
         var request = this.usersRegisterRequest();
         if (request == null) {
-            throw new NullPointerException("Request sent by client is null");
-        }
+            var errorMessage = "Users registration request is  null";
+            var resolveIssue = "Some of your data is registered, contact AA for verification";
+            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);        }else {
 
-        Optional<Users> entitiesList;
-        try {
+            Optional<Users> entitiesList;
+
             entitiesList = usersRepository.findByUserCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo()));
 
-        } catch (Exception e) {
-            entitiesList   = null;
-            e.printStackTrace();
-        }
 
-        if (false) {
-            if (entitiesList.get().getUserStatus() == 0) {
-                var errorMessage = "User has already been registered, email or cellphone number not verified";
-                var resolveIssue = "click the verify or go to nearest AA registered company";
-                throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+            if (entitiesList.isPresent()) {
+                if (entitiesList.get().getUserStatus() == 0) {
+                    var errorMessage = "User has already been registered, email or cellphone number not verified";
+                    var resolveIssue = "click the verify or go to nearest AA registered company";
+                    throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+                } else {
+                    var errorMessage = "User has already been registered";
+                    var resolveIssue = "Identity number already registered, please login";
+                    throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+                }
             } else {
-                var errorMessage = "User has already been registered";
-                var resolveIssue = "Identity number already registered, please login";
-                throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
-            }
-        } else {
+                Users users = Users.builder()
+                        .userIdentityNo(getInstance().validateIdentityNo(request.getUserIdentityNo()))
+                        .userPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword().trim())))
+                        .userRegistrationDate(getInstance().formatDateTime(LocalDateTime.now()))
+                        .userModifiedDate(getInstance().formatDateTime(LocalDateTime.now()))
+                        .fk_privilege_id(request.getPrivileges().getId())
+                        .userStatus((short) 0)
+                        .userCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo().trim()))
+                        .userFullName(request.getUserFullName().trim())
+                        .userEmailAddress(request.getUserEmailAddress().trim())
+                        .userAge(getInstance().getValidatedAge())
+                        .build();
 
+                try {
+                    logger.info("users was successfully registered : data : {}", usersRepository.save(users));
+                    var entityList = new ArrayList<Users>();
+                    entityList.add(users);
+                    var responseList = entityList
+                            .stream()
+                            .map(s -> UsersResponse
+                                    .builder()
+                                    .usersAge(s.getUserAge())
+                                    .id(s.getId())
+                                    .usersStatus(s.getUserStatus())
+                                    .usersEmailAddress(s.getUserEmailAddress())
+                                    .usersRegistrationDate(s.getUserRegistrationDate())
+                                    .usersModifiedDate(s.getUserModifiedDate())
+                                    .usersFullName(s.getUserFullName())
+                                    .usersIdentityNo(s.getUserIdentityNo())
+                                    .cellphoneNo(s.getUserCellphoneNo())
+                                    .privileges(s.getFk_privilege_id())
+                                    .build())
+                            .toList();
+                    logger.info("User : {} successfully registered data : {}", usersRegisterRequest().getUserFullName(), responseList);
+                    return responseList;
 
-            Users users = Users.builder()
-                    .userIdentityNo(getInstance().validateIdentityNo(request.getUserIdentityNo()))
-                    .userPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword())))
-                    .userRegistrationDate(getInstance().formatDateTime(LocalDateTime.now()))
-                    .userModifiedDate(getInstance().formatDateTime(LocalDateTime.now()))
-                    .fk_privilege_id(request.getPrivileges().getId())
-                    .userStatus((short) 0)
-                    .userCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo()))
-                    .userFullName(request.getUserFullName())
-                    .userEmailAddress(request.getUserEmailAddress())
-                    .userAge(getInstance().getValidatedAge())
-                    .build();
-
-            try {
-                logger.info("users was successfully registered : data : {}", usersRepository.save(users));
-                var entityList = new ArrayList<Users>();
-                entityList.add(users);
-                var responseList = entityList
-                        .stream()
-                        .map(s -> UsersResponse
-                                .builder()
-                                .usersAge(users.getUserAge())
-                                .id(users.getId())
-                                .usersStatus(users.getUserStatus())
-                                .usersEmailAddress(users.getUserEmailAddress())
-                                .usersRegistrationDate(users.getUserRegistrationDate())
-                                .usersModifiedDate(users.getUserModifiedDate())
-                                .usersFullName(users.getUserFullName())
-                                .usersIdentityNo(users.getUserIdentityNo())
-                                .cellphoneNo(users.getUserCellphoneNo())
-                                .privileges(users.getFk_privilege_id())
-                                .build())
-                        .toList();
-                logger.info("User : {} successfully registered data : {}", usersRegisterRequest().getUserFullName(), responseList);
-                return responseList;
-
-            }catch(DataIntegrityViolationException e){
-                var errorMessage = "User has already been registered";
-                var resolveIssue = "Some of your data is registered, contact AA for verification";
-                throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+                } catch (DataIntegrityViolationException e) {
+                    var errorMessage = "User has already been registered";
+                    var resolveIssue = "Some of your data is registered, contact AA for verification";
+                    throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+                }
             }
         }
     }
 
 
-    private List<UsersResponse> findUserByUsersIdentityNo() {
-        String encrypt = getInstance().validateIdentityNo(identityNoRequest.getUsersIdentityNo());
-        UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
 
-        if (redisUserResponse != null) {
-            logger.info("User with identity no : {} successfully found from cache, data is {}  ", redisUserResponse.getUsersIdentityNo(), redisUserResponse);
-            return List.of(redisUserResponse);
-        } else {
-            var responseList = usersRepository.findByUserIdentityNo(identityNoRequest.getUsersIdentityNo()).stream().map(usersMapper::toDto).toList();
-
-            if (responseList.size() == 1) {
-                var jpaUserResponse = responseList.get(0);
-                redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
-                logger.info("User with identity no : {} successfully found from jpa, data is {}  ", redisUserResponse.getUsersIdentityNo(), jpaUserResponse);
-
-                return responseList;
-            } else {
-                var errorMessage = "User with identity no ending with XXX-XXX-XXX-" + identityNoRequest.getUsersIdentityNo().substring(9) + "not found";
-                var resolveIssue = "Please review the identity number inserted";
-                throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
-            }
-        }
-
-    }
+    /*
+          this code is out of scope v1
+     */
+//    private List<UsersResponse> findUserByUsersIdentityNo() {
+//        String encrypt = getInstance().validateIdentityNo(identityNoRequest.getUsersIdentityNo());
+//        UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
+//
+//        if (redisUserResponse != null) {
+//            logger.info("User with identity no : {} successfully found from cache, data is {}  ", redisUserResponse.getUsersIdentityNo(), redisUserResponse);
+//            return List.of(redisUserResponse);
+//        } else {
+//            var responseList = usersRepository.findByUserIdentityNo(identityNoRequest.getUsersIdentityNo()).stream().map(usersMapper::toDto).toList();
+//
+//            if (responseList.size() == 1) {
+//                var jpaUserResponse = responseList.get(0);
+//                redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
+//                logger.info("User with identity no : {} successfully found from jpa, data is {}  ", redisUserResponse.getUsersIdentityNo(), jpaUserResponse);
+//
+//                return responseList;
+//            } else {
+//                var errorMessage = "User with identity no ending with XXX-XXX-XXX-" + identityNoRequest.getUsersIdentityNo().substring(9) + "not found";
+//                var resolveIssue = "Please review the identity number inserted";
+//                throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+//            }
+//        }
+//
+//    }
 
     @Transactional
     private List<UsersResponse> updateUsersPassword() {
 
 
-        var dbEntity = usersRepository.findByUserEmailAddress(this.updatePasswordRequest().getUsersEmailAddress());
-        if (dbEntity.isPresent()) {
-            var user = dbEntity.get();
-            user.setUserPassword(this.updatePasswordRequest().getUsersPassword());
-            if (this.updatePasswordRequest().getUsersPassword().equals(this.updatePasswordRequest().getUsersConfirmPassword())) {
-                var updateEntity = usersRepository.save(user);
-                logger.info("user with email address {} successfully updated password", updateEntity.getUserEmailAddress());
-                return List.of(updateEntity).stream().map(usersMapper::toDto).toList();
+        try {
+            var dbEntity = usersRepository.findByUserEmailAddress(this.updatePasswordRequest().getUsersEmailAddress());
+            if (dbEntity.isPresent()) {
+                var user = dbEntity.get();
+                if (this.updatePasswordRequest().getUsersPassword().equals(this.updatePasswordRequest().getUsersConfirmPassword())) {
+                    user.setUserPassword(passwordEncoder.encode(this.updatePasswordRequest().getUsersPassword()));
+
+                    var updateEntity = usersRepository.save(user);
+                    logger.info("user with email address {} successfully updated password", updateEntity.getUserEmailAddress());
+                    return Stream.of(updateEntity).map(s -> UsersResponse
+                            .builder()
+                            .usersAge(s.getUserAge())
+                            .id(s.getId())
+                            .usersStatus(s.getUserStatus())
+                            .usersEmailAddress(s.getUserEmailAddress())
+                            .usersRegistrationDate(s.getUserRegistrationDate())
+                            .usersModifiedDate(s.getUserModifiedDate())
+                            .usersFullName(s.getUserFullName())
+                            .usersIdentityNo(s.getUserIdentityNo())
+                            .cellphoneNo(s.getUserCellphoneNo())
+                            .privileges(s.getFk_privilege_id())
+                            .build()).toList();
+                } else {
+                    var errorMessage = "new password and confirm password don't match";
+                    var resolveIssue = "Please confirm your new password and confirmation password";
+                    throw throwExceptionAndReport(new PasswordMisMatchException(errorMessage), errorMessage, resolveIssue);
+                }
             } else {
-                var errorMessage = "new password and confirm password don't match";
-                var resolveIssue = "Please confirm your new password and confirmation password";
-                throw throwExceptionAndReport(new PasswordMisMatchException(errorMessage), errorMessage, resolveIssue);
+                var errorMessage = "User doesn't exists, check your email address";
+                var resolveIssue = "Please check your email address, re-enter email address";
+                throw throwExceptionAndReport(new UserEmailDoesNotExistException(errorMessage), errorMessage, resolveIssue);
             }
-        } else {
-            var errorMessage = "User doesn't exists, check your email address";
-            var resolveIssue = "Please check your email address";
-            throw throwExceptionAndReport(new UserEmailDoesNotExistException(errorMessage), errorMessage, resolveIssue);
+        } catch (NullPointerException e) {
+            var errorMessage = "Update password request is null";
+            var resolveIssue = "contact AA administrator";
+            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
+        }catch(HibernateException e){
+            var errorMessage = "Connection failed try again";
+            var resolveIssue = "refresh page and try again";
+            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
         }
+
     }
 
     private List<UsersResponse> findUserById() {
+        String encrypt;
+        try {
+            encrypt = this.getFindByIdRequest().getId().toString();
 
-        String encrypt = this.getFindByIdRequest().getId().toString();
-        UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
+            UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
 
-        if (redisUserResponse != null) {
-            logger.info("user with id {} successfully retrieved from cache data : {}", redisUserResponse.getId(), redisUserResponse);
+            if (redisUserResponse != null) {
+                logger.info("user with id {} successfully retrieved from cache data : {}", redisUserResponse.getId(), redisUserResponse);
 
-            return List.of(redisUserResponse);
-        } else {
-            var responseList = usersRepository.findById(this.getFindByIdRequest().getId());
-
-            if (responseList.isPresent()) {
-                var users = responseList.get();
-                List<Users> list = new ArrayList<>();
-                list.add(users);
-                var jpaUserResponse = list.stream().map(s -> UsersResponse
-                        .builder()
-                        .usersAge(users.getUserAge())
-                        .id(users.getId())
-                        .usersStatus(users.getUserStatus())
-                        .usersEmailAddress(users.getUserEmailAddress())
-                        .usersRegistrationDate(users.getUserRegistrationDate())
-                        .usersModifiedDate(users.getUserModifiedDate())
-                        .usersFullName(users.getUserFullName())
-                        .usersIdentityNo(users.getUserIdentityNo())
-                        .cellphoneNo(users.getUserCellphoneNo())
-                        .privileges(users.getFk_privilege_id())
-                        .build()).toList();
-
-                redisService.set(encrypt, jpaUserResponse.get(0), 6L, TimeUnit.HOURS);
-                logger.info("cached data : {}", redisService.get(encrypt,UsersResponse.class));
-                logger.info("user with id {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getId(), jpaUserResponse);
-                return jpaUserResponse;
+                return List.of(redisUserResponse);
             } else {
-                var errorMessage = "user id : " + this.getFindByIdRequest().getId() + " not found";
-                var resolveIssue = "Please review id inserted";
-                throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                var responseList = usersRepository.findById(this.getFindByIdRequest().getId());
+
+                if (responseList.isPresent()) {
+                    var users = responseList.get();
+                    List<Users> list = new ArrayList<>();
+                    list.add(users);
+                    var jpaUserResponse = list.stream().map(s -> UsersResponse
+                            .builder()
+                            .usersAge(s.getUserAge())
+                            .id(s.getId())
+                            .usersStatus(s.getUserStatus())
+                            .usersEmailAddress(s.getUserEmailAddress())
+                            .usersRegistrationDate(s.getUserRegistrationDate())
+                            .usersModifiedDate(s.getUserModifiedDate())
+                            .usersFullName(s.getUserFullName())
+                            .usersIdentityNo(s.getUserIdentityNo())
+                            .cellphoneNo(s.getUserCellphoneNo())
+                            .privileges(s.getFk_privilege_id())
+                            .build()).toList();
+
+                    redisService.set(encrypt, jpaUserResponse.get(0), 6L, TimeUnit.HOURS);
+                    logger.info("cached data : {}", redisService.get(encrypt, UsersResponse.class));
+                    logger.info("user with id {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getId(), jpaUserResponse);
+                    return jpaUserResponse;
+                } else {
+                    var errorMessage = "user id : " + this.getFindByIdRequest().getId() + " not found";
+                    var resolveIssue = "Please review id inserted";
+                    throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                }
             }
+        } catch (NullPointerException e) {
+            var errorMessage = "Find by id request is null ";
+            var resolveIssue = "Contact AA System administrator";
+            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
         }
+
     }
 
 
     private List<UsersResponse> findAllUsers() {
 
-        return usersRepository.findAll().stream().map(usersMapper::toDto).toList();
+        return usersRepository.findAll().stream().map(s -> UsersResponse
+                .builder()
+                .usersAge(s.getUserAge())
+                .id(s.getId())
+                .usersStatus(s.getUserStatus())
+                .usersEmailAddress(s.getUserEmailAddress())
+                .usersRegistrationDate(s.getUserRegistrationDate())
+                .usersModifiedDate(s.getUserModifiedDate())
+                .usersFullName(s.getUserFullName())
+                .usersIdentityNo(s.getUserIdentityNo())
+                .cellphoneNo(s.getUserCellphoneNo())
+                .privileges(s.getFk_privilege_id())
+                .build()).toList();
+
     }
 
     private List<UsersResponse> findAllUsersByName() {
-        String encrypt = passwordEncoder.encode(usersFullNameRequest().usersFullName());
-        UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
-
-        if (redisUserResponse != null) {
-            logger.info("user with name {} successfully retrieved from cache data : {}", redisUserResponse.getUsersFullName(), redisUserResponse);
-
-            return List.of(redisUserResponse);
-        } else {
-            var responseList = usersRepository.findByUserFullName(usersFullNameRequest().usersFullName()).stream().map(usersMapper::toDto).toList();
-
-            if (responseList.size() == 1) {
-                var jpaUserResponse = responseList.get(0);
-                redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
-                logger.info("user with name {} successfully retrieved from jpa data : {}", jpaUserResponse.getUsersFullName(), jpaUserResponse);
-
-                return responseList;
-            } else {
-                var errorMessage = "user with full name :" + usersFullNameRequest().usersFullName() + " not found";
-                var resolveIssue = "Please review the full name inserted";
-                throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
-            }
-        }
-
-    }
-
-    private boolean redisStatus, passwordStatus;
-
-
-    @Transactional
-    private List<UsersResponse> login() {
-        var encrypt = loginRequest().getUsersEmailAddress();
-        UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
-
-        UsersResponse jpaUserResponse;
-        if (redisUserResponse != null) {
-            System.out.println("redis");
-            redisStatus = true;
-            jpaUserResponse = null;
-
-        } else {
-            System.out.println("Jpa");
-            redisStatus = false;
-
-
-            var optionalEntity = usersRepository.findByUserEmailAddress(loginRequest().getUsersEmailAddress());
-
-
-            if (optionalEntity.isPresent()) {
-
-                var users = optionalEntity.get();
-                List<Users> list = new ArrayList<>();
-                list.add(users);
-                 jpaUserResponse = list.stream().map(s -> UsersResponse
-                        .builder()
-                        .usersAge(users.getUserAge())
-                        .id(users.getId())
-                        .usersStatus(users.getUserStatus())
-                        .usersEmailAddress(users.getUserEmailAddress())
-                        .usersRegistrationDate(users.getUserRegistrationDate())
-                        .usersModifiedDate(users.getUserModifiedDate())
-                        .usersFullName(users.getUserFullName())
-                        .usersIdentityNo(users.getUserIdentityNo())
-                        .cellphoneNo(users.getUserCellphoneNo())
-                        .privileges(users.getFk_privilege_id())
-                        .build()).toList()
-                         .get(0);
-
-                passwordStatus = true;
-                jwtService.generateToken(optionalEntity.get());
-
-
-            } else {
-                jpaUserResponse = null;
-                passwordStatus = false;
-            }
-
-        }
 
         try {
-            if (redisStatus) {
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
-                logger.info("user with email {} successfully logged in using cache data : {}", redisUserResponse.getUsersEmailAddress(), redisUserResponse);
+            String encrypt = usersFullNameRequest().getUsersFullName();
+            UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
+            if (redisUserResponse != null) {
+                logger.info("user with name {} successfully retrieved from cache data : {}", redisUserResponse.getUsersFullName(), redisUserResponse);
 
                 return List.of(redisUserResponse);
             } else {
+                var responseList = usersRepository.findByUserFullName(usersFullNameRequest().getUsersFullName());
 
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
-                logger.info("user with email {} successfully logged in using jpa data : {}", loginRequest().getUsersEmailAddress(), jpaUserResponse);
-                redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
+                if (responseList.isPresent()) {
+                    var users = responseList.get();
+                    List<Users> list = new ArrayList<>();
+                    list.add(users);
+                    var jpaUserResponse = list.stream().map(s -> UsersResponse
+                            .builder()
+                            .usersAge(users.getUserAge())
+                            .id(users.getId())
+                            .usersStatus(users.getUserStatus())
+                            .usersEmailAddress(users.getUserEmailAddress())
+                            .usersRegistrationDate(users.getUserRegistrationDate())
+                            .usersModifiedDate(users.getUserModifiedDate())
+                            .usersFullName(users.getUserFullName())
+                            .usersIdentityNo(users.getUserIdentityNo())
+                            .cellphoneNo(users.getUserCellphoneNo())
+                            .privileges(users.getFk_privilege_id())
+                            .build()).toList();
+                    redisService.set(encrypt, jpaUserResponse.get(0), 6L, TimeUnit.HOURS);
+                    logger.info("user with name {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getUsersFullName(), jpaUserResponse);
 
-                logger.info("cached login data : {}", redisService.get(encrypt,UsersResponse.class));
-
-                return List.of(jpaUserResponse);
-            }
-        } catch (AuthenticationException e) {
-            if (redisStatus) {
-                var errorMessage = "cached data shows change of password ";
-                var resolveIssue = "please log in again";
-                throw throwExceptionAndReport(new CachedUsersPasswordChangedException(errorMessage), errorMessage, resolveIssue);
-            } else {
-                if (passwordStatus) {
-                    var errorMessage = UsersControllerAdvice.setMessage("password inserted is incorrect");
-                    var resolveIssue = "please provide correct password or update password";
-                    throw throwExceptionAndReport(new UsersPasswordIncorrectException(errorMessage), errorMessage, resolveIssue);
+                    return jpaUserResponse;
                 } else {
-                    var errorMessage = UsersControllerAdvice.setMessage("email address " + loginRequest().getUsersEmailAddress() + " not found, verify your email or register");
-                    var resolveIssue = "please provide correct password or register with the email address";
+                    var errorMessage = "user with full name :" + usersFullNameRequest().getUsersFullName() + " not found";
+                    var resolveIssue = "Please review the full name inserted";
                     throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
                 }
             }
 
+        } catch (NullPointerException e) {
+            var errorMessage = "Full name request is null";
+            var resolveIssue = "Contact AA Administrator";
+            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
         }
+
+
+    }
+
+    private boolean passwordStatus;
+
+
+    @Transactional
+    private List<UsersResponse> login() {
+
+        try {
+            var encrypt = loginRequest().getUsersEmailAddress();
+            UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
+            UsersResponse jpaUserResponse;
+            boolean redisStatus;
+            if (redisUserResponse != null) {
+                System.out.println("redis");
+                redisStatus = true;
+                jpaUserResponse = null;
+
+            } else {
+                System.out.println("Jpa");
+                redisStatus = false;
+
+
+                var optionalEntity = usersRepository.findByUserEmailAddress(loginRequest().getUsersEmailAddress());
+
+
+                if (optionalEntity.isPresent()) {
+
+                    var users = optionalEntity.get();
+                    List<Users> list = new ArrayList<>();
+                    list.add(users);
+                    jpaUserResponse = list.stream().map(s -> UsersResponse
+                                    .builder()
+                                    .usersAge(users.getUserAge())
+                                    .id(users.getId())
+                                    .usersStatus(users.getUserStatus())
+                                    .usersEmailAddress(users.getUserEmailAddress())
+                                    .usersRegistrationDate(users.getUserRegistrationDate())
+                                    .usersModifiedDate(users.getUserModifiedDate())
+                                    .usersFullName(users.getUserFullName())
+                                    .usersIdentityNo(users.getUserIdentityNo())
+                                    .cellphoneNo(users.getUserCellphoneNo())
+                                    .privileges(users.getFk_privilege_id())
+                                    .build()).toList()
+                            .get(0);
+
+                    passwordStatus = true;
+                    jwtService.generateToken(optionalEntity.get());
+
+
+                } else {
+                    jpaUserResponse = null;
+                    passwordStatus = false;
+                }
+
+            }
+
+            try {
+                if (redisStatus) {
+                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
+                    logger.info("user with email {} successfully logged in using cache data : {}", redisUserResponse.getUsersEmailAddress(), redisUserResponse);
+
+                    return List.of(redisUserResponse);
+                } else {
+
+                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
+                    logger.info("user with email {} successfully logged in using jpa data : {}", loginRequest().getUsersEmailAddress(), jpaUserResponse);
+                    redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
+
+                    logger.info("cached login data : {}", redisService.get(encrypt, UsersResponse.class));
+
+                    return List.of(jpaUserResponse);
+                }
+            } catch (AuthenticationException e) {
+                if (redisStatus) {
+                    var errorMessage = "cached data shows change of password ";
+                    var resolveIssue = "please log in again";
+                    throw throwExceptionAndReport(new CachedUsersPasswordChangedException(errorMessage), errorMessage, resolveIssue);
+                } else {
+                    if (passwordStatus) {
+                        var errorMessage = UsersControllerAdvice.setMessage("password inserted is incorrect");
+                        var resolveIssue = "please provide correct password or update password";
+                        throw throwExceptionAndReport(new UsersPasswordIncorrectException(errorMessage), errorMessage, resolveIssue);
+                    } else {
+                        var errorMessage = UsersControllerAdvice.setMessage("email address " + loginRequest().getUsersEmailAddress() + " not found, verify your email or register");
+                        var resolveIssue = "please provide correct password or register with the email address";
+                        throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                    }
+                }
+
+            }
+
+        } catch (NullPointerException e) {
+            var errorMessage = UsersControllerAdvice.setMessage("Login request is null");
+            var resolveIssue = "Contact AA Administrator";
+            throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+        }
+
     }
 
     @Override
     public List<UsersResponse> call() {
-        if (handleServiceHandler(serviceHandler) != "START_SERVICE")
-            switch (serviceHandler) {
-                case "registerUsers":
-                    return this.registerUsers();
-                case "getAllUsers":
-                    return this.findAllUsers();
-                case "getUsersByFullName":
-                    return this.findAllUsersByName();
-                case "getUsersByIdentityNo":
-                    return this.findUserByUsersIdentityNo();
-                case "getUsersById":
-                    return this.findUserById();
-                case "userLogin":
-                    return this.login();
-                default:
-                    throw new ServiceHandlerException("Failed execute service due to incorrect service string");
-            }
+        if (!handleServiceHandler(serviceHandler).equals("START_SERVICE"))
+            return switch (serviceHandler) {
+                case "registerUsers" -> this.registerUsers();
+                case "getAllUsers" -> this.findAllUsers();
+                case "getUsersByFullName" -> this.findAllUsersByName();
+                //code is out of scope v1
+//                case "getUsersByIdentityNo":
+//                    return this.findUserByUsersIdentityNo();
+                case "getUsersById" -> this.findUserById();
+                case "userLogin" -> this.login();
+                case "userUpdatePassword" -> this.updateUsersPassword();
+
+                default -> throw new ServiceHandlerException("Failed execute service due to incorrect service string");
+            };
         else
-            return new ArrayList<>();
+            return null;
     }
 
     @Override

@@ -3,11 +3,13 @@ package com.users.application.exceptions.controllerAdvice;
 import com.users.application.exceptions.*;
 import com.utils.application.ExceptionHandlerReporter;
 import com.utils.application.globalExceptions.errorResponse.ErrorResponse;
+import org.hibernate.HibernateException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.time.LocalDateTime;
 
 
 @ControllerAdvice
@@ -46,5 +48,11 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
     @ExceptionHandler(UsersPasswordIncorrectException.class)
     public ResponseEntity<ErrorResponse> manageUsersPasswordIncorrectException(){
         return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.FORBIDDEN);
+    }
+
+
+    @ExceptionHandler(HibernateException.class)
+    public ResponseEntity<ErrorResponse> manageConnectionTimeout(){
+        return new ResponseEntity<>(new ErrorResponse(LocalDateTime.now().toString(), "Reconnect","---------------Connection timeout------"),HttpStatus.FORBIDDEN);
     }
 }
