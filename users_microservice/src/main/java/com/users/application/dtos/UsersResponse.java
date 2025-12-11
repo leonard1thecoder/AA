@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Builder
 @AllArgsConstructor
 @Component
-public class UsersResponse implements ResponseContract {
+public class UsersResponse implements ResponseContract,java.io.Serializable {
     private Long id;
     private Integer privileges;
     private String usersIdentityNo;
@@ -35,13 +35,5 @@ public class UsersResponse implements ResponseContract {
 
 
 
-    @Override
-    public Long getId() {
-        return id;
-    }
 
-    @Override
-    public void setId(Long id) {
-      this.id = id;
-    }
 }
