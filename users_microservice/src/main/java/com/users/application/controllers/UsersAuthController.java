@@ -6,7 +6,7 @@ import com.users.application.dtos.*;
 import com.users.application.mappers.UsersMapper;
 import com.users.application.services.UsersService;
 import com.utils.application.ResponseContract;
-import com.utils.application.ServiceConcurrentExecutor;
+import com.users.application.executor.ServiceConcurrentExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,11 +48,8 @@ public class UsersAuthController {
         UsersService.setServiceHandler("userLogin");
         service.setLoginRequest(request);
         var list = this.serviceConcurrentExecutor.buildServiceExecutor(service);
-
         if (list.isEmpty())
             return ResponseEntity.notFound().build();
-        else if (list == null)
-            return ResponseEntity.badRequest().build();
         else
             return ResponseEntity.ok(list);
     }
