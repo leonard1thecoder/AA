@@ -418,7 +418,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
 
                 if (optionalEntity.isPresent()) {
-
+                    logger.info("email address {} found",loginRequest().getUsersEmailAddress());
                     var users = optionalEntity.get();
                     List<Users> list = new ArrayList<>();
                     list.add(users);
@@ -442,6 +442,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
 
                 } else {
+                    logger.info("email address {} not found",loginRequest().getUsersEmailAddress());
                     jpaUserResponse = null;
                     passwordStatus = false;
                 }
@@ -476,7 +477,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                         throw throwExceptionAndReport(new UsersPasswordIncorrectException(errorMessage), errorMessage, resolveIssue);
                     } else {
                         var errorMessage = UsersControllerAdvice.setMessage("email address " + loginRequest().getUsersEmailAddress() + " not found, verify your email or register");
-                        var resolveIssue = "please provide correct password or register with the email address";
+                        var resolveIssue = "Enter correct email address or register using the email entered";
                         throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
                     }
                 }
