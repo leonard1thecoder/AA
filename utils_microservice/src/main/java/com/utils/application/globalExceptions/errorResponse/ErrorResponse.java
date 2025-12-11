@@ -1,6 +1,10 @@
 package com.utils.application.globalExceptions.errorResponse;
 
-public class ErrorResponse{
+import com.utils.application.ResponseContract;
+import lombok.Getter;
+
+@Getter
+public class ErrorResponse implements ResponseContract {
     private String errorOccurredDate;
     private String  message;
     private String resolveIssueDetails;
@@ -12,24 +16,12 @@ public class ErrorResponse{
         this.message = message;
     }
 
-    public String getErrorOccurredDate() {
-        return errorOccurredDate;
-    }
-
     public void setErrorOccurredDate(String errorOccurredDate) {
         this.errorOccurredDate = errorOccurredDate;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public String getResolveIssueDetails() {
-        return resolveIssueDetails;
     }
 
     public void setResolveIssueDetails(String resolveIssueDetails) {
