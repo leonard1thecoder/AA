@@ -5,7 +5,7 @@ import com.retails.application.dto.*;
 import com.retails.application.mapper.RetailCompanyMapper;
 import com.retails.application.service.RetailCompanyService;
 import com.utils.application.ResponseContract;
-import com.utils.application.ServiceConcurrentExecutor;
+import com.users.application.executor.ServiceConcurrentExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
