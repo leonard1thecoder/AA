@@ -15,7 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 
 @RestController
-@RequestMapping("/dev/api/auth/")
+@RequestMapping("/dev/api/auth")
 public class UsersAuthController {
     private UsersService service;
     private ServiceConcurrentExecutor serviceConcurrentExecutor;
@@ -54,9 +54,9 @@ public class UsersAuthController {
             return ResponseEntity.ok(list);
     }
 
-    @PutMapping("/{usersEmailAddress}")
+    @PutMapping("/{userUpdatePassword}")
     public ResponseEntity<Void> updateUsersPassword(@PathVariable String usersEmailAddress, @RequestBody UpdatePasswordRequest request) {
-        UsersService.setServiceHandler("getUsersByFullName");
+        UsersService.setServiceHandler("userUpdatePassword");
         service.setUpdatePasswordRequest(request);
 
         if(request.getUsersPassword().equals(request.getUsersConfirmPassword())) {
@@ -64,10 +64,7 @@ public class UsersAuthController {
 
             if (list.isEmpty())
                 return ResponseEntity.notFound().build();
-            else if (list == null)
-                return ResponseEntity.badRequest().build();
-            else
-                return ResponseEntity.noContent().build();
+            else return ResponseEntity.noContent().build();
         }else{
             return ResponseEntity.badRequest().build();
         }
