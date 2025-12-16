@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 public class UsersRegisterRequest {
 
     private String userCellphoneNo;
-    private Privileges privileges;
-    
+    private Integer privileges;
+
     private String userIdentityNo;
 
-  
+
     private Short userStatus;
-  
+
     private String userFullName, userEmailAddress, userPassword;
 
 
