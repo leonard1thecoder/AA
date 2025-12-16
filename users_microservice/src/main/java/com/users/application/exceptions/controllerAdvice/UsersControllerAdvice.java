@@ -3,15 +3,12 @@ package com.users.application.exceptions.controllerAdvice;
 import com.users.application.exceptions.*;
 import com.utils.application.ExceptionHandlerReporter;
 import com.utils.application.globalExceptions.errorResponse.ErrorResponse;
-import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -32,9 +29,10 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
     }
 
     @ExceptionHandler(UsersExistsException.class)
-    public ResponseEntity<ErrorResponse> manageUsersExistsException(){
-        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.FORBIDDEN);
-    }
+    public ResponseEntity<List<ErrorResponse>> manageUsersExistsException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);    }
 
     @ExceptionHandler(PasswordMisMatchException.class)
     public ResponseEntity<ErrorResponse> managePasswordMisMatchException(){
@@ -47,19 +45,43 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
     }
 
     @ExceptionHandler(CachedUsersPasswordChangedException.class)
-    public ResponseEntity<ErrorResponse> manageCachedUsersPasswordChangedException(){
-        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.FORBIDDEN);
-    }
+    public ResponseEntity<List<ErrorResponse>> manageCachedUsersPasswordChangedException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);      }
 
     @ExceptionHandler(UsersPasswordIncorrectException.class)
     public ResponseEntity<List<ErrorResponse>> manageUsersPasswordIncorrectException(){
         var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(PrivilegeIdOutOfBoundException.class)
+    public ResponseEntity<List<ErrorResponse>> managePrivilegeIdOutOfBoundException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);    }
 
+    @ExceptionHandler(PasswordStandardException.class)
+    public ResponseEntity<List<ErrorResponse>> managePasswordStandardException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);
+    }
 
-    @ExceptionHandler(HibernateException.class)
-    public ResponseEntity<ErrorResponse> manageConnectionTimeout(){
-        return new ResponseEntity<>(new ErrorResponse(LocalDateTime.now().toString(), "Reconnect","---------------Connection timeout------"),HttpStatus.FORBIDDEN);
+    @ExceptionHandler(NullRequestException.class)
+    public ResponseEntity<List<ErrorResponse>> manageNullRequestException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserNotVerifiedException.class)
+    public ResponseEntity<List<ErrorResponse>> manageUserNotVerifiedException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
 }
