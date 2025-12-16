@@ -1,6 +1,7 @@
 package com.users.application.validators;
 
 import com.users.application.exceptions.IdentificationNumberIsNot13DigitsException;
+import com.users.application.exceptions.PasswordStandardException;
 import com.users.application.exceptions.UserAgeException;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -194,17 +195,17 @@ public class UsersFieldsDataValidator {
         if (password == null) {
             throw new NullPointerException("password is null");
         } else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordSpecialCharacters), password)) {
-            throw new IllegalArgumentException("Password should have at one special characters {" + passwordSpecialCharacters + "}");
+            throw new PasswordStandardException("Password should have at one special characters {" + passwordSpecialCharacters + "}");
         } else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordLowerAlphabets), password)) {
-            throw new IllegalArgumentException("password should have at least one small letter");
+            throw new PasswordStandardException("password should have at least one small letter");
         } else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordUpperAlphabets), password)) {
-            throw new IllegalArgumentException("password should have at least one upper case letter");
+            throw new PasswordStandardException("password should have at least one upper case letter");
         } else if (!checkPasswordContainsValidators(splitPasswordValidators(passwordNumbers), password)) {
-            throw new IllegalArgumentException("password should have at least one number");
+            throw new PasswordStandardException("password should have at least one number");
         } else if (password.length() < passwordMinLength) {
-            throw new IllegalArgumentException("Password minimum length starts from 8");
+            throw new PasswordStandardException("Password minimum length starts from 8");
         } else if (password.length() > passwordMaxLength) {
-            throw new IllegalArgumentException("Password maximum length starts from 16");
+            throw new PasswordStandardException("Password maximum length starts from 16");
         }
 
         return password;
@@ -225,9 +226,9 @@ public class UsersFieldsDataValidator {
     }
 
     private boolean checkPasswordContainsValidators(List<String> listValidators, String password) {
-        for (int x = 0; x < listValidators.size(); x++) {
-            if (password.contains(listValidators.get(x))) {
-                System.out.println("Contained : " + password.contains(listValidators.get(x)));
+        for (String listValidator : listValidators) {
+            if (password.contains(listValidator)) {
+                System.out.println("Contained : " + password.contains(listValidator));
                 return true;
             }
         }

@@ -134,30 +134,37 @@ public class UsersService implements Execute<List<UsersResponse>> {
         if (request == null) {
             var errorMessage = "Users registration request is  null";
             var resolveIssue = "Some of your data is registered, contact AA for verification";
-            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);        }else {
+            throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);        }else {
 
             Optional<Users> entitiesList;
 
             entitiesList = usersRepository.findByUserCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo()));
 
-
+            logger.info("entities list : {} ",entitiesList );
             if (entitiesList.isPresent()) {
                 if (entitiesList.get().getUserStatus() == 0) {
                     var errorMessage = "User has already been registered, email or cellphone number not verified";
-                    var resolveIssue = "click the verify or go to nearest AA registered company";
-                    throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+                    var resolveIssue = "Login to get verification link";
+                    throw throwExceptionAndReport(new UserNotVerifiedException(errorMessage), errorMessage, resolveIssue);
                 } else {
                     var errorMessage = "User has already been registered";
-                    var resolveIssue = "Identity number already registered, please login";
+                    var resolveIssue = "Please login";
                     throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
                 }
             } else {
+
+                if(request.getPrivileges() > 4 || request.getPrivileges() <1){
+                    var errorMessage = "AA agent do not have privilege id of : " + request.getPrivileges();
+                    var resolveIssue = "use registration form to register in official website or app";
+                    throw throwExceptionAndReport(new PrivilegeIdOutOfBoundException(errorMessage), errorMessage, resolveIssue);
+                }
+
                 Users users = Users.builder()
                         .userIdentityNo(getInstance().validateIdentityNo(request.getUserIdentityNo()))
                         .userPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword().trim())))
                         .userRegistrationDate(getInstance().formatDateTime(LocalDateTime.now()))
                         .userModifiedDate(getInstance().formatDateTime(LocalDateTime.now()))
-                        .fk_privilege_id(request.getPrivileges().getId())
+                        .fk_privilege_id(request.getPrivileges())
                         .userStatus((short) 0)
                         .userCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo().trim()))
                         .userFullName(request.getUserFullName().trim())
@@ -185,6 +192,11 @@ public class UsersService implements Execute<List<UsersResponse>> {
                                     .privileges(s.getFk_privilege_id())
                                     .build())
                             .toList();
+
+                    if(redisService.get("ALL_USERS",UsersResponse.class) != null) {
+                        logger.info("Cached data for all users deleted  : {}", redisService.delete("ALL_USERS"));
+                    }
+
                     logger.info("User : {} successfully registered data : {}", usersRegisterRequest().getUserFullName(), responseList);
                     return responseList;
 
@@ -467,6 +479,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 }
             } catch (AuthenticationException e) {
                 if (redisStatus) {
+
+                    logger.info("delete cached data for login : {}",redisService.delete(encrypt));
                     var errorMessage = "cached data shows change of password ";
                     var resolveIssue = "please log in again";
                     throw throwExceptionAndReport(new CachedUsersPasswordChangedException(errorMessage), errorMessage, resolveIssue);

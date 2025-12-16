@@ -2,15 +2,14 @@ package com.users.application.executor;
 
 
 
-import com.users.application.exceptions.UserNotFoundException;
-import com.users.application.exceptions.UsersPasswordIncorrectException;
+import com.users.application.exceptions.*;
 import com.utils.application.Execute;
 import com.utils.application.ResponseContract;
 import com.utils.application.controllerAdvice.ExecutorControllerAdvice;
 import com.utils.application.globalExceptions.ServiceExecutionException;
 import com.utils.application.globalExceptions.ServiceInterruptedException;
 import com.utils.application.globalExceptions.ServiceTimeoutException;
-import com.utils.application.globalExceptions.errorResponse.ErrorResponse;
+
 import lombok.Getter;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class ServiceConcurrentExecutor {
 
     @Getter
     private final static ServiceConcurrentExecutor instance = new ServiceConcurrentExecutor();
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
 
     private Execute service;
 
@@ -67,8 +66,16 @@ public class ServiceConcurrentExecutor {
                 throw throwExceptionAndReport(new UserNotFoundException(getMessage()), getMessage(), getResolveIssueDetails());
             else if(e.getMessage().contains("UsersPasswordIncorrectException"))
                 throw throwExceptionAndReport(new UsersPasswordIncorrectException(getMessage()), getMessage(), getResolveIssueDetails());
-            else
-                return null;
+            else if(e.getMessage().contains("CachedUsersPasswordChangedException"))
+            throw throwExceptionAndReport(new UsersPasswordIncorrectException(getMessage()), getMessage(), getResolveIssueDetails());
+           else if (e.getMessage().contains("NullRequestException"))
+                throw throwExceptionAndReport(new NullRequestException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("UsersExistsException"))
+                throw throwExceptionAndReport(new UsersExistsException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("UserNotVerifiedException"))
+                throw throwExceptionAndReport(new UserNotVerifiedException(getMessage()), getMessage(), getResolveIssueDetails());
+
+            return null;
         } catch (TimeoutException e) {
             var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
             ExecutorControllerAdvice.setResolveIssueDetails("please try again later");

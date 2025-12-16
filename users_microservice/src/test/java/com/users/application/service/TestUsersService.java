@@ -46,8 +46,8 @@ public class TestUsersService {
         public void initRegisterRequest() {
 
             request = UsersRegisterRequest.builder()
-                    .privileges(new Privileges(1, "users", (byte) 1))
-                    .userCellphoneNo("0801231230")
+                    .privileges( 1)
+                    .userCellphoneNo("0802231230")
                     .userEmailAddress("em22ail2@email.com")
                     .userFullName("Sizolwakhe Leonard Mthimunye")
                     .userIdentityNo("9701316953188")
