@@ -35,13 +35,22 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);    }
 
     @ExceptionHandler(PasswordMisMatchException.class)
-    public ResponseEntity<ErrorResponse> managePasswordMisMatchException(){
-        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.FORBIDDEN);
-    }
+    public ResponseEntity<List<ErrorResponse>> managePasswordMisMatchException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);    }
+
+    @ExceptionHandler(ConcurrentExecutionException.class)
+    public ResponseEntity<List<ErrorResponse>> manageConcurrentExecutionException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);    }
 
     @ExceptionHandler(UserEmailDoesNotExistException.class)
-    public ResponseEntity<ErrorResponse> manageUserEmailDoesNotExistException(){
-        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.NOT_FOUND);
+    public ResponseEntity<List<ErrorResponse>> manageUserEmailDoesNotExistException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(list, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(CachedUsersPasswordChangedException.class)
