@@ -247,10 +247,14 @@ public class UsersService implements Execute<List<UsersResponse>> {
             var dbEntity = usersRepository.findByUserEmailAddress(this.updatePasswordRequest().getUsersEmailAddress());
             if (dbEntity.isPresent()) {
                 var user = dbEntity.get();
-                if (this.updatePasswordRequest().getUsersPassword().equals(this.updatePasswordRequest().getUsersConfirmPassword())) {
+                if (getInstance().checkPasswordValidity(this.updatePasswordRequest().getUsersPassword()).equals(getInstance().checkPasswordValidity(this.updatePasswordRequest().getUsersConfirmPassword()))) {
                     user.setUserPassword(passwordEncoder.encode(this.updatePasswordRequest().getUsersPassword()));
-
+                    user.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
                     var updateEntity = usersRepository.save(user);
+
+                    if(redisService.get(updateEntity.getUserEmailAddress(),UsersResponse.class) != null) {
+                        logger.info("user with email address {} successfully successfully removed from cache", redisService.delete(updateEntity.getUserEmailAddress()));
+                    }
                     logger.info("user with email address {} successfully updated password", updateEntity.getUserEmailAddress());
                     return Stream.of(updateEntity).map(s -> UsersResponse
                             .builder()
@@ -278,13 +282,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
         } catch (NullPointerException e) {
             var errorMessage = "Update password request is null";
             var resolveIssue = "contact AA administrator";
-            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
-        }catch(HibernateException e){
-            var errorMessage = "Connection failed try again";
-            var resolveIssue = "refresh page and try again";
-            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
+            throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
         }
-
     }
 
     private List<UsersResponse> findUserById() {

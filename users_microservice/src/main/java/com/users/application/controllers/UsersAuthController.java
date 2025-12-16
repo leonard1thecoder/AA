@@ -54,19 +54,17 @@ public class UsersAuthController {
             return ResponseEntity.ok(list);
     }
 
-    @PutMapping("/{userUpdatePassword}")
-    public ResponseEntity<Void> updateUsersPassword(@PathVariable String usersEmailAddress, @RequestBody UpdatePasswordRequest request) {
+    @PutMapping("/updatePassword")
+    public ResponseEntity<Void> updateUsersPassword( @RequestBody UpdatePasswordRequest request) {
         UsersService.setServiceHandler("userUpdatePassword");
         service.setUpdatePasswordRequest(request);
 
-        if(request.getUsersPassword().equals(request.getUsersConfirmPassword())) {
+
             var list = this.serviceConcurrentExecutor.buildServiceExecutor(service);
 
             if (list.isEmpty())
                 return ResponseEntity.notFound().build();
             else return ResponseEntity.noContent().build();
-        }else{
-            return ResponseEntity.badRequest().build();
-        }
+
     }
 }

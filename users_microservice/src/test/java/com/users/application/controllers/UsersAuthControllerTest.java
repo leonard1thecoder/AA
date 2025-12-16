@@ -1,13 +1,16 @@
 package com.users.application.controllers;
 
 import com.users.application.dtos.LoginRequest;
+import com.users.application.dtos.UpdatePasswordRequest;
 import com.users.application.dtos.UsersRegisterRequest;
+import com.users.application.dtos.UsersResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 
 import java.util.List;
 
@@ -165,7 +168,71 @@ class UsersAuthControllerTest {
 
         }
 
-    @Test
-    void updateUsersPassword() {
+
+        @Nested
+        class TestUsersUpdatePassword{
+
+            @Test
+            void updateUsersPasswordMethod_usersEmailDoNotExists() {
+
+                UpdatePasswordRequest request =UpdatePasswordRequest
+                        .builder()
+                        .usersPassword("12345")
+                        .usersConfirmPassword("12345")
+                        .usersEmailAddress("blueStar@mail.com")
+                        .build();
+
+                //Given
+
+
+
+                var response =
+                        restTemplate.exchange("/dev/api/auth/updatePassword", HttpMethod.PUT, sendRequestANdGetResponse(request), List.class);
+
+
+                assertEquals(HttpStatus.NOT_FOUND , response.getStatusCode());
+
+            }
+
+            private HttpEntity sendRequestANdGetResponse(UpdatePasswordRequest request){
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                return new HttpEntity<>(request, headers);
+            }
+
+            @Test
+            void testUpdatePasswordMethod_validateEmailAddress(){
+             var request = UpdatePasswordRequest
+                     .builder()
+                     .usersEmailAddress("leo11thecoder@gmail.com")
+                     .usersPassword("#KingSparkon1")
+                     .usersConfirmPassword("#KingSparkon1")
+                     .build();
+
+
+                var response =
+                        restTemplate.exchange("/dev/api/auth/updatePassword", HttpMethod.PUT, sendRequestANdGetResponse(request), List.class);
+
+
+                Assertions.assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+            }
+
+            @Test
+            void testUpdatePasswordMethod_misMatchPassword(){
+                var request = UpdatePasswordRequest
+                        .builder()
+                        .usersEmailAddress("leo11thecoder@gmail.com")
+                        .usersPassword("#KingSparkon21")
+                        .usersConfirmPassword("#KingSparkon1")
+                        .build();
+
+                var response =
+                        restTemplate.exchange("/dev/api/auth/updatePassword", HttpMethod.PUT, sendRequestANdGetResponse(request), List.class);
+
+
+                Assertions.assertEquals(HttpStatus.FORBIDDEN,response.getStatusCode());
+            }
     }
+
 }
