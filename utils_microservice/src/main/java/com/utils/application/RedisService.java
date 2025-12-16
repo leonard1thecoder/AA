@@ -43,4 +43,10 @@ public class RedisService {
             throw new RuntimeException(e);
         }
     }
+
+    public Object delete(String key){
+
+            return redisTemplate.opsForValue().getAndDelete(key);
+
+    }
 }
