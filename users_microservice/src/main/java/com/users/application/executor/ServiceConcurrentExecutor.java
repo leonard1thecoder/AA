@@ -57,10 +57,8 @@ public class ServiceConcurrentExecutor {
         } catch (InterruptedException e) {
             var errorMessage = ExecutorControllerAdvice.setMessage("Interruption occurred while executing service : " + service +" reason "+ e.getMessage());
             ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
-            if(e.getMessage().contains("UserNotFoundException"))
-                throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, getResolveIssueDetails());
-            else
-            return null;
+                throw throwExceptionAndReport(new ConcurrentExecutionException(errorMessage), errorMessage, getResolveIssueDetails());
+
         } catch (ExecutionException e) {
             if(e.getMessage().contains("UserNotFoundException"))
                 throw throwExceptionAndReport(new UserNotFoundException(getMessage()), getMessage(), getResolveIssueDetails());
@@ -74,8 +72,13 @@ public class ServiceConcurrentExecutor {
                 throw throwExceptionAndReport(new UsersExistsException(getMessage()), getMessage(), getResolveIssueDetails());
             else if (e.getMessage().contains("UserNotVerifiedException"))
                 throw throwExceptionAndReport(new UserNotVerifiedException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("UserEmailDoesNotExistException"))
+                throw throwExceptionAndReport(new UserEmailDoesNotExistException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("PasswordMisMatchException"))
+                throw throwExceptionAndReport(new PasswordMisMatchException(getMessage()), getMessage(), getResolveIssueDetails());
 
-            return null;
+
+            throw throwExceptionAndReport(new ConcurrentExecutionException("Unknown Exception occurred trace :  " + e.getMessage()), "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");
         } catch (TimeoutException e) {
             var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
             ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
