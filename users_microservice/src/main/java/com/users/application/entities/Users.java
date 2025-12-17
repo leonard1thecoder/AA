@@ -37,6 +37,9 @@ public class Users implements UserDetails {
     @Column(nullable = false)
     private String userFullName, userRegistrationDate, userModifiedDate;
 
+    @Column(columnDefinition = "TEXT")
+    private String token;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if(fk_privilege_id == 1)
