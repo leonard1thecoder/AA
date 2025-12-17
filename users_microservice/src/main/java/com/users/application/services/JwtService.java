@@ -8,7 +8,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,12 +42,14 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails){
+        SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(Long.parseLong("1760692779000")))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setExpiration(Date.from(Instant.now().plusSeconds(3600)))
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -57,9 +60,9 @@ public class JwtService {
                 .getPayload();
     }
 
-    private Key getSigningKey() {
-        byte[] key = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(key);
+    private SecretKey getSigningKey() {
+
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
