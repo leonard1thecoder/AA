@@ -40,7 +40,7 @@ import static com.utils.application.HandlingLoadingService.handleServiceHandler;
 
 @Service
 public class UsersService implements Execute<List<UsersResponse>> {
-    private static Logger logger = LoggerFactory.getLogger(UsersService.class);
+    private static final Logger logger = LoggerFactory.getLogger(UsersService.class);
 
 
     public static String serviceHandler;
@@ -134,13 +134,14 @@ public class UsersService implements Execute<List<UsersResponse>> {
         if (request == null) {
             var errorMessage = "Users registration request is  null";
             var resolveIssue = "Some of your data is registered, contact AA for verification";
-            throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);        }else {
+            throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
+        } else {
 
             Optional<Users> entitiesList;
 
             entitiesList = usersRepository.findByUserCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo()));
 
-            logger.info("entities list : {} ",entitiesList );
+            logger.info("entities list : {} ", entitiesList);
             if (entitiesList.isPresent()) {
                 if (entitiesList.get().getUserStatus() == 0) {
                     var errorMessage = "User has already been registered, email or cellphone number not verified";
@@ -153,7 +154,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 }
             } else {
 
-                if(request.getPrivileges() > 4 || request.getPrivileges() <1){
+                if (request.getPrivileges() > 4 || request.getPrivileges() < 1) {
                     var errorMessage = "AA agent do not have privilege id of : " + request.getPrivileges();
                     var resolveIssue = "use registration form to register in official website or app";
                     throw throwExceptionAndReport(new PrivilegeIdOutOfBoundException(errorMessage), errorMessage, resolveIssue);
@@ -193,7 +194,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                                     .build())
                             .toList();
 
-                    if(redisService.get("ALL_USERS",UsersResponse.class) != null) {
+                    if (redisService.get("ALL_USERS", UsersResponse.class) != null) {
                         logger.info("Cached data for all users deleted  : {}", redisService.delete("ALL_USERS"));
                     }
 
@@ -252,7 +253,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                     user.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
                     var updateEntity = usersRepository.save(user);
 
-                    if(redisService.get(updateEntity.getUserEmailAddress(),UsersResponse.class) != null) {
+                    if (redisService.get(updateEntity.getUserEmailAddress(), UsersResponse.class) != null) {
                         logger.info("user with email address {} successfully successfully removed from cache", redisService.delete(updateEntity.getUserEmailAddress()));
                     }
                     logger.info("user with email address {} successfully updated password", updateEntity.getUserEmailAddress());
@@ -338,21 +339,31 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
 
     private List<UsersResponse> findAllUsers() {
+        var redisResponse = redisService.get("ALL_USERS", List.class);
+        if (redisResponse != null) {
+            var returnRedisResponse = redisService.safeCastList(redisResponse,UsersResponse.class);
+            logger.info("get all users from cache, data from redis : {}", returnRedisResponse);
+            return returnRedisResponse;
+        } else {
+            var jpaResponse= usersRepository.findAll().stream().map(s -> UsersResponse
+                    .builder()
+                    .usersAge(s.getUserAge())
+                    .id(s.getId())
+                    .usersStatus(s.getUserStatus())
+                    .usersEmailAddress(s.getUserEmailAddress())
+                    .usersRegistrationDate(s.getUserRegistrationDate())
+                    .usersModifiedDate(s.getUserModifiedDate())
+                    .usersFullName(s.getUserFullName())
+                    .usersIdentityNo(s.getUserIdentityNo())
+                    .cellphoneNo(s.getUserCellphoneNo())
+                    .privileges(s.getFk_privilege_id())
+                    .build()).toList();
 
-        return usersRepository.findAll().stream().map(s -> UsersResponse
-                .builder()
-                .usersAge(s.getUserAge())
-                .id(s.getId())
-                .usersStatus(s.getUserStatus())
-                .usersEmailAddress(s.getUserEmailAddress())
-                .usersRegistrationDate(s.getUserRegistrationDate())
-                .usersModifiedDate(s.getUserModifiedDate())
-                .usersFullName(s.getUserFullName())
-                .usersIdentityNo(s.getUserIdentityNo())
-                .cellphoneNo(s.getUserCellphoneNo())
-                .privileges(s.getFk_privilege_id())
-                .build()).toList();
-
+            redisService.set("ALL_USERS",jpaResponse,1L,TimeUnit.HOURS);
+            var redisResponseChecker = redisService.get("ALL_USERS", List.class);
+            logger.info("cached data for all users from jpa : {}", redisService.safeCastList(redisResponseChecker,UsersResponse.class));
+            return jpaResponse;
+        }
     }
 
     private List<UsersResponse> findAllUsersByName() {
@@ -415,7 +426,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
             UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
             UsersResponse jpaUserResponse;
             boolean redisStatus;
-            if (redisUserResponse != null) {
+            if (redisUserResponse == null) {
                 System.out.println("redis");
                 redisStatus = true;
                 jpaUserResponse = null;
@@ -429,7 +440,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
 
                 if (optionalEntity.isPresent()) {
-                    logger.info("email address {} found",loginRequest().getUsersEmailAddress());
+                    logger.info("email address {} found", loginRequest().getUsersEmailAddress());
                     var users = optionalEntity.get();
                     List<Users> list = new ArrayList<>();
                     list.add(users);
@@ -449,11 +460,12 @@ public class UsersService implements Execute<List<UsersResponse>> {
                             .get(0);
 
                     passwordStatus = true;
-                    jwtService.generateToken(optionalEntity.get());
+                    var jwt = jwtService.generateToken(optionalEntity.get());
 
+                    logger.info("JWT Token : {}" , jwt);
 
                 } else {
-                    logger.info("email address {} not found",loginRequest().getUsersEmailAddress());
+                    logger.info("email address {} not found", loginRequest().getUsersEmailAddress());
                     jpaUserResponse = null;
                     passwordStatus = false;
                 }
@@ -479,7 +491,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
             } catch (AuthenticationException e) {
                 if (redisStatus) {
 
-                    logger.info("delete cached data for login : {}",redisService.delete(encrypt));
+                    logger.info("delete cached data for login : {}", redisService.delete(encrypt));
                     var errorMessage = "cached data shows change of password ";
                     var resolveIssue = "please log in again";
                     throw throwExceptionAndReport(new CachedUsersPasswordChangedException(errorMessage), errorMessage, resolveIssue);
