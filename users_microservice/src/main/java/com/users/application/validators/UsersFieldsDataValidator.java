@@ -221,14 +221,14 @@ public class UsersFieldsDataValidator {
         for (int x = 0; x < validateType.length(); x++) {
             list.add(String.valueOf(validateType.charAt(x)));
         }
-        System.out.println(list);
+        logger.info("password characters : {}",list);
         return list;
     }
 
     private boolean checkPasswordContainsValidators(List<String> listValidators, String password) {
         for (String listValidator : listValidators) {
             if (password.contains(listValidator)) {
-                System.out.println("Contained : " + password.contains(listValidator));
+                logger.info("Contained : {} " , password.contains(listValidator));
                 return true;
             }
         }

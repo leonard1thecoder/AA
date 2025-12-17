@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/dev/api/users/")
+@RequestMapping("/dev/api/users")
 public class UsersController {
 
-    private UsersService service;
-    private ServiceConcurrentExecutor serviceConcurrentExecutor;
+    private final UsersService service;
+    private final ServiceConcurrentExecutor serviceConcurrentExecutor;
 
 
     @Autowired
@@ -31,7 +31,7 @@ public class UsersController {
     @GetMapping("/getAllUsers")
     public ResponseEntity<List<? extends ResponseContract>> getAllUsers() {
         UsersService.setServiceHandler("getAllUsers");
-        var list = this.serviceConcurrentExecutor.buildServiceExecutor();
+        var list = this.serviceConcurrentExecutor.buildServiceExecutor(service);
         return ResponseEntity.ok(list);
     }
 
