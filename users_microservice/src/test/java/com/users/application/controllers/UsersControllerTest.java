@@ -2,6 +2,7 @@ package com.users.application.controllers;
 
 
 import com.users.application.dtos.FindByIdRequest;
+import com.users.application.dtos.UsersFullNameRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-
 class UsersControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
@@ -27,7 +27,7 @@ class UsersControllerTest {
         return new HttpEntity<>(null, headers);
     }
 
-    private HttpEntity<?> sendRequestANdGetResponse(String jwt,Object obj) {
+    private HttpEntity<?> sendRequestANdGetResponse(String jwt, Object obj) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + jwt);
@@ -56,8 +56,8 @@ class UsersControllerTest {
     class TestGetUserByIdMethod {
 
         @Test
-    void testGetUserByIdMethod_validId() {
-    //When
+        void testGetUserByIdMethod_validId() {
+            //When
             var request = FindByIdRequest
                     .builder()
                     .id(252L)
@@ -66,9 +66,9 @@ class UsersControllerTest {
 
             //Given
             var response =
-                    restTemplate.exchange("/dev/api/users/getAllUsers/"+request.getId(), HttpMethod.GET, sendRequestANdGetResponse(jwt,null), List.class);
+                    restTemplate.exchange("/dev/api/users/getAllUsers/" + request.getId(), HttpMethod.GET, sendRequestANdGetResponse(jwt, null), List.class);
 
-            Assertions.assertEquals(HttpStatus.OK,response.getStatusCode());
+            Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
         }
 
@@ -83,16 +83,48 @@ class UsersControllerTest {
 
             //Given
             var response =
-                    restTemplate.exchange("/dev/api/users/getAllUsers/"+request.getId(), HttpMethod.GET, sendRequestANdGetResponse(jwt,null), List.class);
+                    restTemplate.exchange("/dev/api/users/getAllUsers/" + request.getId(), HttpMethod.GET, sendRequestANdGetResponse(jwt, null), List.class);
 
-            Assertions.assertEquals(HttpStatus.NOT_FOUND,response.getStatusCode());
+            Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
         }
-}
+    }
 
-    @Test
-    void getUserByFullName() {
+    @Nested
+    class TestGetUserByFullNameMethod {
+        @Test
+        void testGetUserByNameMethod_validName() {
+            //When
+            var request = UsersFullNameRequest
+                    .builder()
+                    .usersFullName("Sizolwakhe Leonard Mthimunye")
+                    .build();
+            var jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbTJhaWwyQGVtYWlsLmNvbSIsImlhdCI6MTc2NjA1Nzg2OCwiZXhwIjoxNzY2MDYxNDY4fQ.zw9voAv5jYySvFYLMDyTrCraPz7T5xKXShDN1yuzfy8Hit5w53cAtK0dZ7abezRbud_dMGgiDzzScmkPE6X4Bg";
 
+            //Given
+            var response =
+                    restTemplate.exchange("/dev/api/users/getUsersByFullName/" + request.getUsersFullName(), HttpMethod.GET, sendRequestANdGetResponse(jwt, null), List.class);
+
+            Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        }
+
+        @Test
+        void testGetUserByNameMethod_invalidName() {
+            //When
+            var request = UsersFullNameRequest
+                    .builder()
+                    .usersFullName("Sizolwakhe2 Leonard3 Mthimunye5")
+                    .build();
+            var jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbTJhaWwyQGVtYWlsLmNvbSIsImlhdCI6MTc2NjA1Nzg2OCwiZXhwIjoxNzY2MDYxNDY4fQ.zw9voAv5jYySvFYLMDyTrCraPz7T5xKXShDN1yuzfy8Hit5w53cAtK0dZ7abezRbud_dMGgiDzzScmkPE6X4Bg";
+
+            //Given
+            var response =
+                    restTemplate.exchange("/dev/api/users/getUsersByFullName/" + request.getUsersFullName(), HttpMethod.GET, sendRequestANdGetResponse(jwt, null), List.class);
+
+            Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+        }
     }
 
     /*
