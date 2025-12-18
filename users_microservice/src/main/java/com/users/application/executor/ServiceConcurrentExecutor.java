@@ -6,6 +6,7 @@ import com.users.application.exceptions.*;
 import com.utils.application.Execute;
 import com.utils.application.ResponseContract;
 import com.utils.application.controllerAdvice.ExecutorControllerAdvice;
+import com.utils.application.globalExceptions.JwtExpiredOnSessionException;
 import com.utils.application.globalExceptions.ServiceExecutionException;
 import com.utils.application.globalExceptions.ServiceInterruptedException;
 import com.utils.application.globalExceptions.ServiceTimeoutException;
@@ -76,6 +77,8 @@ public class ServiceConcurrentExecutor {
                 throw throwExceptionAndReport(new UserEmailDoesNotExistException(getMessage()), getMessage(), getResolveIssueDetails());
             else if (e.getMessage().contains("PasswordMisMatchException"))
                 throw throwExceptionAndReport(new PasswordMisMatchException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("JwtExpiredOnSessionException"))
+                throw throwExceptionAndReport(new JwtExpiredOnSessionException(getMessage()), getMessage(), getResolveIssueDetails());
 
 
             throw throwExceptionAndReport(new ConcurrentExecutionException("Unknown Exception occurred trace :  " + e.getMessage()), "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");

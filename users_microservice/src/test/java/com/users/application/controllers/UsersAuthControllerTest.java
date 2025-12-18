@@ -26,7 +26,7 @@ class UsersAuthControllerTest {
     @Nested
     class TestLogin{
         @Test
-        void testLoginMethod_validLoginCredentials() {
+        void testLoginMethod_validLoginCredential() {
         //When
             LoginRequest request = LoginRequest
                     .builder()

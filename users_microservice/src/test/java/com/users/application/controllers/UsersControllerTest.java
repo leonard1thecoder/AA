@@ -1,6 +1,7 @@
 package com.users.application.controllers;
 
 
+import com.users.application.dtos.FindByIdRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,11 +20,18 @@ class UsersControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private HttpEntity sendRequestANdGetResponse(String jwt) {
+    private HttpEntity<?> sendRequestANdGetResponse(String jwt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + jwt);
         return new HttpEntity<>(null, headers);
+    }
+
+    private HttpEntity<?> sendRequestANdGetResponse(String jwt,Object obj) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + jwt);
+        return new HttpEntity<>(obj, headers);
     }
 
     @Nested
@@ -48,8 +56,38 @@ class UsersControllerTest {
     class TestGetUserByIdMethod {
 
         @Test
-    void getUserById() {
-    }
+    void testGetUserByIdMethod_validId() {
+    //When
+            var request = FindByIdRequest
+                    .builder()
+                    .id(252L)
+                    .build();
+            var jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbTJhaWwyQGVtYWlsLmNvbSIsImlhdCI6MTc2NjA1MTYxMCwiZXhwIjoxNzY2MDU1MjEwfQ.7ha8rjYtrh45m_xg0hlmuc3P8tMQ7ZlaMaBO0iYv3mLZPO74vIr-1nBZ1KZBFJOvvgIAJ-oaEW_SroDGDtYmng";
+
+            //Given
+            var response =
+                    restTemplate.exchange("/dev/api/users/getAllUsers/"+request.getId(), HttpMethod.GET, sendRequestANdGetResponse(jwt,null), List.class);
+
+            Assertions.assertEquals(HttpStatus.OK,response.getStatusCode());
+
+        }
+
+        @Test
+        void testGetUserByIdMethod_invalidId() {
+            //When
+            var request = FindByIdRequest
+                    .builder()
+                    .id(5000L)
+                    .build();
+            var jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbTJhaWwyQGVtYWlsLmNvbSIsImlhdCI6MTc2NjA1MTYxMCwiZXhwIjoxNzY2MDU1MjEwfQ.7ha8rjYtrh45m_xg0hlmuc3P8tMQ7ZlaMaBO0iYv3mLZPO74vIr-1nBZ1KZBFJOvvgIAJ-oaEW_SroDGDtYmng";
+
+            //Given
+            var response =
+                    restTemplate.exchange("/dev/api/users/getAllUsers/"+request.getId(), HttpMethod.GET, sendRequestANdGetResponse(jwt,null), List.class);
+
+            Assertions.assertEquals(HttpStatus.NOT_FOUND,response.getStatusCode());
+
+        }
 }
 
     @Test

@@ -10,7 +10,7 @@ import static com.utils.application.ExceptionHandlerReporter.formatDateTime;
 
 
 public class ExceptionHandler {
-   private static Logger   logger = LoggerFactory.getLogger(ExceptionHandler.class);
+   private static final Logger   logger = LoggerFactory.getLogger(ExceptionHandler.class);
 
     public static RuntimeException throwExceptionAndReport(RuntimeException ex,String errorMessage,String resolveIssueDetails){
         try{
