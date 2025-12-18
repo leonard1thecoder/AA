@@ -34,8 +34,11 @@ public class Users implements UserDetails {
     private String userPassword;
     @Column(nullable = false)
     private Short userStatus, userAge;
+    @Column(nullable = false, unique = true)
+    private String userFullName;
     @Column(nullable = false)
-    private String userFullName, userRegistrationDate, userModifiedDate;
+
+    private String userRegistrationDate, userModifiedDate;
 
     @Column(columnDefinition = "TEXT")
     private String token;

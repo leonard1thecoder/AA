@@ -44,10 +44,10 @@ public class UsersController {
         return ResponseEntity.ok(list);
     }
 
-    @PostMapping("/getUsersByFullName")
-    public ResponseEntity<List<? extends ResponseContract>> getUserByFullName(@PathVariable UsersFullNameRequest request) {
+    @GetMapping("/getUsersByFullName/{fullName}")
+    public ResponseEntity<List<? extends ResponseContract>> getUserByFullName(@PathVariable String fullName) {
         UsersService.setServiceHandler("getUsersByFullName");
-        service.setUsersFullNameRequest(request);
+        service.setUsersFullNameRequest(new UsersFullNameRequest(fullName));
         var list = this.serviceConcurrentExecutor.buildServiceExecutor(service);
         return ResponseEntity.ok(list);
     }

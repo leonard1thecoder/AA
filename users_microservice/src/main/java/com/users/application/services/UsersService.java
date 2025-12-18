@@ -227,7 +227,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 //
 //            if (responseList.size() == 1) {
 //                var jpaUserResponse = responseList.get(0);
-//                redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
+//                redisService.set(encrypt, jpaUserResponse, 1L, TimeUnit.HOURS);
 //                logger.info("User with identity no : {} successfully found from jpa, data is {}  ", redisUserResponse.getUsersIdentityNo(), jpaUserResponse);
 //
 //                return responseList;
@@ -319,7 +319,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                             .privileges(s.getFk_privilege_id())
                             .build()).toList();
 
-                    redisService.set(encrypt, jpaUserResponse.get(0), 6L, TimeUnit.HOURS);
+                    redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
                     logger.info("cached data : {}", redisService.get(encrypt, UsersResponse.class));
                     logger.info("user with id {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getId(), jpaUserResponse);
                     return jpaUserResponse;
@@ -395,7 +395,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                             .cellphoneNo(users.getUserCellphoneNo())
                             .privileges(users.getFk_privilege_id())
                             .build()).toList();
-                    redisService.set(encrypt, jpaUserResponse.get(0), 6L, TimeUnit.HOURS);
+                    redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
                     logger.info("user with name {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getUsersFullName(), jpaUserResponse);
 
                     return jpaUserResponse;
@@ -426,7 +426,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
             UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
             UsersResponse jpaUserResponse;
             boolean redisStatus;
-            if (redisUserResponse == null) {
+            if (redisUserResponse != null) {
                 System.out.println("redis");
                 redisStatus = true;
                 jpaUserResponse = null;
@@ -473,16 +473,15 @@ public class UsersService implements Execute<List<UsersResponse>> {
             }
 
             try {
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
                 if (redisStatus) {
-                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
                     logger.info("user with email {} successfully logged in using cache data : {}", redisUserResponse.getUsersEmailAddress(), redisUserResponse);
 
                     return List.of(redisUserResponse);
                 } else {
 
-                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
                     logger.info("user with email {} successfully logged in using jpa data : {}", loginRequest().getUsersEmailAddress(), jpaUserResponse);
-                    redisService.set(encrypt, jpaUserResponse, 6L, TimeUnit.HOURS);
+                    redisService.set(encrypt, jpaUserResponse, 1L, TimeUnit.HOURS);
 
                     logger.info("cached login data : {}", redisService.get(encrypt, UsersResponse.class));
 
