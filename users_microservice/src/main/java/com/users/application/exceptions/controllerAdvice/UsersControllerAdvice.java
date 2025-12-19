@@ -16,6 +16,13 @@ import java.util.List;
 public class UsersControllerAdvice extends ExceptionHandlerReporter {
     private static final Logger logger = LoggerFactory.getLogger(UsersControllerAdvice.class);
 
+    @ExceptionHandler(VerifyEmailAddressException.class)
+    public ResponseEntity<List<ErrorResponse>> manageVerifyEmailAddressException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<List<ErrorResponse>> manageUserNotFoundException(){
         var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
@@ -23,10 +30,18 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
         return new ResponseEntity<>(list, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(UserAgeException.class)
-    public ResponseEntity<ErrorResponse> manageUserAgeException(){
-        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.FORBIDDEN);
+    @ExceptionHandler(InvalidUserStatusException.class)
+    public ResponseEntity<List<ErrorResponse>> manageInvalidUserStatusException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(UserAgeException.class)
+    public ResponseEntity<List<ErrorResponse>> manageUserAgeException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(list, HttpStatus.NOT_FOUND);    }
 
     @ExceptionHandler(UsersExistsException.class)
     public ResponseEntity<List<ErrorResponse>> manageUsersExistsException(){
