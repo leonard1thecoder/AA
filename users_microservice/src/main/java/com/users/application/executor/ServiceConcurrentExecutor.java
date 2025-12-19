@@ -79,6 +79,12 @@ public class ServiceConcurrentExecutor {
                 throw throwExceptionAndReport(new PasswordMisMatchException(getMessage()), getMessage(), getResolveIssueDetails());
             else if (e.getMessage().contains("JwtExpiredOnSessionException"))
                 throw throwExceptionAndReport(new JwtExpiredOnSessionException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("InvalidUserStatusException"))
+                throw throwExceptionAndReport(new InvalidUserStatusException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("VerifyEmailAddressException"))
+                throw throwExceptionAndReport(new VerifyEmailAddressException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("UserAgeException"))
+                throw throwExceptionAndReport(new UserAgeException(getMessage()), getMessage(), getResolveIssueDetails());
 
 
             throw throwExceptionAndReport(new ConcurrentExecutionException("Unknown Exception occurred trace :  " + e.getMessage()), "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");
