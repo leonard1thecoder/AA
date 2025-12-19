@@ -44,7 +44,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
 
     public static String serviceHandler;
-
+    @Setter
+    private static FindByTokenRequest findByTokenRequest;
     private UsersFullNameRequest usersFullNameRequest;
     @Setter
     private static UsersRepository usersRepository;
@@ -415,7 +416,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
     }
 
-    private boolean passwordStatus;
+    private boolean passwordStatus,sendMail;
 
 
     @Transactional
@@ -427,12 +428,19 @@ public class UsersService implements Execute<List<UsersResponse>> {
             UsersResponse jpaUserResponse;
             boolean redisStatus;
             if (redisUserResponse != null) {
-                System.out.println("redis");
-                redisStatus = true;
+                logger.info("redis executing...");
                 jpaUserResponse = null;
+               if (redisUserResponse.getUsersStatus() == 0){
+                   var errorMessage = "User already got email to verify account";
+                   var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
+                   throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
+               }
+
+                redisStatus = true;
+
 
             } else {
-                System.out.println("Jpa");
+                logger.info("Jpa executing...");
                 redisStatus = false;
 
 
@@ -441,29 +449,44 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
                 if (optionalEntity.isPresent()) {
                     logger.info("email address {} found", loginRequest().getUsersEmailAddress());
+
+
+
                     var users = optionalEntity.get();
+                    var jwt = jwtService.generateToken(optionalEntity.get());
+                    users.setToken(jwt);
+                    var userWithToken=    usersRepository.save(users);
                     List<Users> list = new ArrayList<>();
-                    list.add(users);
+                    list.add(userWithToken);
                     jpaUserResponse = list.stream().map(s -> UsersResponse
                                     .builder()
-                                    .usersAge(users.getUserAge())
-                                    .id(users.getId())
-                                    .usersStatus(users.getUserStatus())
-                                    .usersEmailAddress(users.getUserEmailAddress())
-                                    .usersRegistrationDate(users.getUserRegistrationDate())
-                                    .usersModifiedDate(users.getUserModifiedDate())
-                                    .usersFullName(users.getUserFullName())
-                                    .usersIdentityNo(users.getUserIdentityNo())
-                                    .cellphoneNo(users.getUserCellphoneNo())
-                                    .privileges(users.getFk_privilege_id())
-                                    .build()).toList()
+                                    .usersAge(s.getUserAge())
+                                    .id(s.getId())
+                                    .usersStatus(s.getUserStatus())
+                                    .usersEmailAddress(s.getUserEmailAddress())
+                                    .usersRegistrationDate(s.getUserRegistrationDate())
+                                    .usersModifiedDate(s.getUserModifiedDate())
+                                    .usersFullName(s.getUserFullName())
+                                    .usersIdentityNo(s.getUserIdentityNo())
+                                    .cellphoneNo(s.getUserCellphoneNo())
+                                    .privileges(s.getFk_privilege_id())
+                                    .token(s.getToken())
+                                    .build())
+                            .toList()
                             .get(0);
+// send mail when status is 0, pub sub pattern will be used
+                    if (optionalEntity.get().getUserStatus() ==  0){
+                        sendMail = true;
+                    } else if(optionalEntity.get().getUserStatus() ==  1){
+                        passwordStatus = true;
+                        sendMail = false;
+                    }else {
 
-                    passwordStatus = true;
-                    var jwt = jwtService.generateToken(optionalEntity.get());
-
-                    logger.info("JWT Token : {}" , jwt);
-
+                        var errorMessage = "log in failed due to invalid user status ";
+                        var resolveIssue = "Contact AA Administrator";
+                        throw throwExceptionAndReport(new InvalidUserStatusException(errorMessage), errorMessage, resolveIssue);
+                    }
+                    logger.info("JWT Token : {}", jwt);
                 } else {
                     logger.info("email address {} not found", loginRequest().getUsersEmailAddress());
                     jpaUserResponse = null;
@@ -481,9 +504,12 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 } else {
 
                     logger.info("user with email {} successfully logged in using jpa data : {}", loginRequest().getUsersEmailAddress(), jpaUserResponse);
-                    redisService.set(encrypt, jpaUserResponse, 1L, TimeUnit.HOURS);
 
-                    logger.info("cached login data : {}", redisService.get(encrypt, UsersResponse.class));
+                        redisService.set(encrypt, jpaUserResponse, 1L, TimeUnit.HOURS);
+
+                        logger.info("cached login data : {}", redisService.get(encrypt, UsersResponse.class));
+
+
 
                     return List.of(jpaUserResponse);
                 }
@@ -529,12 +555,45 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 case "getUsersById" -> this.findUserById();
                 case "userLogin" -> this.login();
                 case "userUpdatePassword" -> this.updateUsersPassword();
-
+                case "verifyUser"-> this.verifyCustomer();
                 default -> throw new ServiceHandlerException("Failed execute service due to incorrect service string");
             };
         else
             return null;
     }
+
+    @Transactional
+    private List<UsersResponse> verifyCustomer() {
+       Optional<Users> user = usersRepository.findByToken(findByTokenRequest.getToken());
+
+       if(user.isPresent()){
+           var verifiedUser = user.get();
+           verifiedUser.setUserStatus((short)1);
+           verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
+
+           redisService.delete(verifiedUser.getUserEmailAddress());
+           List<Users> list = new ArrayList<>();
+           list.add(usersRepository.save(verifiedUser));
+         var  jpaUserResponse = list.stream().map(s -> UsersResponse
+                           .builder()
+                           .usersAge(s.getUserAge())
+                           .id(s.getId())
+                           .usersStatus(s.getUserStatus())
+                           .usersEmailAddress(s.getUserEmailAddress())
+                           .usersRegistrationDate(s.getUserRegistrationDate())
+                           .usersModifiedDate(s.getUserModifiedDate())
+                           .usersFullName(s.getUserFullName())
+                           .usersIdentityNo(s.getUserIdentityNo())
+                           .cellphoneNo(s.getUserCellphoneNo())
+                           .privileges(s.getFk_privilege_id())
+                           .token(s.getToken())
+                           .build())
+                   .toList()
+                   .get(0);
+       }
+        return null;
+    }
+
 
     @Override
     public void setCache(@Autowired RedisService redisService) {
