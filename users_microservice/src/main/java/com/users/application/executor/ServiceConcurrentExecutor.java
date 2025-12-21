@@ -85,6 +85,16 @@ public class ServiceConcurrentExecutor {
                 throw throwExceptionAndReport(new VerifyEmailAddressException(getMessage()), getMessage(), getResolveIssueDetails());
             else if (e.getMessage().contains("UserAgeException"))
                 throw throwExceptionAndReport(new UserAgeException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("CellphoneNuException"))
+                throw throwExceptionAndReport(new CellphoneNuException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("IdentityNoIsEmptyException"))
+                throw throwExceptionAndReport(new IdentityNoIsEmptyException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("IdentityNuContainsIncorrectValuesException"))
+                throw throwExceptionAndReport(new IdentityNuContainsIncorrectValuesException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("IdentityNuException"))
+                throw throwExceptionAndReport(new IdentityNuException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("UserDateTimeException"))
+                throw throwExceptionAndReport(new UserDateTimeException(getMessage()), getMessage(), getResolveIssueDetails());
 
 
             throw throwExceptionAndReport(new ConcurrentExecutionException("Unknown Exception occurred trace :  " + e.getMessage()), "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");
