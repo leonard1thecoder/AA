@@ -574,24 +574,26 @@ public class UsersService implements Execute<List<UsersResponse>> {
            redisService.delete(verifiedUser.getUserEmailAddress());
            List<Users> list = new ArrayList<>();
            list.add(usersRepository.save(verifiedUser));
-         var  jpaUserResponse = list.stream().map(s -> UsersResponse
-                           .builder()
-                           .usersAge(s.getUserAge())
-                           .id(s.getId())
-                           .usersStatus(s.getUserStatus())
-                           .usersEmailAddress(s.getUserEmailAddress())
-                           .usersRegistrationDate(s.getUserRegistrationDate())
-                           .usersModifiedDate(s.getUserModifiedDate())
-                           .usersFullName(s.getUserFullName())
-                           .usersIdentityNo(s.getUserIdentityNo())
-                           .cellphoneNo(s.getUserCellphoneNo())
-                           .privileges(s.getFk_privilege_id())
-                           .token(s.getToken())
-                           .build())
-                   .toList()
-                   .get(0);
+           return list.stream().map(s -> UsersResponse
+                             .builder()
+                             .usersAge(s.getUserAge())
+                             .id(s.getId())
+                             .usersStatus(s.getUserStatus())
+                             .usersEmailAddress(s.getUserEmailAddress())
+                             .usersRegistrationDate(s.getUserRegistrationDate())
+                             .usersModifiedDate(s.getUserModifiedDate())
+                             .usersFullName(s.getUserFullName())
+                             .usersIdentityNo(s.getUserIdentityNo())
+                             .cellphoneNo(s.getUserCellphoneNo())
+                             .privileges(s.getFk_privilege_id())
+                             .token(s.getToken())
+                             .build())
+                     .toList();
+       }else{
+           var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
+           var resolveIssue = "Please log in again to get new token in your mail";
+           throw throwExceptionAndReport(new VerificationTokenExpiredException(errorMessage), errorMessage, resolveIssue);
        }
-        return null;
     }
 
 
