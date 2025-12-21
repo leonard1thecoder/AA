@@ -16,8 +16,42 @@ import java.util.List;
 public class UsersControllerAdvice extends ExceptionHandlerReporter {
     private static final Logger logger = LoggerFactory.getLogger(UsersControllerAdvice.class);
 
-    @ExceptionHandler(VerifyEmailAddressException.class)
+    @ExceptionHandler(CellphoneNuException.class)
+    public ResponseEntity<List<ErrorResponse>> manageCellphoneNuException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(IdentityNoIsEmptyException.class)
+    public ResponseEntity<List<ErrorResponse>> manageIdentityNoIsEmptyException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    } @ExceptionHandler(IdentityNuContainsIncorrectValuesException.class)
+    public ResponseEntity<List<ErrorResponse>> manageIdentityNuContainsIncorrectValuesException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    } @ExceptionHandler(IdentityNuException.class)
+    public ResponseEntity<List<ErrorResponse>> manageIdentityNuException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    } @ExceptionHandler(UserDateTimeException.class)
+    public ResponseEntity<List<ErrorResponse>> manageUserDateTimeException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    } @ExceptionHandler(VerifyEmailAddressException.class)
     public ResponseEntity<List<ErrorResponse>> manageVerifyEmailAddressException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(VerificationTokenExpiredException.class)
+    public ResponseEntity<List<ErrorResponse>> manageVerificationTokenExpiredException(){
         var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
