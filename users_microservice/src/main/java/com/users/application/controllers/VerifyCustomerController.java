@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/dev/api/users")
+@RequestMapping("/dev/api/verify")
 public class VerifyCustomerController {
 
     private final UsersService service;
@@ -24,11 +24,11 @@ public class VerifyCustomerController {
         this.service = service;
     }
 
-    @GetMapping("/verify")
-    public String verifyCustomer(@RequestParam String token) {
-        FindByTokenRequest request = new FindByTokenRequest(token);
+    @GetMapping("/verify-customer")
+    public String verifyCustomer(@RequestParam String qTokq1) {
+        FindByTokenRequest request = new FindByTokenRequest(qTokq1);
         UsersService.setFindByTokenRequest(request);
-        UsersService.setServiceHandler("getUsersById");
+        UsersService.setServiceHandler("verifyUser");
         var response = serviceConcurrentExecutor.buildServiceExecutor(service);
 
         if(response.size() == 1){
