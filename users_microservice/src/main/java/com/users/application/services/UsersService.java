@@ -373,12 +373,6 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
     private List<UsersResponse> login() {
 
         try {
-
-            try {
-                Thread.sleep(500000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
             var encrypt = loginRequest().getUsersEmailAddress();
             UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
             UsersResponse jpaUserResponse;
