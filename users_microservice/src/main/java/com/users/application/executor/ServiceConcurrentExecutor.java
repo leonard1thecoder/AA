@@ -57,9 +57,9 @@ Logger logger = LoggerFactory.getLogger(ServiceConcurrentExecutor.class);
     public List<? extends ResponseContract> buildServiceExecutor(Execute service) {
         var retryTime = 3;
         var retryAttempt = 0;
+        Future<List<? extends ResponseContract>> future = this.executorService.submit(service);
 
         while (retryAttempt < retryTime) {
-            Future<List<? extends ResponseContract>> future = this.executorService.submit(service);
             try {
                 return future.get(60, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
