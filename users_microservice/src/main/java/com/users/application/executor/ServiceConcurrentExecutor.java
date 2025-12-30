@@ -12,6 +12,8 @@ import com.utils.application.globalExceptions.ServiceInterruptedException;
 import com.utils.application.globalExceptions.ServiceTimeoutException;
 
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -20,7 +22,7 @@ import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
 import static com.utils.application.ExceptionHandlerReporter.*;
 
 public class ServiceConcurrentExecutor {
-
+Logger logger = LoggerFactory.getLogger(ServiceConcurrentExecutor.class);
     @Getter
     private final static ServiceConcurrentExecutor instance = new ServiceConcurrentExecutor();
     private final ExecutorService executorService;
@@ -108,10 +110,14 @@ public class ServiceConcurrentExecutor {
             } catch (TimeoutException e) {
                 retryAttempt++;
                 if(retryAttempt >= retryTime) {
-                    var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service + " reason service waited 15 seconds");
+                    var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service + " reason service waited 60 seconds");
                     ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
                     throw throwExceptionAndReport(new ServiceTimeoutException(errorMessage), getMessage(), getResolveIssueDetails());
                 }
+
+
+                logger.info("service has failed due to time out, retrying {}:",retryAttempt);
+
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException ex) {
