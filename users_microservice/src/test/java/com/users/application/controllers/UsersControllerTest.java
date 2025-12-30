@@ -99,12 +99,13 @@ class UsersControllerTest {
                     .builder()
                     .usersFullName("Sizolwakhe Leonard Mthimunye")
                     .build();
-            var jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbTJhaWwyQGVtYWlsLmNvbSIsImlhdCI6MTc2NjA1Nzg2OCwiZXhwIjoxNzY2MDYxNDY4fQ.zw9voAv5jYySvFYLMDyTrCraPz7T5xKXShDN1yuzfy8Hit5w53cAtK0dZ7abezRbud_dMGgiDzzScmkPE6X4Bg";
+            var jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ566lbTJhaWwyQGVtYWlsLmNvbSIsImlhdCI6MTc2NjA1Nzg2OCwiZXhwIjoxNzY2MDYxNDY4fQ.zw9voAv5jYySvFYLMDyTrCraPz7T5xKXShDN1yuzfy8Hit5w53cAtK0dZ7abezRbud_dMGgiDzzScmkPE6X4Bg";
 
             //Given
             var response =
                     restTemplate.exchange("/dev/api/users/getUsersByFullName/" + request.getUsersFullName(), HttpMethod.GET, sendRequestANdGetResponse(jwt, null), List.class);
 
+            System.out.println(response.getBody());
             Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
         }
@@ -116,12 +117,12 @@ class UsersControllerTest {
                     .builder()
                     .usersFullName("Sizolwakhe2 Leonard3 Mthimunye5")
                     .build();
-            var jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbTJhaWwyQGVtYWlsLmNvbSIsImlhdCI6MTc2NjA1Nzg2OCwiZXhwIjoxNzY2MDYxNDY4fQ.zw9voAv5jYySvFYLMDyTrCraPz7T5xKXShDN1yuzfy8Hit5w53cAtK0dZ7abezRbud_dMGgiDzzScmkPE6X4Bg";
+            var jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIi56OiJlbTJhaWwyQGVtYWlsLmNvbSIsImlhdCI6MTc2NjA1Nzg2OCwiZXhwIjoxNzY2MDYxNDY4fQ.zw9voAv5jYySvFYLMDyTrCraPz7T5xKXShDN1yuzfy8Hit5w53cAtK0dZ7abezRbud_dMGgiDzzScmkPE6X4Bg";
 
             //Given
             var response =
                     restTemplate.exchange("/dev/api/users/getUsersByFullName/" + request.getUsersFullName(), HttpMethod.GET, sendRequestANdGetResponse(jwt, null), List.class);
-
+            System.out.println(response.getBody());
             Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
         }

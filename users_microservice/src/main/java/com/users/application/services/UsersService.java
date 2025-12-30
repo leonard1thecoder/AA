@@ -11,13 +11,16 @@ import com.users.application.mappers.UsersMapper;
 import com.users.application.repository.UsersRepository;
 import com.utils.application.Execute;
 import com.utils.application.globalExceptions.ServiceHandlerException;
+import com.utils.application.mailing.VerifyCustomerEmail;
+import com.utils.application.mailing.dto.VerifyCustomerEvent;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,13 +29,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.net.SocketException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import static com.users.application.validators.UsersFieldsDataValidator.getInstance;
 import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
@@ -41,6 +41,8 @@ import static com.utils.application.HandlingLoadingService.handleServiceHandler;
 @Service
 public class UsersService implements Execute<List<UsersResponse>> {
     private static final Logger logger = LoggerFactory.getLogger(UsersService.class);
+
+    private final ApplicationEventPublisher publisher;
 
 
     public static String serviceHandler;
@@ -65,9 +67,9 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private UsersFieldsDataValidator validator;
 
     @Autowired
-    public UsersService(@Autowired RedisTemplate redisTemplate, PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
+    public UsersService(@Autowired ApplicationEventPublisher publisher, @Autowired RedisTemplate redisTemplate, PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         setUsersRepository(usersRepository);
-
+        this.publisher= publisher;
         UsersService.passwordEncoder = passwordEncoder;
         UsersService.usersMapper = usersMapper;
         UsersService.jwtService = jwtService;
@@ -79,9 +81,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
         return usersFullNameRequest;
     }
 
-    public UsersService setUsersFullNameRequest(UsersFullNameRequest usersFullNameRequest) {
+    public void setUsersFullNameRequest(UsersFullNameRequest usersFullNameRequest) {
         this.usersFullNameRequest = usersFullNameRequest;
-        return this;
     }
 
     public void setFindByIdRequest(FindByIdRequest findByIdRequest) {
@@ -176,24 +177,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
                 try {
                     logger.info("users was successfully registered : data : {}", usersRepository.save(users));
-                    var entityList = new ArrayList<Users>();
-                    entityList.add(users);
-                    var responseList = entityList
-                            .stream()
-                            .map(s -> UsersResponse
-                                    .builder()
-                                    .usersAge(s.getUserAge())
-                                    .id(s.getId())
-                                    .usersStatus(s.getUserStatus())
-                                    .usersEmailAddress(s.getUserEmailAddress())
-                                    .usersRegistrationDate(s.getUserRegistrationDate())
-                                    .usersModifiedDate(s.getUserModifiedDate())
-                                    .usersFullName(s.getUserFullName())
-                                    .usersIdentityNo(s.getUserIdentityNo())
-                                    .cellphoneNo(s.getUserCellphoneNo())
-                                    .privileges(s.getFk_privilege_id())
-                                    .build())
-                            .toList();
+
+                    var responseList =mapToResponse(List.of(users));
 
                     if (redisService.get("ALL_USERS", UsersResponse.class) != null) {
                         logger.info("Cached data for all users deleted  : {}", redisService.delete("ALL_USERS"));
@@ -258,19 +243,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                         logger.info("user with email address {} successfully successfully removed from cache", redisService.delete(updateEntity.getUserEmailAddress()));
                     }
                     logger.info("user with email address {} successfully updated password", updateEntity.getUserEmailAddress());
-                    return Stream.of(updateEntity).map(s -> UsersResponse
-                            .builder()
-                            .usersAge(s.getUserAge())
-                            .id(s.getId())
-                            .usersStatus(s.getUserStatus())
-                            .usersEmailAddress(s.getUserEmailAddress())
-                            .usersRegistrationDate(s.getUserRegistrationDate())
-                            .usersModifiedDate(s.getUserModifiedDate())
-                            .usersFullName(s.getUserFullName())
-                            .usersIdentityNo(s.getUserIdentityNo())
-                            .cellphoneNo(s.getUserCellphoneNo())
-                            .privileges(s.getFk_privilege_id())
-                            .build()).toList();
+                    return mapToResponse(List.of(updateEntity));
                 } else {
                     var errorMessage = "new password and confirm password don't match";
                     var resolveIssue = "Please confirm your new password and confirmation password";
@@ -287,7 +260,23 @@ public class UsersService implements Execute<List<UsersResponse>> {
             throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
         }
     }
+private List<UsersResponse>  mapToResponse(List<Users> list){
+        return list.parallelStream().map(s -> UsersResponse
+                .builder()
+                .usersAge(s.getUserAge())
+                .id(s.getId())
+                .usersStatus(s.getUserStatus())
+                .usersEmailAddress(s.getUserEmailAddress())
+                .usersRegistrationDate(s.getUserRegistrationDate())
+                .usersModifiedDate(s.getUserModifiedDate())
+                .usersFullName(s.getUserFullName())
+                .usersIdentityNo(s.getUserIdentityNo())
+                .cellphoneNo(s.getUserCellphoneNo())
+                .privileges(s.getFk_privilege_id())
+                .token(s.getToken())
+                .build()).toList();
 
+}
     private List<UsersResponse> findUserById() {
         String encrypt;
         try {
@@ -304,21 +293,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
                 if (responseList.isPresent()) {
                     var users = responseList.get();
-                    List<Users> list = new ArrayList<>();
-                    list.add(users);
-                    var jpaUserResponse = list.stream().map(s -> UsersResponse
-                            .builder()
-                            .usersAge(s.getUserAge())
-                            .id(s.getId())
-                            .usersStatus(s.getUserStatus())
-                            .usersEmailAddress(s.getUserEmailAddress())
-                            .usersRegistrationDate(s.getUserRegistrationDate())
-                            .usersModifiedDate(s.getUserModifiedDate())
-                            .usersFullName(s.getUserFullName())
-                            .usersIdentityNo(s.getUserIdentityNo())
-                            .cellphoneNo(s.getUserCellphoneNo())
-                            .privileges(s.getFk_privilege_id())
-                            .build()).toList();
+
+                    var jpaUserResponse =mapToResponse(List.of(users));
 
                     redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
                     logger.info("cached data : {}", redisService.get(encrypt, UsersResponse.class));
@@ -346,19 +322,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
             logger.info("get all users from cache, data from redis : {}", returnRedisResponse);
             return returnRedisResponse;
         } else {
-            var jpaResponse= usersRepository.findAll().stream().map(s -> UsersResponse
-                    .builder()
-                    .usersAge(s.getUserAge())
-                    .id(s.getId())
-                    .usersStatus(s.getUserStatus())
-                    .usersEmailAddress(s.getUserEmailAddress())
-                    .usersRegistrationDate(s.getUserRegistrationDate())
-                    .usersModifiedDate(s.getUserModifiedDate())
-                    .usersFullName(s.getUserFullName())
-                    .usersIdentityNo(s.getUserIdentityNo())
-                    .cellphoneNo(s.getUserCellphoneNo())
-                    .privileges(s.getFk_privilege_id())
-                    .build()).toList();
+            var jpaResponse= mapToResponse(usersRepository.findAll());
 
             redisService.set("ALL_USERS",jpaResponse,1L,TimeUnit.HOURS);
             var redisResponseChecker = redisService.get("ALL_USERS", List.class);
@@ -381,21 +345,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
                 if (responseList.isPresent()) {
                     var users = responseList.get();
-                    List<Users> list = new ArrayList<>();
-                    list.add(users);
-                    var jpaUserResponse = list.stream().map(s -> UsersResponse
-                            .builder()
-                            .usersAge(users.getUserAge())
-                            .id(users.getId())
-                            .usersStatus(users.getUserStatus())
-                            .usersEmailAddress(users.getUserEmailAddress())
-                            .usersRegistrationDate(users.getUserRegistrationDate())
-                            .usersModifiedDate(users.getUserModifiedDate())
-                            .usersFullName(users.getUserFullName())
-                            .usersIdentityNo(users.getUserIdentityNo())
-                            .cellphoneNo(users.getUserCellphoneNo())
-                            .privileges(users.getFk_privilege_id())
-                            .build()).toList();
+                    var jpaUserResponse = mapToResponse(List.of(users));
                     redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
                     logger.info("user with name {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getUsersFullName(), jpaUserResponse);
 
@@ -427,7 +377,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
             UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
             UsersResponse jpaUserResponse;
             boolean redisStatus;
-            if (redisUserResponse != null) {
+            if (false) {
                 logger.info("redis executing...");
                 jpaUserResponse = null;
                if (redisUserResponse.getUsersStatus() == 0){
@@ -455,30 +405,32 @@ public class UsersService implements Execute<List<UsersResponse>> {
                     var users = optionalEntity.get();
                     var jwt = jwtService.generateToken(optionalEntity.get());
                     users.setToken(jwt);
+                    logger.info("JWT Token : {}", jwt);
+                    logger.info("User with set token  : {}", users);
+
+
                     var userWithToken=    usersRepository.save(users);
-                    List<Users> list = new ArrayList<>();
-                    list.add(userWithToken);
-                    jpaUserResponse = list.stream().map(s -> UsersResponse
-                                    .builder()
-                                    .usersAge(s.getUserAge())
-                                    .id(s.getId())
-                                    .usersStatus(s.getUserStatus())
-                                    .usersEmailAddress(s.getUserEmailAddress())
-                                    .usersRegistrationDate(s.getUserRegistrationDate())
-                                    .usersModifiedDate(s.getUserModifiedDate())
-                                    .usersFullName(s.getUserFullName())
-                                    .usersIdentityNo(s.getUserIdentityNo())
-                                    .cellphoneNo(s.getUserCellphoneNo())
-                                    .privileges(s.getFk_privilege_id())
-                                    .token(s.getToken())
-                                    .build())
-                            .toList()
-                            .get(0);
+                    logger.info("User with set token from db : {}", userWithToken);
+
+                    jpaUserResponse = mapToResponse(List.of(userWithToken)).get(0);
 // send mail when status is 0, pub sub pattern will be used
                     if (optionalEntity.get().getUserStatus() ==  0){
+                        publisher.publishEvent(VerifyCustomerEvent
+                                .builder()
+                                        .emailFrom("softwareaa65@gmail.com")
+                                        .emailTo(jpaUserResponse.getUsersEmailAddress())
+                                        .name(jpaUserResponse.getUsersFullName())
+                                        .token(jpaUserResponse.getToken())
+                                        .privilegeId(optionalEntity.get().getFk_privilege_id())
+                                .build()
+                        );
+
+                        logger.info("user : {} has not been verified, email sent to verify customer",jpaUserResponse.getUsersFullName());
                         sendMail = true;
                     } else if(optionalEntity.get().getUserStatus() ==  1){
                         passwordStatus = true;
+                        logger.info("user : {} has  been verified,trying to login...",jpaUserResponse.getUsersFullName());
+
                         sendMail = false;
                     }else {
 
@@ -486,7 +438,6 @@ public class UsersService implements Execute<List<UsersResponse>> {
                         var resolveIssue = "Contact AA Administrator";
                         throw throwExceptionAndReport(new InvalidUserStatusException(errorMessage), errorMessage, resolveIssue);
                     }
-                    logger.info("JWT Token : {}", jwt);
                 } else {
                     logger.info("email address {} not found", loginRequest().getUsersEmailAddress());
                     jpaUserResponse = null;
@@ -570,29 +521,14 @@ public class UsersService implements Execute<List<UsersResponse>> {
            var verifiedUser = user.get();
            verifiedUser.setUserStatus((short)1);
            verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
-
+logger.info("User : {} has been successfully verified", verifiedUser.getUserFullName());
            redisService.delete(verifiedUser.getUserEmailAddress());
-           List<Users> list = new ArrayList<>();
-           list.add(usersRepository.save(verifiedUser));
-           return list.stream().map(s -> UsersResponse
-                             .builder()
-                             .usersAge(s.getUserAge())
-                             .id(s.getId())
-                             .usersStatus(s.getUserStatus())
-                             .usersEmailAddress(s.getUserEmailAddress())
-                             .usersRegistrationDate(s.getUserRegistrationDate())
-                             .usersModifiedDate(s.getUserModifiedDate())
-                             .usersFullName(s.getUserFullName())
-                             .usersIdentityNo(s.getUserIdentityNo())
-                             .cellphoneNo(s.getUserCellphoneNo())
-                             .privileges(s.getFk_privilege_id())
-                             .token(s.getToken())
-                             .build())
-                     .toList();
+
+           return mapToResponse(List.of(usersRepository.save(verifiedUser)));
        }else{
            var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
            var resolveIssue = "Please log in again to get new token in your mail";
-           throw throwExceptionAndReport(new VerificationTokenExpiredException(errorMessage), errorMessage, resolveIssue);
+           throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
        }
     }
 

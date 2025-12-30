@@ -50,7 +50,7 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(VerificationTokenExpiredException.class)
+    @ExceptionHandler(VerificationTokenIncorrectException.class)
     public ResponseEntity<List<ErrorResponse>> manageVerificationTokenExpiredException(){
         var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());

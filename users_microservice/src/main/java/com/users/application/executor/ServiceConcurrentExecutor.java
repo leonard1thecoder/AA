@@ -95,6 +95,8 @@ public class ServiceConcurrentExecutor {
                 throw throwExceptionAndReport(new IdentityNuException(getMessage()), getMessage(), getResolveIssueDetails());
             else if (e.getMessage().contains("UserDateTimeException"))
                 throw throwExceptionAndReport(new UserDateTimeException(getMessage()), getMessage(), getResolveIssueDetails());
+            else if (e.getMessage().contains("VerificationTokenIncorrectException"))
+                throw throwExceptionAndReport(new VerificationTokenIncorrectException(getMessage()), getMessage(), getResolveIssueDetails());
 
 
             throw throwExceptionAndReport(new ConcurrentExecutionException("Unknown Exception occurred trace :  " + e.getMessage()), "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");
