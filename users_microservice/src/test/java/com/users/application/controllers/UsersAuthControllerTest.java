@@ -30,7 +30,7 @@ class UsersAuthControllerTest {
         //When
             LoginRequest request = LoginRequest
                     .builder()
-                    .usersEmailAddress("em2ail2@email.com")
+                    .usersEmailAddress("leonard1thecoder@gmail.com")
                     .usersPassword("12345")
                     .build();
 
