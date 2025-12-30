@@ -373,11 +373,17 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
     private List<UsersResponse> login() {
 
         try {
+
+            try {
+                Thread.sleep(500000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             var encrypt = loginRequest().getUsersEmailAddress();
             UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
             UsersResponse jpaUserResponse;
             boolean redisStatus;
-            if (false) {
+            if (redisUserResponse != null) {
                 logger.info("redis executing...");
                 jpaUserResponse = null;
                if (redisUserResponse.getUsersStatus() == 0){
@@ -496,6 +502,7 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
     @Override
     public List<UsersResponse> call() {
         if (!handleServiceHandler(serviceHandler).equals("START_SERVICE"))
+
             return switch (serviceHandler) {
                 case "registerUsers" -> this.registerUsers();
                 case "getAllUsers" -> this.findAllUsers();
