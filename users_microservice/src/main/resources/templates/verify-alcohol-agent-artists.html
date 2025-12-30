@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="EN">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify E-mail</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f8f9fa;">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#fff;border-radius:8px;overflow:hidden;">
+    <tr>
+        <td style="background-color:white;
+               color:orange;
+               text-align:center;
+               padding:20px;
+               border:2px solid orange;">
+            <img src="https://raw.githubusercontent.com/leonard1thecoder/AA/main/users_microservice/src/main/resources/templates/images/logo.png" alt="Alcohol Agent Logo" style="max-width:150px;height:auto;"/>
+            <h1 style="margin-top:10px;">Alcohol Agent welcomes you</h1>
+        </td>
+    </tr>
+
+    <tr>
+        <td style="padding:20px;">
+            <p>Hi <span th:text="${name}">User</span>,</p>
+            <p>Thank you for registering an account with <strong>Alcohol Agent</strong></p>
+
+            <h4>
+                Once your artist account is verified, you’ll be able to:
+                <ul style="margin:10px 0;padding-left:20px;">
+                    <li>Be booked by Alcohol Agent Retails for events based on their booking requests</li>
+                    <li>Alcohol Agent Retails receives notifications after verify your registration </li>
+                    <li>Negotiate riders and performance requirements with Alcohol Agent Retails before the event</li>
+                    <li>Manage your bookings with a clear dashboard showing upcoming events, venues, and logistics</li>
+                    <li>Track payments and agreements securely for each event</li>
+                    <li>Access event insights to see audience size, demographics, and retail engagement</li>
+                </ul>
+            </h4>
+
+            <p>
+                Your registered email: <b th:text="${email}">example@example.com</b>.
+                Please use this email to log in after verifying your account.
+            </p>
+
+            <p>
+                To activate your account and complete registration, please
+                <a th:href="@{'http://localhost:8080/dev/api/verify/verify-customer?qTokq1=' + ${token}}">click here</a>
+                or use the button below:
+            </p>
+
+            <p style="text-align:center;">
+                <a th:href="@{'http://localhost:8080/dev/api/verify/verify-customer?qTokq1=' + ${token}}"
+                   style="display:inline-block;padding:10px 20px;background:Orange;color:#fff;text-decoration:none;border-radius:4px;">
+                    Verify Me
+                </a>
+            </p>
+
+            <p style="text-align:center;">
+                <i>This is a no-reply email. Please do not reply.</i>
+            </p>
+            <br/>
+
+            <p>Kind regards,</p>
+            <strong style="color:Orange">The Alcohol Agent Team</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="background:#f1f1f1;padding:10px;text-align:center;font-size:12px;color:#555;">
+            Need help? Visit <a href="https://yourapp.com/support">Support</a> | © 2025 Alcohol Agent
+        </td>
+    </tr>
+</table>
+</body>
+</html>
