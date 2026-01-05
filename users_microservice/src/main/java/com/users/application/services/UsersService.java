@@ -13,6 +13,7 @@ import com.utils.application.Execute;
 import com.utils.application.globalExceptions.ServiceHandlerException;
 import com.utils.application.mailing.VerifyCustomerEmail;
 import com.utils.application.mailing.dto.VerifyCustomerEvent;
+import com.utils.application.mailing.dto.VerifyUpdatePasswordEvent;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
@@ -69,7 +70,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
     @Autowired
     public UsersService(@Autowired ApplicationEventPublisher publisher, @Autowired RedisTemplate redisTemplate, PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
         setUsersRepository(usersRepository);
-        this.publisher= publisher;
+        this.publisher = publisher;
         UsersService.passwordEncoder = passwordEncoder;
         UsersService.usersMapper = usersMapper;
         UsersService.jwtService = jwtService;
@@ -165,6 +166,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 Users users = Users.builder()
                         .userIdentityNo(getInstance().validateIdentityNo(request.getUserIdentityNo()))
                         .userPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword().trim())))
+                        .previousPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword().trim())))
                         .userRegistrationDate(getInstance().formatDateTime(LocalDateTime.now()))
                         .userModifiedDate(getInstance().formatDateTime(LocalDateTime.now()))
                         .fk_privilege_id(request.getPrivileges())
@@ -173,12 +175,13 @@ public class UsersService implements Execute<List<UsersResponse>> {
                         .userFullName(request.getUserFullName().trim())
                         .userEmailAddress(request.getUserEmailAddress().trim())
                         .userAge(getInstance().getValidatedAge())
+                        .passwordUpdateStatus((short) 0)
                         .build();
 
                 try {
                     logger.info("users was successfully registered : data : {}", usersRepository.save(users));
 
-                    var responseList =mapToResponse(List.of(users));
+                    var responseList = mapToResponse(List.of(users));
 
                     if (redisService.get("ALL_USERS", UsersResponse.class) != null) {
                         logger.info("Cached data for all users deleted  : {}", redisService.delete("ALL_USERS"));
@@ -260,7 +263,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
             throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
         }
     }
-private List<UsersResponse>  mapToResponse(List<Users> list){
+
+    private List<UsersResponse> mapToResponse(List<Users> list) {
         return list.parallelStream().map(s -> UsersResponse
                 .builder()
                 .usersAge(s.getUserAge())
@@ -276,7 +280,8 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
                 .token(s.getToken())
                 .build()).toList();
 
-}
+    }
+
     private List<UsersResponse> findUserById() {
         String encrypt;
         try {
@@ -294,7 +299,7 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
                 if (responseList.isPresent()) {
                     var users = responseList.get();
 
-                    var jpaUserResponse =mapToResponse(List.of(users));
+                    var jpaUserResponse = mapToResponse(List.of(users));
 
                     redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
                     logger.info("cached data : {}", redisService.get(encrypt, UsersResponse.class));
@@ -318,15 +323,15 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
     private List<UsersResponse> findAllUsers() {
         var redisResponse = redisService.get("ALL_USERS", List.class);
         if (redisResponse != null) {
-            var returnRedisResponse = redisService.safeCastList(redisResponse,UsersResponse.class);
+            var returnRedisResponse = redisService.safeCastList(redisResponse, UsersResponse.class);
             logger.info("get all users from cache, data from redis : {}", returnRedisResponse);
             return returnRedisResponse;
         } else {
-            var jpaResponse= mapToResponse(usersRepository.findAll());
+            var jpaResponse = mapToResponse(usersRepository.findAll());
 
-            redisService.set("ALL_USERS",jpaResponse,1L,TimeUnit.HOURS);
+            redisService.set("ALL_USERS", jpaResponse, 1L, TimeUnit.HOURS);
             var redisResponseChecker = redisService.get("ALL_USERS", List.class);
-            logger.info("cached data for all users from jpa : {}", redisService.safeCastList(redisResponseChecker,UsersResponse.class));
+            logger.info("cached data for all users from jpa : {}", redisService.safeCastList(redisResponseChecker, UsersResponse.class));
             return jpaResponse;
         }
     }
@@ -366,7 +371,7 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
 
     }
 
-    private boolean passwordStatus,sendMail;
+    private boolean passwordStatus, sendMail;
 
 
     @Transactional
@@ -380,11 +385,11 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
             if (redisUserResponse != null) {
                 logger.info("redis executing...");
                 jpaUserResponse = null;
-               if (redisUserResponse.getUsersStatus() == 0){
-                   var errorMessage = "User already got email to verify account";
-                   var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
-                   throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
-               }
+                if (redisUserResponse.getUsersStatus() == 0) {
+                    var errorMessage = "User already got email to verify account";
+                    var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
+                    throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
+                }
 
                 redisStatus = true;
 
@@ -401,7 +406,6 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
                     logger.info("email address {} found", loginRequest().getUsersEmailAddress());
 
 
-
                     var users = optionalEntity.get();
                     var jwt = jwtService.generateToken(optionalEntity.get());
                     users.setToken(jwt);
@@ -409,30 +413,40 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
                     logger.info("User with set token  : {}", users);
 
 
-                    var userWithToken=    usersRepository.save(users);
+                    var userWithToken = usersRepository.save(users);
                     logger.info("User with set token from db : {}", userWithToken);
 
                     jpaUserResponse = mapToResponse(List.of(userWithToken)).get(0);
 // send mail when status is 0, pub sub pattern will be used
-                    if (optionalEntity.get().getUserStatus() ==  0){
+                    if (optionalEntity.get().getUserStatus() == 0) {
                         publisher.publishEvent(VerifyCustomerEvent
                                 .builder()
-                                        .emailFrom("softwareaa65@gmail.com")
-                                        .emailTo(jpaUserResponse.getUsersEmailAddress())
-                                        .name(jpaUserResponse.getUsersFullName())
-                                        .token(jpaUserResponse.getToken())
+                                .emailFrom("softwareaa65@gmail.com")
+                                .emailTo(jpaUserResponse.getUsersEmailAddress())
+                                .name(jpaUserResponse.getUsersFullName())
+                                .token(jpaUserResponse.getToken())
                                         .privilegeId(optionalEntity.get().getFk_privilege_id())
                                 .build()
                         );
 
-                        logger.info("user : {} has not been verified, email sent to verify customer",jpaUserResponse.getUsersFullName());
+                        logger.info("user : {} has not been verified, email sent to verify customer", jpaUserResponse.getUsersFullName());
                         sendMail = true;
-                    } else if(optionalEntity.get().getUserStatus() ==  1){
+                    } else if (optionalEntity.get().getUserStatus() == 1) {
                         passwordStatus = true;
-                        logger.info("user : {} has  been verified,trying to login...",jpaUserResponse.getUsersFullName());
+                        logger.info("user : {} has  been verified,trying to login...", jpaUserResponse.getUsersFullName());
 
                         sendMail = false;
-                    }else {
+                        if (optionalEntity.get().getPasswordUpdateStatus() == 0) {
+                            publisher.publishEvent(VerifyUpdatePasswordEvent
+                                    .builder()
+                                    .emailFrom("softwareaa65@gmail.com")
+                                    .emailTo(jpaUserResponse.getUsersEmailAddress())
+                                    .name(jpaUserResponse.getUsersFullName())
+                                    .token(jpaUserResponse.getToken())
+                                    .build()
+                            );
+                        }
+                    } else {
 
                         var errorMessage = "log in failed due to invalid user status ";
                         var resolveIssue = "Contact AA Administrator";
@@ -456,10 +470,9 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
 
                     logger.info("user with email {} successfully logged in using jpa data : {}", loginRequest().getUsersEmailAddress(), jpaUserResponse);
 
-                        redisService.set(encrypt, jpaUserResponse, 1L, TimeUnit.HOURS);
+                    redisService.set(encrypt, jpaUserResponse, 1L, TimeUnit.HOURS);
 
-                        logger.info("cached login data : {}", redisService.get(encrypt, UsersResponse.class));
-
+                    logger.info("cached login data : {}", redisService.get(encrypt, UsersResponse.class));
 
 
                     return List.of(jpaUserResponse);
@@ -507,30 +520,73 @@ private List<UsersResponse>  mapToResponse(List<Users> list){
                 case "getUsersById" -> this.findUserById();
                 case "userLogin" -> this.login();
                 case "userUpdatePassword" -> this.updateUsersPassword();
-                case "verifyUser"-> this.verifyCustomer();
+                case "verifyUser" -> this.verifyCustomer();
+                case "passwordRollBack" -> this.passwordRollBack();
+                case "verifyPasswordUpdate" -> this.verifyPasswordUpdate();
                 default -> throw new ServiceHandlerException("Failed execute service due to incorrect service string");
             };
         else
             return null;
     }
 
+    private FindByEmailRequest findByEmailRequest;
+
+    private List<UsersResponse> passwordRollBack() {
+        Optional<Users> user = usersRepository.findByUserEmailAddress(findByEmailRequest.getEmailAddress());
+
+        if (user.isPresent()) {
+            var foundUser = user.get();
+
+            foundUser.setUserPassword(foundUser.getPreviousPassword());
+            return mapToResponse(List.of(usersRepository.save(foundUser)));
+        } else {
+            var errorMessage = "user with email:" +findByEmailRequest.getEmailAddress() + " not found";
+            var resolveIssue = "Please provide correct email";
+            throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+
+        }
+
+
+    }
+
+    private List<UsersResponse> verifyPasswordUpdate() {
+        Optional<Users> user = usersRepository.findByToken(findByTokenRequest.getToken());
+        if (user.isPresent()) {
+            var verifiedUser = user.get();
+            verifiedUser.setPasswordUpdateStatus((short) 1);
+            verifiedUser.setPreviousPassword(verifiedUser.getPassword());
+            verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
+
+            logger.info("User : {} has been successfully verified", verifiedUser.getUserFullName());
+            redisService.delete(verifiedUser.getUserEmailAddress());
+
+            return mapToResponse(List.of(usersRepository.save(verifiedUser)));
+
+        } else {
+            var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
+            var resolveIssue = "Please log in again to get new token in your mail";
+            throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
+        }
+    }
+
     @Transactional
     private List<UsersResponse> verifyCustomer() {
-       Optional<Users> user = usersRepository.findByToken(findByTokenRequest.getToken());
+        Optional<Users> user = usersRepository.findByToken(findByTokenRequest.getToken());
 
-       if(user.isPresent()){
-           var verifiedUser = user.get();
-           verifiedUser.setUserStatus((short)1);
-           verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
-logger.info("User : {} has been successfully verified", verifiedUser.getUserFullName());
-           redisService.delete(verifiedUser.getUserEmailAddress());
+        if (user.isPresent()) {
+            var verifiedUser = user.get();
+            verifiedUser.setUserStatus((short) 1);
+            verifiedUser.setPasswordUpdateStatus((short) 1);
+            verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
+            logger.info("User : {} has been successfully verified", verifiedUser.getUserFullName());
+            redisService.delete(verifiedUser.getUserEmailAddress());
 
-           return mapToResponse(List.of(usersRepository.save(verifiedUser)));
-       }else{
-           var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
-           var resolveIssue = "Please log in again to get new token in your mail";
-           throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
-       }
+            return mapToResponse(List.of(usersRepository.save(verifiedUser)));
+        } else {
+            var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
+            var resolveIssue = "Please log in again to get new token in your mail";
+            throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
+        }
     }
 
 
