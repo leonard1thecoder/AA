@@ -2,6 +2,7 @@ package com.users.application.controllers;
 
 
 import com.users.application.dtos.FindByTokenRequest;
+import com.users.application.dtos.RollBackPasswordRequest;
 import com.users.application.executor.ServiceConcurrentExecutor;
 import com.users.application.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,22 @@ public class VerifyCustomerController {
         FindByTokenRequest request = new FindByTokenRequest(qTokq1);
         UsersService.setFindByTokenRequest(request);
         UsersService.setServiceHandler("verifyUser");
+        var response = serviceConcurrentExecutor.buildServiceExecutor(service);
+/*
+I need to create update
+ */
+        if(response.size() == 1){
+            return "redirect:https://www.example.com";
+        }else{
+            return null;
+        }
+    }
+
+    @GetMapping("/passwordRollBack")
+    public String rollbackPassword(@RequestParam String qTokq1,@RequestParam String emailAddress){
+        RollBackPasswordRequest request = new RollBackPasswordRequest(qTokq1,emailAddress);
+        UsersService.setRollBackPasswordRequest(request);
+        UsersService.setServiceHandler("passwordRollBack");
         var response = serviceConcurrentExecutor.buildServiceExecutor(service);
 /*
 I need to create update
