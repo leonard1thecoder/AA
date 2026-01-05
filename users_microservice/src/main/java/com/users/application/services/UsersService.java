@@ -78,6 +78,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
         UsersService.authenticationManager = authenticationManager;
     }
 
+    @Setter
+   private  static RollBackPasswordRequest rollBackPasswordRequest;
     public UsersFullNameRequest usersFullNameRequest() {
         return usersFullNameRequest;
     }
@@ -278,6 +280,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 .cellphoneNo(s.getUserCellphoneNo())
                 .privileges(s.getFk_privilege_id())
                 .token(s.getToken())
+                .updatePasswordStatus(s.getPasswordUpdateStatus())
                 .build()).toList();
 
     }
@@ -371,7 +374,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 
     }
 
-    private boolean passwordStatus, sendMail;
+    private boolean passwordStatus;
 
 
     @Transactional
@@ -386,6 +389,10 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 logger.info("redis executing...");
                 jpaUserResponse = null;
                 if (redisUserResponse.getUsersStatus() == 0) {
+                    var errorMessage = "User already got email to verify account";
+                    var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
+                    throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
+                }else  if (redisUserResponse.getUpdatePasswordStatus() == 0) {
                     var errorMessage = "User already got email to verify account";
                     var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
                     throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
@@ -430,12 +437,10 @@ public class UsersService implements Execute<List<UsersResponse>> {
                         );
 
                         logger.info("user : {} has not been verified, email sent to verify customer", jpaUserResponse.getUsersFullName());
-                        sendMail = true;
                     } else if (optionalEntity.get().getUserStatus() == 1) {
                         passwordStatus = true;
                         logger.info("user : {} has  been verified,trying to login...", jpaUserResponse.getUsersFullName());
 
-                        sendMail = false;
                         if (optionalEntity.get().getPasswordUpdateStatus() == 0) {
                             publisher.publishEvent(VerifyUpdatePasswordEvent
                                     .builder()
@@ -529,18 +534,27 @@ public class UsersService implements Execute<List<UsersResponse>> {
             return null;
     }
 
-    private FindByEmailRequest findByEmailRequest;
 
+@Transactional
     private List<UsersResponse> passwordRollBack() {
-        Optional<Users> user = usersRepository.findByUserEmailAddress(findByEmailRequest.getEmailAddress());
+        Optional<Users> user = usersRepository.findByUserEmailAddress(rollBackPasswordRequest.getEmailAddress());
 
         if (user.isPresent()) {
-            var foundUser = user.get();
+            Optional<Users> userByToken = usersRepository.findByToken(rollBackPasswordRequest.getToken());
 
-            foundUser.setUserPassword(foundUser.getPreviousPassword());
-            return mapToResponse(List.of(usersRepository.save(foundUser)));
+            if(userByToken.isPresent()) {
+                var foundUser = user.get();
+                foundUser.setUserPassword(foundUser.getPreviousPassword());
+                foundUser.setPasswordUpdateStatus((short)1);
+                return mapToResponse(List.of(usersRepository.save(foundUser)));
+            }else{
+                var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer rollback has expired");
+                var resolveIssue = "Please log in again to get new token in your mail";
+                throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
+
+            }
         } else {
-            var errorMessage = "user with email:" +findByEmailRequest.getEmailAddress() + " not found";
+            var errorMessage = "user with email:" +rollBackPasswordRequest.getEmailAddress() + " not found";
             var resolveIssue = "Please provide correct email";
             throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
 
