@@ -31,9 +31,9 @@ public class Users implements UserDetails {
     private String userEmailAddress;
      
     @Column(columnDefinition = "TEXT",nullable = false)
-    private String userPassword;
+    private String userPassword,previousPassword;
     @Column(nullable = false)
-    private Short userStatus, userAge;
+    private Short userStatus, userAge,passwordUpdateStatus;
     @Column(nullable = false, unique = true)
     private String userFullName;
     @Column(nullable = false)
