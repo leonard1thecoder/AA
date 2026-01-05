@@ -16,7 +16,7 @@ public class UsersResponse implements ResponseContract,java.io.Serializable {
     private Long id;
     private Integer privileges;
     private String usersIdentityNo;
-    private Short usersStatus,usersAge;
+    private Short usersStatus,usersAge,updatePasswordStatus;
     private String usersFullName,cellphoneNo, usersEmailAddress, usersRegistrationDate, usersModifiedDate;
     private String  token;
 
