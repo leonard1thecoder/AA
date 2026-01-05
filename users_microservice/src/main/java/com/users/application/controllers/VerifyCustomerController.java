@@ -39,4 +39,21 @@ public class VerifyCustomerController {
     }
 
 
+    @GetMapping("/verify-password-update")
+    public String verifyPasswordUpdate(@RequestParam String qTokq1) {
+        FindByTokenRequest request = new FindByTokenRequest(qTokq1);
+        UsersService.setFindByTokenRequest(request);
+        UsersService.setServiceHandler("verifyUser");
+        var response = serviceConcurrentExecutor.buildServiceExecutor(service);
+/*
+I need to create update
+ */
+        if(response.size() == 1){
+            return "redirect:https://www.example.com";
+        }else{
+            return null;
+        }
+    }
+
+
 }
