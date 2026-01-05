@@ -31,15 +31,18 @@ public class Users implements UserDetails {
     private String userEmailAddress;
      
     @Column(columnDefinition = "TEXT",nullable = false)
-    private String userPassword,previousPassword;
+    private String userPassword;
+    @Column(columnDefinition = "TEXT")
+    private String previousPassword;
     @Column(nullable = false)
-    private Short userStatus, userAge,passwordUpdateStatus;
+    private Short userStatus, userAge;
     @Column(nullable = false, unique = true)
+
     private String userFullName;
     @Column(nullable = false)
 
     private String userRegistrationDate, userModifiedDate;
-
+    private Short passwordUpdateStatus;
     @Column(columnDefinition = "TEXT")
     private String token;
 
