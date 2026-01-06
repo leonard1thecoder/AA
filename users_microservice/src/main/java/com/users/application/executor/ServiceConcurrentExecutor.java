@@ -1,8 +1,9 @@
 package com.users.application.executor;
 
 
-
+import com.users.application.dtos.UsersResponse;
 import com.users.application.exceptions.*;
+import com.users.application.services.UsersService;
 import com.utils.application.Execute;
 import com.utils.application.ResponseContract;
 import com.utils.application.controllerAdvice.ExecutorControllerAdvice;
@@ -22,7 +23,7 @@ import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
 import static com.utils.application.ExceptionHandlerReporter.*;
 
 public class ServiceConcurrentExecutor {
-Logger logger = LoggerFactory.getLogger(ServiceConcurrentExecutor.class);
+    Logger logger = LoggerFactory.getLogger(ServiceConcurrentExecutor.class);
     @Getter
     private final static ServiceConcurrentExecutor instance = new ServiceConcurrentExecutor();
     private final ExecutorService executorService;
@@ -30,8 +31,28 @@ Logger logger = LoggerFactory.getLogger(ServiceConcurrentExecutor.class);
     private Execute service;
 
     private ServiceConcurrentExecutor() {
+
         int threads = Runtime.getRuntime().availableProcessors();
         this.executorService = Executors.newFixedThreadPool(threads);
+    }
+
+    private ExecutorService setThreadName(Long user_id) {
+        ThreadFactory threadFactory = new ThreadFactory() {
+            private final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = defaultFactory.newThread(r);
+                if (UsersService.serviceHandler.equals("getAllUsers"))
+                    t.setName("AA-" + UsersService.serviceHandler + "-Administrator"); // "AA" prefix for Alcohol Agent
+                else
+                    t.setName("AA-" + UsersService.serviceHandler + "-user_id:" + user_id); // "AA" prefix for Alcohol Agent
+
+                return t;
+            }
+        };
+        var threads = Runtime.getRuntime().availableProcessors();
+        return Executors.newFixedThreadPool(threads, threadFactory);
     }
 
     public List<? extends ResponseContract> buildServiceExecutor() {
@@ -40,24 +61,25 @@ Logger logger = LoggerFactory.getLogger(ServiceConcurrentExecutor.class);
         try {
             return future.get(15, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            var errorMessage = ExecutorControllerAdvice.setMessage("Interruption occurred while executing service : " + service +" reason "+ e.getMessage());
+            var errorMessage = ExecutorControllerAdvice.setMessage("Interruption occurred while executing service : " + service + " reason " + e.getMessage());
             ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
             throw new ServiceInterruptedException(errorMessage);
         } catch (ExecutionException e) {
-            var errorMessage = ExecutorControllerAdvice.setMessage("Execution failed while executing service : " + service +" reason "+ e.getMessage());
+            var errorMessage = ExecutorControllerAdvice.setMessage("Execution failed while executing service : " + service + " reason " + e.getMessage());
             ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
             throw new ServiceExecutionException(errorMessage);
         } catch (TimeoutException e) {
-            var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service +" reason service waited 15 seconds");
+            var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service + " reason service waited 15 seconds");
             ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
             throw new ServiceTimeoutException(errorMessage);
         }
     }
 
-    public List<? extends ResponseContract> buildServiceExecutor(Execute service) {
+    public List<? extends ResponseContract> buildServiceExecutor(UsersService service) {
         var retryTime = 3;
         var retryAttempt = 0;
-        Future<List<? extends ResponseContract>> future = this.executorService.submit(service);
+        var user_id = service.call().get(0).getId();
+        Future<List<? extends ResponseContract>> future = this.setThreadName(user_id).submit(service::call);
 
         while (retryAttempt < retryTime) {
             try {
@@ -109,14 +131,14 @@ Logger logger = LoggerFactory.getLogger(ServiceConcurrentExecutor.class);
                 throw throwExceptionAndReport(new ConcurrentExecutionException("Unknown Exception occurred trace :  " + e.getMessage()), "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");
             } catch (TimeoutException e) {
                 retryAttempt++;
-                if(retryAttempt >= retryTime) {
+                if (retryAttempt >= retryTime) {
                     var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service + " reason service waited 60 seconds");
                     ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
                     throw throwExceptionAndReport(new ServiceTimeoutException(errorMessage), getMessage(), getResolveIssueDetails());
                 }
 
 
-                logger.info("service has failed due to time out, retrying {}:",retryAttempt);
+                logger.info("service has failed due to time out, retrying {}:", retryAttempt);
 
                 try {
                     Thread.sleep(5000);
