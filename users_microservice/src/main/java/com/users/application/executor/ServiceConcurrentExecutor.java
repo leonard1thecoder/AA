@@ -78,7 +78,11 @@ public class ServiceConcurrentExecutor {
         var retryAttempt = 0;
         var user_id = service.call().get(0).getId();
         Future<List<? extends ResponseContract>> future = this.setThreadName().submit(() -> {
+          if(!UsersService.serviceHandler.equals("getAllUsers"))
             MDC.put("taskName", "User_id:"+user_id);
+          else
+              MDC.put("taskName", "ADMIN");
+
             try {
                 return service.call();
             } finally {
