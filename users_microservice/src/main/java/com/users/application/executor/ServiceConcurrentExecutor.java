@@ -15,6 +15,7 @@ import com.utils.application.globalExceptions.ServiceTimeoutException;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -36,17 +37,14 @@ public class ServiceConcurrentExecutor {
         this.executorService = Executors.newFixedThreadPool(threads);
     }
 
-    private ExecutorService setThreadName(Long user_id) {
+    private ExecutorService setThreadName() {
         ThreadFactory threadFactory = new ThreadFactory() {
             private final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
 
             @Override
             public Thread newThread(Runnable r) {
                 Thread t = defaultFactory.newThread(r);
-                if (UsersService.serviceHandler.equals("getAllUsers"))
-                    t.setName("AA-" + UsersService.serviceHandler + "-Administrator"); // "AA" prefix for Alcohol Agent
-                else
-                    t.setName("AA-" + UsersService.serviceHandler + "-user_id:" + user_id); // "AA" prefix for Alcohol Agent
+                t.setName("AA-" + UsersService.serviceHandler  ); // "AA" prefix for Alcohol Agent
 
                 return t;
             }
@@ -79,7 +77,14 @@ public class ServiceConcurrentExecutor {
         var retryTime = 3;
         var retryAttempt = 0;
         var user_id = service.call().get(0).getId();
-        Future<List<? extends ResponseContract>> future = this.setThreadName(user_id).submit(service::call);
+        Future<List<? extends ResponseContract>> future = this.setThreadName().submit(() -> {
+            MDC.put("taskName", "User_id:"+user_id);
+            try {
+                return service.call();
+            } finally {
+                MDC.remove("taskName");
+            }
+        });
 
         while (retryAttempt < retryTime) {
             try {
