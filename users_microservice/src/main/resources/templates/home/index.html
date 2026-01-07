@@ -39,6 +39,7 @@ https://templatemo.com/tm-606-string-master
   <!-- Hero Section -->
   <!-- TIP: To enable full-screen hero, uncomment "min-height: 100vh" in the .hero CSS -->
   <section class="hero">
+
     <div class="hero-container">
       <div class="hero-content">
 
@@ -73,7 +74,18 @@ https://templatemo.com/tm-606-string-master
 
       <!-- Interactive Guitar -->
       <div class="guitar-wrapper">
-          <img class="logo-img2" src="https://raw.githubusercontent.com/leonard1thecoder/AA/main/users_microservice/src/main/resources/templates/images/logo.png" alt="Alcohol Agent Logo" />
+          <div class="slider">
+              <div class="slides">
+                  <img src="images/fingerstyle-expert.jpg" alt="Picture 1">
+                  <img src="images/acoustic-specialist.jpg" alt="Picture 2">
+                  <img src="images/blues-rock-guitar.jpg" alt="Picture 3">
+                  <img src="images/music-theory-instructor.jpg" alt="Picture 4">
+              </div>
+
+              <button class="prev" aria-label="Previous">&#10094;</button>
+              <button class="next" aria-label="Next">&#10095;</button>
+
+          </div>
       </div>
     </div>
   </section>
@@ -347,6 +359,48 @@ https://templatemo.com/tm-606-string-master
     </div>
   </section>
 
+  <section class="testimonials" id="testimonials1">
+      <div class="section-container">
+          <div class="section-header">
+              <h2 class="section-title">Contact Us</h2>
+              <div class="section-label">Have inquires ? Please fill in your inquiries below:</div>
+
+          </div>
+          <div  class="form-container">
+
+              <form class="contact-form" id="contactForm" novalidate>
+
+                  <label for="name">Name:</label>
+                  <input type="text" id="name" name="name" placeholder="Enter your name" required>
+
+                  <label for="surname">Surname:</label>
+                  <input type="text" id="surname" name="surname" placeholder="Enter your surname" required>
+
+                  <label for="email">Email Address:</label>
+                  <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+
+                  <label for="message">Message:</label>
+                  <textarea id="message" name="message" rows="4" placeholder="Type your message here..." required></textarea>
+
+
+                  <button type="submit">Submit</button>
+              </form>
+          </div>
+
+          <div id="popup" class="popup">
+              <div class="popup-content">
+                  <h3 id="popupTitle">Enquiry successfully submitted</h3>
+                  <p id="popupMessage">Thank you for reaching out. We’ll get back to you soon!</p>
+                  <button id="okBtn" class="ok-btn">OK</button>
+              </div>
+          </div>
+
+
+
+
+      </div>
+  </section>
+
   <!-- Footer -->
   <footer>
     <div class="footer-container">
@@ -393,6 +447,10 @@ https://templatemo.com/tm-606-string-master
     </div>
   </footer>
 
-<script src="templatemo-606-string-scripts.js"></script>
+
+
+  <script src="templatemo-606-string-scripts.js"></script>
+
+
 </body>
 </html>
