@@ -36,6 +36,170 @@ body {
 	color: var(--text-primary);
 	line-height: 1.6;
 }
+/* Centering via container */
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 46vh; /* full viewport height */
+}
+
+
+.contact-form {
+
+  background-color: forestgreen;
+  border: 2px solid orange;
+  padding: 20px;
+  border-radius: 8px;
+  width: 550px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.contact-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.contact-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: white;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  height:57px;
+  font-size:20px;
+}
+
+.contact-form button {
+  width: 100%;
+  padding: 10px;
+  background-color: orange;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 26px;
+  cursor: pointer;
+  height:63px;
+}
+
+.contact-form button:hover {
+  background-color: darkorange;
+}
+
+/* Popup overlay */
+.popup {
+  display: none; /* hidden by default */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); /* semi-transparent background */
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Popup box */
+.popup-content {
+  background: #ffffff;
+  border: 3px solid orange;
+  border-radius: 8px;
+  padding: 20px;
+  width: 500px;
+    height: 200px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  color: forestgreen;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+}
+
+.input-error {
+  border: 2px solid red !important;
+}
+
+
+.ok-btn {
+  margin-top: 20px;
+  padding: 12px 30px;
+  background: orange;             /* vibrant orange background */
+  border: none;
+  border-radius: 25px;            /* pill-shaped button */
+  color: white;                   /* white text */
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2); /* subtle shadow */
+  transition: all 0.3s ease;      /* smooth hover effect */
+}
+
+.ok-btn:hover {
+  background: darkorange;         /* darker orange on hover */
+  transform: scale(1.05);         /* slight zoom effect */
+}
+
+.ok-btn:active {
+  transform: scale(0.95);         /* press-down effect */
+}
+/* Slider viewport */
+.slider {
+  position: relative;
+    height: 387px;
+    width: 526px;       /* adjust as needed */
+  overflow: hidden;    /* show only one slide at a time */
+  margin: auto;
+  border: 3px solid orange;
+  border-radius: 8px;
+}
+
+/* Slides strip */
+.slides {
+  display: flex;                         /* lay images in a row */
+  transition: transform 1s ease-in-out;  /* smooth slide */
+}
+
+/* Each image occupies exactly one viewport */
+.slides img {
+  flex: 0 0 100%;        /* each slide = 100% of slider width */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* fill nicely without distortion */
+  display: block;         /* avoid inline spacing issues */
+}
+
+/* Navigation buttons */
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: green;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+
+.prev:hover, .next:hover {
+  background: darkgreen;
+}
 
 /* Navigation */
 nav {
@@ -267,13 +431,14 @@ width: 750px;
 
 .stat-label {
 	font-size: 0.85rem;
-	color: var(--text-muted);
+	color: black;
 }
 
 /* Guitar Section */
 .guitar-wrapper {
 	position: relative;
 	z-index: 1;
+	height:387px;
 }
 
 .guitar-card {
@@ -500,6 +665,11 @@ width: 750px;
 	100% {
 		transform: scale(1);
 	}
+}
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border: 2px solid orange;   /* green border when active */
+  outline: none;             /* remove default browser outline */
 }
 
 .fret-marker {
@@ -1130,6 +1300,7 @@ width: 750px;
 footer {
 	padding: 4rem 2rem 2rem;
 	border-top: 1px solid var(--border);
+	background:forestgreen;
 }
 
 .footer-container {
@@ -1223,7 +1394,8 @@ footer {
 	.guitar-wrapper {
 		order: 0;
 		max-width: 500px;
-		margin: 0 auto;
+		margin: 63px 64px;
+
 	}
 
 	.hero-description {
@@ -1271,6 +1443,88 @@ footer {
 	.nav-cta {
 		display: none;
 	}
+
+	.logo-img2{
+            width: 316px;
+            height: 266px;
+    	 display: inline-block;
+
+    }
+
+    .slider {
+      position: relative;
+        height: 387px;
+        width: 377px;       /* adjust as needed */
+      overflow: hidden;    /* show only one slide at a time */
+      margin: auto;
+      border: 3px solid orange;
+      border-radius: 8px;
+    }
+
+    .slides{
+    height:383px;
+    }
+
+    /* Centering via container */
+    .form-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 85vh; /* full viewport height */
+      margin: -162px 0px;
+    }
+
+
+    .contact-form {
+
+      background-color: forestgreen;
+      border: 2px solid orange;
+      padding: 20px;
+      border-radius: 8px;
+      width: 397px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .contact-form h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .contact-form label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      height:51px;
+              font-size: 16px;
+    }
+
+    .contact-form button {
+      width: 100%;
+      padding: 10px;
+      background-color: orange;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .contact-form button:hover {
+      background-color: darkorange;
+    }
+
 
 	.mobile-menu-btn {
 		display: block;
