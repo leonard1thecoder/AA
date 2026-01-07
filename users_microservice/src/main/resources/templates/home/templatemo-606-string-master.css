@@ -357,6 +357,7 @@ width: 750px;
 	margin-bottom: 1.5rem;
 	letter-spacing: -0.02em;
 	    color: green;
+	    margin: 32px 0px;
 
 }
 
@@ -1380,6 +1381,7 @@ footer {
 	cursor: pointer;
 }
 
+
 /* Responsive */
 @media (max-width: 1024px) {
 	.hero-container {
@@ -1451,6 +1453,32 @@ footer {
 
     }
 
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        width: 262px;
+        margin: 0px 107px;
+    }
+    .btn-secondary{
+    background: transparent;
+    color: var(--text-primary);
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    width: 262px;
+    margin: 0px 107px;
+}
     .slider {
       position: relative;
         height: 387px;
@@ -1459,6 +1487,7 @@ footer {
       margin: auto;
       border: 3px solid orange;
       border-radius: 8px;
+      margin: 0px -25px;
     }
 
     .slides{
@@ -1584,7 +1613,10 @@ footer {
 	}
 
 	.hero h1 {
-		font-size: 2rem;
+		font-size: 26px;
+		        margin: 2px 33px;
+                width: 379px;
+
 	}
 
 	.hero-buttons {
@@ -1642,4 +1674,60 @@ footer {
 		gap: 1rem;
 		text-align: center;
 	}
+}
+
+@media (max-width: 450px) {
+	.hero-description {
+		        margin: 1px -16px 2rem;
+                font-size: 10px;
+                width: 360px;
+	}
+
+	    .hero h1 {
+            font-size: 17px;
+            margin: 0px -29px;
+            width: 379px;
+        }
+
+        .btn-primary {
+                background: var(--accent);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                text-decoration: none;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: all 0.2s;
+                width: 262px;
+                margin: 0px 21px;
+            }
+
+                .btn-secondary {
+                    background: transparent;
+                    color: var(--text-primary);
+                    padding: 1rem 2rem;
+                    border-radius: 10px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    border: 1px solid var(--border);
+                    transition: all 0.2s;
+                    width: 262px;
+                    margin: 0px 21px;
+                }
+        .guitar-wrapper {
+                order: 0;
+                max-width: 500px;
+                margin: 56px -88px;
+            }
+.slider{
+            position: relative;
+                    height: 387px;
+                    width: 328px;
+                    overflow: hidden;
+                    margin: auto;
+                    border: 3px solid orange;
+                    border-radius: 8px;
+        }            margin: 0px -25px;
 }
