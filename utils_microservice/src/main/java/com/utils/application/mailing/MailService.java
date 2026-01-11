@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -51,5 +50,31 @@ public class MailService {
 
         logger.info("email was sent successfully to {}",to);
     }
+
+    public void sendSubmitEnquiryEmail(String to, String subject, String from, String htmlFileName, String name,String message) throws MessagingException {
+
+        Context context = new Context();
+        context.setVariable("name", name);
+        context.setVariable("email", to);
+        context.setVariable("message", message);
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+        String htmlContent = templateEngine.process(htmlFileName, context);
+
+
+        // true = multipart message
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+
+        helper.setFrom(from);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(htmlContent, true);
+        //helper.addInline("logoImage", new ClassPathResource("/static/images/logo.png"));
+        mailSender.send(mimeMessage);
+
+        logger.info("email was sent successfully to {}",to);
+    }
+
 
 }
