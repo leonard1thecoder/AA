@@ -1,8 +1,12 @@
 package com.users.application.executor;
 
 
+import com.users.application.dtos.ContactFormRequest;
+import com.users.application.dtos.ContactUsResponse;
 import com.users.application.dtos.UsersResponse;
+import com.users.application.entities.ContactForm;
 import com.users.application.exceptions.*;
+import com.users.application.services.ContactFormService;
 import com.users.application.services.UsersService;
 import com.utils.application.Execute;
 import com.utils.application.ResponseContract;
@@ -37,15 +41,19 @@ public class ServiceConcurrentExecutor {
         this.executorService = Executors.newFixedThreadPool(threads);
     }
 
-    private ExecutorService setThreadName() {
+    private ExecutorService setThreadName(boolean isContactForm) {
         ThreadFactory threadFactory = new ThreadFactory() {
             private final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
 
             @Override
             public Thread newThread(Runnable r) {
                 Thread t = defaultFactory.newThread(r);
-                t.setName("AA-" + UsersService.serviceHandler  ); // "AA" prefix for Alcohol Agent
 
+                if(isContactForm){
+ t.setName("Contact form");
+              }else {
+                    t.setName("AA-" + UsersService.serviceHandler); // "AA" prefix for Alcohol Agent
+                }
                 return t;
             }
         };
@@ -73,11 +81,29 @@ public class ServiceConcurrentExecutor {
         }
     }
 
+    public String buildContactFormServiceExecutor(ContactFormService service, ContactFormRequest request, boolean  isList) {
+
+        Future<String> future = this.setThreadName(true).submit(() -> service.save(request));
+        try {
+            return future.get(15, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            var errorMessage = ExecutorControllerAdvice.setMessage("Interruption occurred while executing service : " + service + " reason " + e.getMessage());
+            ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
+            throw new ServiceInterruptedException(errorMessage);
+        } catch (ExecutionException e) {
+                throw throwExceptionAndReport(new InvalidArgumentException(getMessage()), getMessage(), getResolveIssueDetails());
+        } catch (TimeoutException e) {
+            var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service + " reason service waited 15 seconds");
+            ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
+            throw new ServiceTimeoutException(errorMessage);
+        }
+    }
+
     public List<? extends ResponseContract> buildServiceExecutor(UsersService service) {
         var retryTime = 3;
         var retryAttempt = 0;
         var user_id = service.call().get(0).getId();
-        Future<List<? extends ResponseContract>> future = this.setThreadName().submit(() -> {
+        Future<List<? extends ResponseContract>> future = this.setThreadName(false).submit(() -> {
           if(!UsersService.serviceHandler.equals("getAllUsers"))
             MDC.put("taskName", "User_id:"+user_id);
           else
