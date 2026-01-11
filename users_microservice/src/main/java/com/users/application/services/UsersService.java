@@ -134,16 +134,13 @@ public class UsersService implements Execute<List<UsersResponse>> {
      */
     @Transactional
     private List<UsersResponse> registerUsers() {
-
         var request = this.usersRegisterRequest();
         if (request == null) {
             var errorMessage = "Users registration request is  null";
             var resolveIssue = "Some of your data is registered, contact AA for verification";
             throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
         } else {
-
             Optional<Users> entitiesList;
-
             entitiesList = usersRepository.findByUserCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo()));
 
             logger.info("entities list : {} ", entitiesList);
