@@ -290,4 +290,72 @@ public class UsersFieldsDataValidator {
         }
         return false;
     }
+
+    public static boolean isValidEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+
+        // Must contain '@'
+        int atIndex = email.indexOf('@');
+        if (atIndex < 1) { // '@' cannot be first
+            return false;
+        }
+
+        // Must contain '.' after '@'
+        int dotIndex = email.indexOf('.', atIndex);
+        if (dotIndex < atIndex + 2) { // need at least one char between '@' and '.'
+            return false;
+        }
+
+        // '.' cannot be the last character
+        if (dotIndex == email.length() - 1) {
+            return false;
+        }
+
+        // No spaces allowed
+        if (email.contains(" ")) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    public static boolean isValidName(String name) {
+        if (name == null || name.isEmpty()) {
+            return false;
+        }
+
+        // Trim spaces
+        name = name.trim();
+
+        // Must be at least 2 characters
+        if (name.length() < 2) {
+            return false;
+        }
+
+        // No digits allowed
+        for (char c : name.toCharArray()) {
+            if (Character.isDigit(c)) {
+                return false;
+            }
+        }
+
+        // No special symbols except space or hyphen
+        for (char c : name.toCharArray()) {
+            if (!Character.isLetter(c) && c != ' ' && c != '-') {
+                return false;
+            }
+        }
+
+        // Must start with a letter
+        if (!Character.isLetter(name.charAt(0))) {
+            return false;
+        }
+
+        return true;
+    }
+
+
 }
