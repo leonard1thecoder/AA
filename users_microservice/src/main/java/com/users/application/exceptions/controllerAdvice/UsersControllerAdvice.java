@@ -1,5 +1,6 @@
 package com.users.application.exceptions.controllerAdvice;
 
+import com.users.application.dtos.ContactUsResponse;
 import com.users.application.exceptions.*;
 import com.utils.application.ExceptionHandlerReporter;
 import com.utils.application.globalExceptions.errorResponse.ErrorResponse;
@@ -7,9 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @ControllerAdvice
@@ -21,6 +26,13 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
         var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InvalidArgumentException.class)
+    public ResponseEntity<ContactUsResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
+        var errorResponse = new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage());
+        logger.warn("Error response : {}, error code : {}", errorResponse,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(new ContactUsResponse("Failure",errorResponse.getResolveIssueDetails()), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(IdentityNoIsEmptyException.class)

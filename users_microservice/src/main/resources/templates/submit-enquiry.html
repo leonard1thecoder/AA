@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="EN">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify E-mail</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f8f9fa;">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#fff;border-radius:8px;overflow:hidden;">
+    <tr>
+        <td style="background-color:white;
+               color:orange;
+               text-align:center;
+               padding:20px;
+               border:2px solid orange;">
+            <img src="https://raw.githubusercontent.com/leonard1thecoder/AA/main/users_microservice/src/main/resources/templates/images/logo.png" alt="Alcohol Agent Logo" style="max-width:150px;height:auto;"/>
+            <h1 style="margin-top:10px;">Alcohol Agent welcomes you</h1>
+        </td>
+    </tr>
+
+    <tr>
+        <td style="padding:20px;">
+            <p>Hi Sizolwakhe Leonard Mthimunye</span>,</p>
+
+            I
+            <p>
+                I trust you're well, I have enquiry about <b th:text="${email}">message</b>>
+            </p>
+
+            <p> Your  response will mean a lot</p>
+
+            <p>Kind regards,</p>
+            <strong style="color:Orange"><b th:text="${name}">name</b></strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="background:#f1f1f1;padding:10px;text-align:center;font-size:12px;color:#555;">
+            Need help? Visit <a href="https://yourapp.com/support">Support</a> | © 2026 Alcohol Agent
+        </td>
+    </tr>
+</table>
+</body>
+</html>
