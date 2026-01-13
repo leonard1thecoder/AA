@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reset Password</title>
+    <link href="../../static/css/login-style.css" rel="stylesheet" />
+</head>
+<body>
+<main class="wrap">
+    <section class="card" role="form" aria-labelledby="reset-title">
+        <div class="brand">
+            <span class="dot" aria-hidden="true"></span>
+            <h1>Glow</h1>
+        </div>
+
+        <h2 id="reset-title" class="title">Reset Password</h2>
+        <p class="subtitle">Enter your new password below to complete the reset.</p>
+
+        <form id="resetForm" novalidate>
+            <div class="field">
+                <label class="label" for="password">New Password</label>
+                <input class="input" type="password" id="password" name="password" placeholder="New password" required minlength="6" />
+                <div id="passwordError" class="error-text"></div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="confirm">Confirm Password</label>
+                <input class="input" type="password" id="confirm" name="confirm" placeholder="Confirm password" required minlength="6" />
+                <div id="confirmError" class="error-text"></div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" type="submit">Update Password</button>
+            </div>
+
+            <div class="or">or</div>
+
+            <button class="btn btn-secondary" type="button" onclick="window.location.href='login.html'">
+                Back to Login
+            </button>
+        </form>
+    </section>
+</main>
+<script src="../../static/js/reset.js"></script>
+</body>
+</html>
