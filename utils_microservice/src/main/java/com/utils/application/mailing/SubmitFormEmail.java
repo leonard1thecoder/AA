@@ -31,7 +31,7 @@ public class SubmitFormEmail {
 
                 logger.info(" email : {} is registered as Alcohol agent sending mail",event.getEmailTo());
 
-                mailService.sendSubmitEnquiryEmail(event.getEmailTo(), event.getSubject(), event.getEmailFrom(), "submit-enquiry", event.getName(), event.getMessage());
+                mailService.sendSubmitEnquiryEmail( event.getSubject(), event.getEmailFrom(), "submit-enquiry", event.getName(), event.getMessage());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
