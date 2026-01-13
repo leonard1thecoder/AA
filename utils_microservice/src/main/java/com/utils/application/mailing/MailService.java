@@ -51,11 +51,11 @@ public class MailService {
         logger.info("email was sent successfully to {}",to);
     }
 
-    public void sendSubmitEnquiryEmail(String to, String subject, String from, String htmlFileName, String name,String message) throws MessagingException {
+    public void sendSubmitEnquiryEmail( String subject, String messageFrom, String htmlFileName, String name,String message) throws MessagingException {
 
         Context context = new Context();
         context.setVariable("name", name);
-        context.setVariable("email", to);
+        context.setVariable("email",  messageFrom);
         context.setVariable("message", message);
         MimeMessage mimeMessage = mailSender.createMimeMessage();
 
@@ -66,14 +66,14 @@ public class MailService {
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
 
-        helper.setFrom(from);
-        helper.setTo(to);
+        helper.setFrom("softwareaa65@gmail.com");
+        helper.setTo("leonard1thecoder@gmail.com");
         helper.setSubject(subject);
         helper.setText(htmlContent, true);
         //helper.addInline("logoImage", new ClassPathResource("/static/images/logo.png"));
         mailSender.send(mimeMessage);
 
-        logger.info("email was sent successfully to {}",to);
+        logger.info("email was sent successfully from {}",messageFrom);
     }
 
 
