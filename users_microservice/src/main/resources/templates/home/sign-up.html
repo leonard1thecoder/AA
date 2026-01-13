@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign Up</title>
+    <link href="../../static/css/login-style.css" rel="stylesheet" />
+</head>
+<body>
+<main class="wrap">
+    <section class="card" role="form" aria-labelledby="signup-title">
+        <div class="brand">
+            <span class="dot" aria-hidden="true"></span>
+            <h1>Glow</h1>
+        </div>
+
+        <div class="links center-link">
+            <a href="login.html" class="link">Already have an account? Log in</a>
+        </div>
+
+        <h2 id="signup-title" class="title">Create Account</h2>
+        <p class="subtitle">Fill in your details to register.</p>
+
+        <form id="signupForm" novalidate>
+            <!-- Privilege ID -->
+            <div class="field">
+                <label class="label" for="privilege">Privilege ID</label>
+                <input class="input" type="number" id="privilege" name="fk_privilege_id" required />
+                <div class="error-text" id="privilegeError"></div>
+            </div>
+
+            <!-- Identity No -->
+            <div class="field">
+                <label class="label" for="identity">Identity Number</label>
+                <input class="input" type="text" id="identity" name="userIdentityNo" required />
+                <div class="error-text" id="identityError"></div>
+            </div>
+
+            <!-- Cellphone No -->
+            <div class="field">
+                <label class="label" for="cellphone">Cellphone Number</label>
+                <input class="input" type="tel" id="cellphone" name="userCellphoneNo" required />
+                <div class="error-text" id="cellphoneError"></div>
+            </div>
+
+            <!-- Email -->
+            <div class="field">
+                <label class="label" for="email">Email Address</label>
+                <input class="input" type="email" id="email" name="userEmailAddress" required />
+                <div class="error-text" id="emailError"></div>
+            </div>
+
+            <!-- Password -->
+            <div class="field">
+                <label class="label" for="password">Password</label>
+                <input class="input" type="password" id="password" name="userPassword" required minlength="6" />
+                <div class="error-text" id="passwordError"></div>
+            </div>
+
+            <!-- Previous Password -->
+            <div class="field">
+                <label class="label" for="previousPassword">Previous Password</label>
+                <input class="input" type="password" id="previousPassword" name="previousPassword" />
+                <div class="error-text" id="previousPasswordError"></div>
+            </div>
+
+            <!-- Full Name -->
+            <div class="field">
+                <label class="label" for="fullName">Full Name</label>
+                <input class="input" type="text" id="fullName" name="userFullName" required />
+                <div class="error-text" id="fullNameError"></div>
+            </div>
+
+            <!-- Age -->
+            <div class="field">
+                <label class="label" for="age">Age</label>
+                <input class="input" type="number" id="age" name="userAge" required />
+                <div class="error-text" id="ageError"></div>
+            </div>
+
+            <!-- Status -->
+            <div class="field">
+                <label class="label" for="status">Status</label>
+                <input class="input" type="number" id="status" name="userStatus" required />
+                <div class="error-text" id="statusError"></div>
+            </div>
+
+            <!-- Registration Date -->
+            <div class="field">
+                <label class="label" for="registrationDate">Registration Date</label>
+                <input class="input" type="date" id="registrationDate" name="userRegistrationDate" required />
+                <div class="error-text" id="registrationDateError"></div>
+            </div>
+
+            <!-- Modified Date -->
+            <div class="field">
+                <label class="label" for="modifiedDate">Modified Date</label>
+                <input class="input" type="date" id="modifiedDate" name="userModifiedDate" required />
+                <div class="error-text" id="modifiedDateError"></div>
+            </div>
+
+            <!-- Password Update Status -->
+            <div class="field">
+                <label class="label" for="passwordUpdateStatus">Password Update Status</label>
+                <input class="input" type="number" id="passwordUpdateStatus" name="passwordUpdateStatus" />
+                <div class="error-text" id="passwordUpdateStatusError"></div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" type="submit">Sign Up</button>
+            </div>
+
+
+        </form>
+    </section>
+</main>
+<script src="../../static/js/signup.js"></script>
+</body>
+</html>
