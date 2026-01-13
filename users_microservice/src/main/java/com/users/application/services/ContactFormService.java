@@ -71,10 +71,9 @@ public class ContactFormService {
             publisher.publishEvent(SubmitFormEvent
                     .builder()
                     .emailFrom(submittedForm.getEmail())
-                    .emailTo("leonard1thecoder@gmail.com")
                     .name(submittedForm.getName())
                     .message(submittedForm.getMessage())
-                    .Subject("Alcohol Agent Message By" + submittedForm.getName())
+                    .Subject("Alcohol Agent Enquire Message By " + submittedForm.getName())
                     .build()
             );
             repository.save(submittedForm);

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login</title>
+    <link href="../../static/css/login-style.css" rel="stylesheet" />
+</head>
+<body>
+<main class="wrap">
+    <section class="card" role="form" aria-labelledby="login-title">
+        <div class="brand">
+            <span class="dot" aria-hidden="true"></span>
+            <h1>Glow</h1>
+        </div>
+
+        <h2 id="login-title" class="title">Log in</h2>
+        <p class="subtitle">Welcome back. Please enter your details.</p>
+
+        <form id="loginForm" novalidate>
+            <div class="field">
+                <label class="label" for="email">Email address</label>
+                <input class="input" type="email" id="email" name="email" placeholder="you@example.com" required />
+                <div id="emailError" class="error-text"></div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="password">Password</label>
+                <input class="input" type="password" id="password" name="password" placeholder="Your password" required minlength="6" />
+                <div id="passwordError" class="error-text"></div>
+            </div>
+            <!-- Log in button first -->
+            <div class="actions">
+                <button class="btn btn-primary" type="submit">Log in</button>
+            </div>
+
+            <!-- Forgot password link centered below -->
+            <div class="links center-link">
+                <a href="forgot-password.html" class="link">Forgot password?</a>
+            </div>
+
+
+            <div class="or">or</div>
+
+            <button class="btn btn-primary" type="button" onclick="window.location.href='sign-up.html'">
+                Create new account
+            </button>
+        </form>
+    </section>
+</main>
+<script src="../../static/js/login-script.js"></script>
+</body>
+</html>
