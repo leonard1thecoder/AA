@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html  xmlns:th="http://www.thymeleaf.org"  lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sign Up</title>
-    <link href="../../static/css/login-style.css" rel="stylesheet" />
+    <link href="/css/login-style.css" rel="stylesheet" />
 </head>
 <body>
 <main class="wrap">
@@ -15,7 +15,7 @@
         </div>
 
         <div class="links center-link">
-            <a href="login.html" class="link">Already have an account? Log in</a>
+            <a th:href="@{/login}" class="link">Already have an account? Log in</a>
         </div>
 
         <h2 id="signup-title" class="title">Create Account</h2>
@@ -114,6 +114,6 @@
         </form>
     </section>
 </main>
-<script src="../../static/js/signup.js"></script>
+<script src="/js/signup.js"></script>
 </body>
 </html>
