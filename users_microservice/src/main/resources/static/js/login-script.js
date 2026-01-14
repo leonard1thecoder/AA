@@ -9,12 +9,14 @@ function setError(input, el, message) {
   input.classList.add('error');
   el.textContent = message;
 }
+
 function setValid(input, el) {
   input.classList.remove('error');
   input.classList.add('valid');
   el.textContent = '';
 }
 
+// Email validation
 email.addEventListener('input', () => {
   if (!email.value.trim()) {
     setError(email, emailError, 'Email is required.');
@@ -25,6 +27,7 @@ email.addEventListener('input', () => {
   }
 });
 
+// Password validation
 password.addEventListener('input', () => {
   if (!password.value.trim()) {
     setError(password, passwordError, 'Password is required.');
@@ -35,14 +38,48 @@ password.addEventListener('input', () => {
   }
 });
 
+// Handle login
+async function handleLogin(event) {
+  event.preventDefault(); // prevent form reload
+
+  const username = email.value; // use email as username
+  const pwd = password.value;
+
+  try {
+    const response = await fetch('/dev/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usersEmailAddress : username, password: pwd })
+    });
+
+    if (!response.ok) {
+      // Try to parse error JSON if server sends one
+      const errorData = await response.json().catch(() => null);
+      const message = errorData?.message || 'Login failed';
+      throw new Error(message);
+    }
+
+    const data = await response.json();
+    console.log('Login success:', data);
+
+    // Example: store JWT token
+    localStorage.setItem('token', data.token);
+
+    // Redirect to home/dashboard
+    window.location.href = '/home';
+
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message); // show server error message
+  }
+}
+
+// Attach submit handler
 form.addEventListener('submit', (e) => {
-  e.preventDefault();
+  // Run validations first
   email.dispatchEvent(new Event('input'));
   password.dispatchEvent(new Event('input'));
 
-  const hasErrors = email.classList.contains('error') || password.classList.contains('error');
-  if (hasErrors) return;
-
-  alert('Logging in...');
-  // TODO: Replace with fetch('/api/auth/login', { ... }) to integrate backend
+  // Then call login
+  handleLogin(e);
 });

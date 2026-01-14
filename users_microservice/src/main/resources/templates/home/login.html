@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html  xmlns:th="http://www.thymeleaf.org"  lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login</title>
-    <link href="../../static/css/login-style.css" rel="stylesheet" />
+    <link href="/css/login-style.css" rel="stylesheet" />
 </head>
 <body>
 <main class="wrap">
@@ -36,7 +36,7 @@
 
             <!-- Forgot password link centered below -->
             <div class="links center-link">
-                <a href="forgot-password.html" class="link">Forgot password?</a>
+                <a th:href="@{/forgot-password}" class="link">Forgot password?</a>
             </div>
 
 
@@ -48,6 +48,6 @@
         </form>
     </section>
 </main>
-<script src="../../static/js/login-script.js"></script>
+<script src="/js/login-script.js"></script>
 </body>
 </html>

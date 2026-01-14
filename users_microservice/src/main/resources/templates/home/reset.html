@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html  xmlns:th="http://www.thymeleaf.org"  lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Reset Password</title>
-    <link href="../../static/css/login-style.css" rel="stylesheet" />
+    <link href="/css/login-style.css" rel="stylesheet" />
 </head>
 <body>
 <main class="wrap">
@@ -36,12 +36,12 @@
 
             <div class="or">or</div>
 
-            <button class="btn btn-secondary" type="button" onclick="window.location.href='login.html'">
+            <a class="btn btn-secondary" type="button" th:href="@{/login}">
                 Back to Login
-            </button>
+            </a>
         </form>
     </section>
 </main>
-<script src="../../static/js/reset.js"></script>
+<script src="/js/reset.js"></script>
 </body>
 </html>
