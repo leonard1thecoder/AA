@@ -51,6 +51,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private static FindByTokenRequest findByTokenRequest;
     private UsersFullNameRequest usersFullNameRequest;
     @Setter
+    private static FindByEmailRequest findByEmailRequest;
+    @Setter
     private static UsersRepository usersRepository;
     private UsersRegisterRequest usersRegisterRequest;
     private UpdatePasswordRequest updatePasswordRequest;
@@ -132,7 +134,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
     /*
         Need to implement redis cache
      */
-    @Transactional
+    
     private List<UsersResponse> registerUsers() {
         var request = this.usersRegisterRequest();
         if (request == null) {
@@ -228,8 +230,8 @@ public class UsersService implements Execute<List<UsersResponse>> {
 //
 //    }
 
-    @Transactional
-    private List<UsersResponse> updateUsersPassword() {
+    
+    private List<UsersResponse> resetPassword() {
 
 
         try {
@@ -374,7 +376,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private boolean passwordStatus;
 
 
-    @Transactional
+    
     private List<UsersResponse> login() {
 
         try {
@@ -386,10 +388,6 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 logger.info("redis executing...");
                 jpaUserResponse = null;
                 if (redisUserResponse.getUsersStatus() == 0) {
-                    var errorMessage = "User already got email to verify account";
-                    var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
-                    throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
-                }else  if (redisUserResponse.getUpdatePasswordStatus() == 0) {
                     var errorMessage = "User already got email to verify account";
                     var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
                     throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
@@ -438,16 +436,6 @@ public class UsersService implements Execute<List<UsersResponse>> {
                         passwordStatus = true;
                         logger.info("user : {} has  been verified,trying to login...", jpaUserResponse.getUsersFullName());
 
-                        if (optionalEntity.get().getPasswordUpdateStatus() == 0) {
-                            publisher.publishEvent(VerifyUpdatePasswordEvent
-                                    .builder()
-                                    .emailFrom("softwareaa65@gmail.com")
-                                    .emailTo(jpaUserResponse.getUsersEmailAddress())
-                                    .name(jpaUserResponse.getUsersFullName())
-                                    .token(jpaUserResponse.getToken())
-                                    .build()
-                            );
-                        }
                     } else {
 
                         var errorMessage = "log in failed due to invalid user status ";
@@ -521,9 +509,9 @@ public class UsersService implements Execute<List<UsersResponse>> {
 //                    return this.findUserByUsersIdentityNo();
                 case "getUsersById" -> this.findUserById();
                 case "userLogin" -> this.login();
-                case "userUpdatePassword" -> this.updateUsersPassword();
+                case "reset-password" -> this.resetPassword();
                 case "verifyUser" -> this.verifyCustomer();
-                case "passwordRollBack" -> this.passwordRollBack();
+                case "forgot-password" -> this.forgotPassword();
                 case "verifyPasswordUpdate" -> this.verifyPasswordUpdate();
                 default -> throw new ServiceHandlerException("Failed execute service due to incorrect service string");
             };
@@ -532,32 +520,47 @@ public class UsersService implements Execute<List<UsersResponse>> {
     }
 
 
-@Transactional
-    private List<UsersResponse> passwordRollBack() {
-        Optional<Users> user = usersRepository.findByUserEmailAddress(rollBackPasswordRequest.getEmailAddress());
 
-        if (user.isPresent()) {
-            Optional<Users> userByToken = usersRepository.findByToken(rollBackPasswordRequest.getToken());
+    private List<UsersResponse> forgotPassword() {
 
-            if(userByToken.isPresent()) {
-                var foundUser = user.get();
-                foundUser.setUserPassword(foundUser.getPreviousPassword());
-                foundUser.setPasswordUpdateStatus((short)1);
-                return mapToResponse(List.of(usersRepository.save(foundUser)));
-            }else{
-                var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer rollback has expired");
-                var resolveIssue = "Please log in again to get new token in your mail";
-                throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
+var encrypt = findByEmailRequest.getEmailAddress();
 
-            }
-        } else {
-            var errorMessage = "user with email:" +rollBackPasswordRequest.getEmailAddress() + " not found";
+       if(redisService.get("Reset-"+encrypt,UsersResponse.class) != null){
+           var errorMessage = "email sent to reset password sent please check your email to continue updating your password";
+           var resolveIssue = "Please check emails and click the reset link or wait hour to get new link";
+           throw throwExceptionAndReport(new ResetPasswordSessionException(errorMessage), errorMessage, resolveIssue);
+
+       }else {
+           Optional<Users> user = usersRepository.findByUserEmailAddress(encrypt);
+
+           if (user.isPresent()) {
+               var jpaEntity = user.get();
+
+                var jwt = jwtService.generateToken(jpaEntity);
+                jpaEntity.setToken(jwt);
+                var jpaResponse = mapToResponse(List.of(usersRepository.save(jpaEntity)));
+               publisher.publishEvent(VerifyUpdatePasswordEvent
+                       .builder()
+                       .emailFrom("softwareaa65@gmail.com")
+                       .emailTo(jpaResponse.get(0).getUsersEmailAddress())
+                       .name(jpaResponse.get(0).getUsersFullName())
+                       .token(jpaResponse.get(0).getToken())
+                       .build()
+               );
+                redisService.set("Reset-"+encrypt, jpaResponse.get(0), 1L, TimeUnit.HOURS);
+                if(redisService.get(encrypt,UsersResponse.class) != null)
+                    redisService.delete(encrypt);
+                return jpaResponse;
+           }  else {
+            var errorMessage = "user with email:" + rollBackPasswordRequest.getEmailAddress() + " not found";
             var resolveIssue = "Please provide correct email";
             throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
 
         }
 
 
+
+       }
     }
 
     private List<UsersResponse> verifyPasswordUpdate() {
@@ -580,7 +583,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
         }
     }
 
-    @Transactional
+    
     private List<UsersResponse> verifyCustomer() {
         Optional<Users> user = usersRepository.findByToken(findByTokenRequest.getToken());
 
@@ -595,7 +598,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
             return mapToResponse(List.of(usersRepository.save(verifiedUser)));
         } else {
             var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
-            var resolveIssue = "Please log in again to get new token in your mail";
+            var resolveIssue = "Please click forgot password again";
             throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
         }
     }
