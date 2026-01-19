@@ -24,6 +24,7 @@ import org.slf4j.MDC;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static com.utils.application.ExceptionHandler.returnErrorResponse;
 import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
 import static com.utils.application.ExceptionHandlerReporter.*;
 
@@ -102,19 +103,9 @@ public class ServiceConcurrentExecutor {
     public List<? extends ResponseContract> buildServiceExecutor(UsersService service) {
         var retryTime = 3;
         var retryAttempt = 0;
-        var user_id = service.call().get(0).getId();
-        Future<List<? extends ResponseContract>> future = this.setThreadName(false).submit(() -> {
-          if(!UsersService.serviceHandler.equals("getAllUsers"))
-            MDC.put("taskName", "User_id:"+user_id);
-          else
-              MDC.put("taskName", "ADMIN");
-
-            try {
-                return service.call();
-            } finally {
-                MDC.remove("taskName");
-            }
-        });
+        Future<List<? extends ResponseContract>> future = this
+                .setThreadName(false)
+                .submit(service::call);
 
         while (retryAttempt < retryTime) {
             try {
@@ -122,54 +113,56 @@ public class ServiceConcurrentExecutor {
             } catch (InterruptedException e) {
                 var errorMessage = ExecutorControllerAdvice.setMessage("Interruption occurred while executing service : " + service + " reason " + e.getMessage());
                 ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
-                throw throwExceptionAndReport(new ConcurrentExecutionException(errorMessage), errorMessage, getResolveIssueDetails());
+                return returnErrorResponse(false, errorMessage, getResolveIssueDetails());
 
             } catch (ExecutionException e) {
                 if (e.getMessage().contains("UserNotFoundException"))
-                    throw throwExceptionAndReport(new UserNotFoundException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("UsersPasswordIncorrectException"))
-                    throw throwExceptionAndReport(new UsersPasswordIncorrectException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("CachedUsersPasswordChangedException"))
-                    throw throwExceptionAndReport(new UsersPasswordIncorrectException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("NullRequestException"))
-                    throw throwExceptionAndReport(new NullRequestException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("UsersExistsException"))
-                    throw throwExceptionAndReport(new UsersExistsException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("UserNotVerifiedException"))
-                    throw throwExceptionAndReport(new UserNotVerifiedException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("UserEmailDoesNotExistException"))
-                    throw throwExceptionAndReport(new UserEmailDoesNotExistException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("PasswordMisMatchException"))
-                    throw throwExceptionAndReport(new PasswordMisMatchException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("JwtExpiredOnSessionException"))
-                    throw throwExceptionAndReport(new JwtExpiredOnSessionException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("InvalidUserStatusException"))
-                    throw throwExceptionAndReport(new InvalidUserStatusException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("VerifyEmailAddressException"))
-                    throw throwExceptionAndReport(new VerifyEmailAddressException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("UserAgeException"))
-                    throw throwExceptionAndReport(new UserAgeException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("CellphoneNuException"))
-                    throw throwExceptionAndReport(new CellphoneNuException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("IdentityNoIsEmptyException"))
-                    throw throwExceptionAndReport(new IdentityNoIsEmptyException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("IdentityNuContainsIncorrectValuesException"))
-                    throw throwExceptionAndReport(new IdentityNuContainsIncorrectValuesException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("IdentityNuException"))
-                    throw throwExceptionAndReport(new IdentityNuException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("UserDateTimeException"))
-                    throw throwExceptionAndReport(new UserDateTimeException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 else if (e.getMessage().contains("VerificationTokenIncorrectException"))
-                    throw throwExceptionAndReport(new VerificationTokenIncorrectException(getMessage()), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
+                else if (e.getMessage().contains("ResetPasswordSessionException"))
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
 
 
-                throw throwExceptionAndReport(new ConcurrentExecutionException("Unknown Exception occurred trace :  " + e.getMessage()), "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");
+                return returnErrorResponse(false, "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");
             } catch (TimeoutException e) {
                 retryAttempt++;
                 if (retryAttempt >= retryTime) {
                     var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service + " reason service waited 60 seconds");
                     ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
-                    throw throwExceptionAndReport(new ServiceTimeoutException(errorMessage), getMessage(), getResolveIssueDetails());
+                    return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
                 }
 
 
@@ -182,7 +175,7 @@ public class ServiceConcurrentExecutor {
                 }
             }
         }
-        throw throwExceptionAndReport(new ServiceTimeoutException(getMessage()), getMessage(), getResolveIssueDetails());
+        return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
 
     }
 

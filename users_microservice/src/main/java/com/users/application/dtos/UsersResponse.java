@@ -18,7 +18,7 @@ public class UsersResponse implements ResponseContract,java.io.Serializable {
     private String usersIdentityNo;
     private Short usersStatus,usersAge,updatePasswordStatus;
     private String usersFullName,cellphoneNo, usersEmailAddress, usersRegistrationDate, usersModifiedDate;
-    private String  token;
+    private String  token,status;
 
     @JsonCreator
     public UsersResponse(){}

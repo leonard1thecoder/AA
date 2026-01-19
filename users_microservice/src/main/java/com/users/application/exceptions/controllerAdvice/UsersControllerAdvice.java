@@ -21,6 +21,13 @@ import java.util.Map;
 public class UsersControllerAdvice extends ExceptionHandlerReporter {
     private static final Logger logger = LoggerFactory.getLogger(UsersControllerAdvice.class);
 
+    @ExceptionHandler(ResetPasswordSessionException.class)
+    public ResponseEntity<List<ErrorResponse>> manageResetPasswordSessionException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(CellphoneNuException.class)
     public ResponseEntity<List<ErrorResponse>> manageCellphoneNuException(){
         var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
