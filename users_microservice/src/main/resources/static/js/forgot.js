@@ -1,34 +1,47 @@
-const form = document.getElementById('forgotForm');
-const emailField = document.getElementById('email');
-const emailError = document.getElementById('emailError');
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("forgotForm");
+  const emailInput = document.getElementById("email");
+  const emailError = document.getElementById("emailError");
 
-function setError(input, el, message) {
-  input.classList.remove('valid');
-  input.classList.add('error');
-  el.textContent = message;
-}
-function setValid(input, el) {
-  input.classList.remove('error');
-  input.classList.add('valid');
-  el.textContent = '';
-}
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault(); // prevent page reload
 
-emailField.addEventListener('input', () => {
-  if (!emailField.value.trim()) {
-    setError(emailField, emailError, 'Email is required.');
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailField.value)) {
-    setError(emailField, emailError, 'Please enter a valid email address.');
-  } else {
-    setValid(emailField, emailError);
-  }
-});
+    // Reset error state
+    emailError.textContent = "";
+    emailInput.classList.remove("input-error");
 
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  emailField.dispatchEvent(new Event('input'));
+    const email = emailInput.value.trim();
 
-  if (emailField.classList.contains('error')) return;
+    if (!email) {
+      emailError.textContent = "Email is required.";
+      emailInput.classList.add("input-error"); // add red border class
+      return;
+    }
 
-  alert('Password reset link sent to your email!');
-  // TODO: Replace with fetch('/api/auth/forgot', { method: 'POST', body: JSON.stringify({ email }) })
+    try {
+      const response = await fetch("/dev/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ emailAddress : email })
+      });
+console.log(JSON.stringify({ emailAddress : email }));
+      if (!response.ok) {
+        const errorData = await response.json();
+        emailError.textContent = errorData.message || "Something went wrong.";
+        emailInput.classList.add("input-error");
+        return;
+      }
+
+      const data = await response.json();
+      console.log(data);
+      alert(data.message || "Password reset link sent to your email.");
+      form.reset();
+    } catch (err) {
+        console.log(err);
+      emailError.textContent = "Network error. Please try again.";
+      emailInput.classList.add("input-error");
+    }
+  });
 });
