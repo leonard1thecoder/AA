@@ -51,7 +51,8 @@ async function handleLogin(event) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ usersEmailAddress : username, password: pwd })
     });
-
+    console.log(response);
+    console.log(JSON.stringify({ usersEmailAddress : username, password: pwd }));
     if (!response.ok) {
       // Try to parse error JSON if server sends one
       const errorData = await response.json().catch(() => null);
