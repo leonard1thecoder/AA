@@ -1,11 +1,10 @@
 package com.users.application.dtos;
 
 
-import com.privileges.application.entity.Privileges;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.stereotype.Component;
+
 
 @Data
 @Builder
@@ -20,7 +19,7 @@ public class UsersRegisterRequest {
 
     private Short userStatus;
 
-    private String userFullName, userEmailAddress, userPassword;
+    private String userFullName, userEmailAddress, userPassword,confirmPassword;
 
 
 
