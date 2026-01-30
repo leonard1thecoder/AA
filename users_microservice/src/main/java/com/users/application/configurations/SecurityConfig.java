@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
     auth.requestMatchers("/dev/api/auth/**").permitAll()
         .requestMatchers("/dev/api/verify/**").permitAll()
+		.requestMatchers("/dev/api/verify/**").permitAll()
+		.requestMatchers("/**").permitAll()
         .anyRequest().authenticated()
 )
                 .sessionManagement(
