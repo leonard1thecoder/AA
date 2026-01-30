@@ -39,12 +39,16 @@ public class UsersAuthController {
         UsersService.setServiceHandler("registerUsers");
         var set = serviceConcurrentExecutor.buildServiceExecutor(service);
 
-        if (set.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        } else {
+        if (set.get(0) instanceof UsersResponse) {
+
             // creating status 201
             var uri = uriBuilder.path("/dev/api/findUserByIdentityNumber/{id}").buildAndExpand(request.getUserIdentityNo()).toUri();
             return ResponseEntity.created(uri).body(set);
+        } else {
+
+            ErrorResponse error = (ErrorResponse) set;
+            logger.warn("Error response : {}", error);
+            return ResponseEntity.badRequest().body(List.of(error));
         }
     }
 
