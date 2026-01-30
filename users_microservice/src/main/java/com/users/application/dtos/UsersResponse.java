@@ -2,7 +2,7 @@ package com.users.application.dtos;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.privileges.application.entity.Privileges;
+
 import com.utils.application.ResponseContract;
 import lombok.*;
 import org.springframework.stereotype.Component;
