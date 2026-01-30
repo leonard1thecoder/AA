@@ -4,12 +4,13 @@ package com.users.application.services;
 import com.users.application.exceptions.*;
 import com.users.application.exceptions.controllerAdvice.UsersControllerAdvice;
 import com.users.application.validators.UsersFieldsDataValidator;
+import com.utils.application.Execute;
 import com.utils.application.RedisService;
 import com.users.application.dtos.*;
 import com.users.application.entities.Users;
 import com.users.application.mappers.UsersMapper;
 import com.users.application.repository.UsersRepository;
-import com.utils.application.Execute;
+
 import com.utils.application.globalExceptions.ServiceHandlerException;
 import com.utils.application.mailing.VerifyCustomerEmail;
 import com.utils.application.mailing.dto.VerifyCustomerEvent;
@@ -38,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import static com.users.application.validators.UsersFieldsDataValidator.getInstance;
 import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
 import static com.utils.application.HandlingLoadingService.handleServiceHandler;
+
 
 @Service
 public class UsersService implements Execute<List<UsersResponse>> {
@@ -164,10 +166,10 @@ public class UsersService implements Execute<List<UsersResponse>> {
                     throw throwExceptionAndReport(new PrivilegeIdOutOfBoundException(errorMessage), errorMessage, resolveIssue);
                 }
 
+                if(request.getUserPassword().equals(request.getConfirmPassword())){
                 Users users = Users.builder()
                         .userIdentityNo(getInstance().validateIdentityNo(request.getUserIdentityNo()))
                         .userPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword().trim())))
-                        .previousPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword().trim())))
                         .userRegistrationDate(getInstance().formatDateTime(LocalDateTime.now()))
                         .userModifiedDate(getInstance().formatDateTime(LocalDateTime.now()))
                         .fk_privilege_id(request.getPrivileges())
@@ -195,6 +197,11 @@ public class UsersService implements Execute<List<UsersResponse>> {
                     var errorMessage = "User has already been registered";
                     var resolveIssue = "Some of your data is registered, contact AA for verification";
                     throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+                }
+                }else{
+                    var errorMessage = "Password inserted  does not match";
+                    var resolveIssue = "Please ensure password and confirm password matches";
+                    throw throwExceptionAndReport(new PasswordMisMatchException(errorMessage), errorMessage, resolveIssue);
                 }
             }
         }
