@@ -1,6 +1,6 @@
 package com.users.application.service;
 
-import com.privileges.application.entity.Privileges;
+
 import com.users.application.dtos.*;
 import com.users.application.exceptions.PasswordMisMatchException;
 import com.users.application.exceptions.UserEmailDoesNotExistException;

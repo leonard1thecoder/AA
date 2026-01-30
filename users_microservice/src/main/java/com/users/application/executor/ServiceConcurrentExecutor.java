@@ -155,8 +155,8 @@ public class ServiceConcurrentExecutor {
                 else if (e.getMessage().contains("ResetPasswordSessionException"))
                     return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
 
-
-                return returnErrorResponse(false, "Unknown Exception occurred trace :  " + e.getMessage(), "Contact AA Administrator");
+			e.printStackTrace();
+                return returnErrorResponse(false, "Unknown Exception occurred trace :  " + e.getStackTrace(), "Contact AA Administrator");
             } catch (TimeoutException e) {
                 retryAttempt++;
                 if (retryAttempt >= retryTime) {

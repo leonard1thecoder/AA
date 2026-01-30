@@ -1,15 +1,46 @@
-version: '3.8'
 
 services:
+  users-microservice:
+    build:
+      context: .
+      dockerfile: users_microservice/Dockerfile
+    image: leonard1thecoder/aa-users-microservice:latest  
+    environment:
+     SPRING_PROFILES_ACTIVE: docker
+     SPRING_REDIS_HOST: redis
+     SPRING_REDIS_PORT: 6379
+    ports:
+      - "9099:9098"                     # Adjust if needed
+    depends_on:
+      redis:
+        condition: service_healthy      # Waits until Redis reports healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+ 
+
   redis:
     image: redis:latest
     container_name: redis_container
     ports:
-      - "6379:6379" # Expose Redis on port 6379
+      - "6379:6379"
     volumes:
-      - redis_data:/data # Persist data
-    command: ["redis-server", "--appendonly", "yes"] # Enable AOF persistence
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]           # Returns PONG on success
+      interval: 10s                                # Check every 10 seconds
+      timeout: 5s                                  # Command timeout
+      retries: 5                                   # Retry 5 times before marking unhealthy
+      start_period: 10s                            # Give Redis time to start
+      start_interval: 5s                           # More frequent checks during startup
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   redis_data:
-    driver: local
