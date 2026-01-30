@@ -1,119 +1,620 @@
 <!DOCTYPE html>
-<html  xmlns:th="http://www.thymeleaf.org"  lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sign Up</title>
-    <link href="/css/login-style.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@Leonard1thecode | Full-Stack Cyber Wizard</title>
+
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet"/>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    <style>
+        :root {
+            --neon-cyan: #00f0ff;
+            --neon-pink: #ff00ea;
+            --neon-purple: #a100ff;
+            --neon-green: #39ff14;
+            --dark-bg: #0b0015;
+            --dark-glass: rgba(15, 5, 30, 0.65);
+            --glass-border: rgba(0, 240, 255, 0.35);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Roboto Mono', monospace;
+            background: var(--dark-bg);
+            color: #e0f7ff;
+            overflow-x: hidden;
+            background-image:
+                    radial-gradient(circle at 15% 25%, rgba(0,240,255,0.15) 0%, transparent 30%),
+                    radial-gradient(circle at 85% 75%, rgba(255,0,234,0.15) 0%, transparent 30%);
+        }
+
+        /* Animated Neon Grid Background */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background:
+                    linear-gradient(to right, rgba(0,240,255,0.08) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0,240,255,0.08) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 60s linear infinite;
+            opacity: 0.4;
+            z-index: -2;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+
+        /* Particles */
+        #particles-js {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(11, 0, 21, 0.8) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--neon-cyan);
+            box-shadow: 0 0 50px rgba(0,240,255,0.4);
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 400%;
+            animation: rainbowFlow 12s linear infinite;
+        }
+
+        @keyframes rainbowFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 400% 50%; }
+        }
+
+        .nav-link {
+            color: #e0f7ff !important;
+            font-weight: 700;
+            text-shadow: 0 0 12px var(--neon-cyan);
+            transition: all 0.4s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--neon-cyan) !important;
+            text-shadow: 0 0 25px var(--neon-cyan), 0 0 50px var(--neon-pink);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 15px;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 6rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 500%;
+            animation: gradientEpic 15s ease infinite;
+            text-shadow: 0 0 60px rgba(0,240,255,0.8);
+        }
+
+        @keyframes gradientEpic {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .glitch-text {
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-4px, 4px); }
+            40% { transform: translate(4px, -4px); }
+        }
+
+        .typing {
+            font-size: 2.2rem;
+            color: var(--neon-cyan);
+            font-weight: 700;
+            border-right: 6px solid var(--neon-pink);
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 5s steps(45) forwards, blink 0.9s infinite;
+            text-shadow: 0 0 25px var(--neon-cyan);
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        /* 3D Tilt Cards */
+        .tilt-card {
+            perspective: 1500px;
+        }
+
+        .tilt-inner {
+            background: var(--dark-glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 0 80px rgba(0,240,255,0.3), inset 0 0 40px rgba(161,0,255,0.15);
+            transform-style: preserve-3d;
+            transition: transform 0.4s ease;
+        }
+
+        .tilt-card:hover .tilt-inner {
+            transform: translateZ(40px) rotateX(8deg) rotateY(8deg);
+            box-shadow: 0 0 160px rgba(0,240,255,0.6), 0 0 300px rgba(255,0,234,0.4);
+            border-color: var(--neon-pink);
+        }
+
+        /* Project Cards */
+        .project-card {
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+            transition: all 0.5s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-30px) scale(1.08);
+            box-shadow: 0 0 140px var(--neon-cyan);
+        }
+
+        .project-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(11,0,21,0.98), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            display: flex;
+            align-items: flex-end;
+            padding: 2.5rem;
+        }
+
+        .project-card:hover .project-overlay { opacity: 1; }
+
+        /* Neon Button */
+        .neon-btn {
+            background: transparent;
+            border: 3px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-weight: 700;
+            padding: 1.2rem 3rem;
+            border-radius: 60px;
+            text-shadow: 0 0 20px var(--neon-cyan);
+            box-shadow: 0 0 40px rgba(0,240,255,0.5);
+            transition: all 0.4s;
+        }
+
+        .neon-btn:hover {
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink));
+            color: #000;
+            box-shadow: 0 0 80px var(--neon-cyan), 0 0 140px var(--neon-pink);
+            transform: scale(1.12);
+        }
+
+        /* Scroll to Top */
+        #scrollTop {
+            position: fixed;
+            bottom: 50px;
+            right: 50px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s;
+            box-shadow: 0 0 60px rgba(0,240,255,0.7);
+            z-index: 9999;
+        }
+
+        #scrollTop.show {
+            opacity: 1;
+            visibility: visible;
+            animation: pulseBtn 2s infinite;
+        }
+
+        @keyframes pulseBtn {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(0,240,255,0.6);
+            margin-bottom: 4rem;
+        }
+
+        /* === NEON FORM STYLES === */
+        .neon-input {
+            background: rgba(15, 5, 30, 0.6);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            color: #e0f7ff;
+            padding: 1.5rem 1rem 0.5rem;
+            font-size: 1.1rem;
+            transition: all 0.4s;
+            box-shadow: inset 0 0 15px rgba(0,240,255,0.15);
+        }
+
+        .neon-input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(0,240,255,0.5), inset 0 0 20px rgba(0,240,255,0.3);
+            outline: none;
+        }
+
+        .neon-label {
+            position: absolute;
+            top: 1.2rem;
+            left: 1rem;
+            color: #a0c0ff;
+            font-size: 1rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(0,240,255,0.3);
+        }
+
+        .neon-input:focus ~ .neon-label,
+        .neon-input:not(:placeholder-shown) ~ .neon-label {
+            top: 0.4rem;
+            left: 1rem;
+            font-size: 0.85rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px var(--neon-cyan);
+        }
+
+        .neon-feedback {
+            color: #ff3366;
+            text-shadow: 0 0 10px #ff3366;
+            font-weight: 600;
+        }
+
+        #submitBtn.loading .btn-text { display: none; }
+        #submitBtn.loading .spinner-border { display: inline-block !important; }
+
+        #formMessage {
+            padding: 1.5rem;
+            border-radius: 15px;
+            font-weight: 600;
+            animation: glitch 2s infinite;
+        }
+
+        #formMessage.success {
+            background: rgba(57,255,20,0.2);
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 0 0 40px rgba(57,255,20,0.5);
+        }
+
+        #formMessage.error {
+            background: rgba(255,51,102,0.2);
+            border: 2px solid #ff3366;
+            color: #ff3366;
+            box-shadow: 0 0 40px rgba(255,51,102,0.5);
+        }
+    </style>
 </head>
 <body>
-<main class="wrap">
-    <section class="card" role="form" aria-labelledby="signup-title">
-        <div class="brand">
-            <span class="dot" aria-hidden="true"></span>
-            <h1>Glow</h1>
+
+<div class="grid-bg"></div>
+<div id="particles-js"></div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand brand glitch-text" href="#">@Leonard1thecode</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="#home">HOME</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about">ABOUT</a></li>
+                <li class="nav-item"><a class="nav-link" href="#skills">SKILLS</a></li>
+                <li class="nav-item"><a class="nav-link" href="#projects">PROJECTS</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">CONTACT</a></li>
+            </ul>
         </div>
+    </div>
+</nav>
 
-        <div class="links center-link">
-            <a th:href="@{/login}" class="link">Already have an account? Log in</a>
+<!-- Hero -->
+<section id="home" class="hero">
+    <div class="container">
+        <h1 class="glitch-text">FULL-STACK CYBER WIZARD</h1>
+        <p class="typing mt-4">React • Node • Next.js • Three.js • AWS • MongoDB</p>
+        <div class="mt-5 d-flex justify-content-center gap-4 flex-wrap">
+            <a href="#projects" class="neon-btn">SEE MY WORK</a>
+            <a href="#contact" class="neon-btn">LET'S BUILD</a>
         </div>
+    </div>
+</section>
 
-        <h2 id="signup-title" class="title">Create Account</h2>
-        <p class="subtitle">Fill in your details to register.</p>
-
-        <form id="signupForm" novalidate>
-            <!-- Privilege ID -->
-            <div class="field">
-                <label class="label" for="privilege">Privilege ID</label>
-                <input class="input" type="number" id="privilege" name="fk_privilege_id" required />
-                <div class="error-text" id="privilegeError"></div>
+<!-- About -->
+<section id="about" class="py-5">
+    <div class="container text-center">
+        <h2 class="section-title">WHO RUNS THE MATRIX?</h2>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="tilt-card">
+                    <div class="tilt-inner">
+                        <p class="lead mb-4" style="text-shadow: 0 0 20px rgba(0,240,255,0.5);">
+                            I'm Sizolwakhe Leonard Mthimunye — a relentless full-stack developer who turns caffeine, code, and chaos into high-performance digital experiences.
+                        </p>
+                        <p class="lead">From pixel-perfect frontends to bulletproof backends and 3D immersive worlds — I build it all.</p>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <!-- Identity No -->
-            <div class="field">
-                <label class="label" for="identity">Identity Number</label>
-                <input class="input" type="text" id="identity" name="userIdentityNo" required />
-                <div class="error-text" id="identityError"></div>
+<!-- Skills -->
+<section id="skills" class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center">WEAPONS OF CHOICE</h2>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4 col-lg-3"><div class="tilt-card"><div class="tilt-inner text-center"><h4 style="color:var(--neon-cyan)">Frontend</h4><p>React • Next.js • Tailwind • GSAP • Three.js</p></div></div></div>
+            <div class="col-md-4 col-lg-3"><div class="tilt-card"><div class="tilt-inner text-center"><h4 style="color:var(--neon-pink)">Backend</h4><p>Node.js • Express • NestJS • Python • Go</p></div></div></div>
+            <div class="col-md-4 col-lg-3"><div class="tilt-card"><div class="tilt-inner text-center"><h4 style="color:var(--neon-purple)">Database</h4><p>MongoDB • PostgreSQL • Redis • Firebase</p></div></div></div>
+            <div class="col-md-4 col-lg-3"><div class="tilt-card"><div class="tilt-inner text-center"><h4 style="color:var(--neon-green)">DevOps</h4><p>AWS • Docker • Kubernetes • CI/CD • Vercel</p></div></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- Projects -->
+<section id="projects" class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center">PROJECTS THAT BROKE THE INTERNET</h2>
+        <div class="row g-5">
+            <div class="col-md-6 col-lg-4">
+                <div class="project-card tilt-card">
+                    <div class="tilt-inner">
+                        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800" alt="Project" class="img-fluid rounded">
+                        <div class="project-overlay">
+                            <div>
+                                <h4>NEON MARKETPLACE</h4>
+                                <p>Next.js 14 • Stripe • Three.js • AWS</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <!-- Cellphone No -->
-            <div class="field">
-                <label class="label" for="cellphone">Cellphone Number</label>
-                <input class="input" type="tel" id="cellphone" name="userCellphoneNo" required />
-                <div class="error-text" id="cellphoneError"></div>
+            <div class="col-md-6 col-lg-4">
+                <div class="project-card tilt-card">
+                    <div class="tilt-inner">
+                        <img src="https://images.unsplash.com/photo-1551650975-60cb7c8d2d0e?w=800" alt="Project" class="img-fluid rounded">
+                        <div class="project-overlay">
+                            <div>
+                                <h4>CYBER DASHBOARD</h4>
+                                <p>React • D3.js • Node • Socket.io</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <!-- Email -->
-            <div class="field">
-                <label class="label" for="email">Email Address</label>
-                <input class="input" type="email" id="email" name="userEmailAddress" required />
-                <div class="error-text" id="emailError"></div>
+            <div class="col-md-6 col-lg-4">
+                <div class="project-card tilt-card">
+                    <div class="tilt-inner">
+                        <img src="https://images.unsplash.com/photo-1551288049-b1f4d9e7c4a2?w=800" alt="Project" class="img-fluid rounded">
+                        <div class="project-overlay">
+                            <div>
+                                <h4>3D NEON PORTFOLIO</h4>
+                                <p>Three.js • GSAP • Blender • Vercel</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <!-- Password -->
-            <div class="field">
-                <label class="label" for="password">Password</label>
-                <input class="input" type="password" id="password" name="userPassword" required minlength="6" />
-                <div class="error-text" id="passwordError"></div>
+<!-- Contact Form - FULL POWER -->
+<section id="contact" class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="tilt-card">
+                    <div class="tilt-inner text-center">
+                        <h2 class="section-title mb-4 glitch-text">TRANSMIT YOUR SIGNAL</h2>
+                        <p class="lead mb-5" style="text-shadow: 0 0 20px var(--neon-cyan);">
+                            Ready to break the matrix together? Drop your message — I'll respond in neon speed.
+                        </p>
+
+                        <form id="cyberForm" class="text-start" novalidate>
+                            <div class="mb-4 position-relative">
+                                <input type="text" class="form-control neon-input" id="name" name="name" required placeholder=" ">
+                                <label for="name" class="neon-label">YOUR NAME / HANDLE</label>
+                                <div class="invalid-feedback neon-feedback">Enter your name, coder!</div>
+                            </div>
+
+                            <div class="mb-4 position-relative">
+                                <input type="email" class="form-control neon-input" id="email" name="email" required placeholder=" ">
+                                <label for="email" class="neon-label">NEON EMAIL ADDRESS</label>
+                                <div class="invalid-feedback neon-feedback">Valid email required — no ghost accounts!</div>
+                            </div>
+
+                            <div class="mb-5 position-relative">
+                                <textarea class="form-control neon-input" id="message" name="message" rows="5" required placeholder=" "></textarea>
+                                <label for="message" class="neon-label">YOUR MESSAGE / MISSION</label>
+                                <div class="invalid-feedback neon-feedback">Don't leave me hanging — what's the plan?</div>
+                            </div>
+
+                            <button type="submit" class="neon-btn btn-lg w-100" id="submitBtn">
+                                <span class="btn-text">SEND TRANSMISSION</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                        </form>
+
+                        <div id="formMessage" class="mt-4 text-center" style="display: none;"></div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <!-- Previous Password -->
-            <div class="field">
-                <label class="label" for="previousPassword">Previous Password</label>
-                <input class="input" type="password" id="previousPassword" name="previousPassword" />
-                <div class="error-text" id="previousPasswordError"></div>
-            </div>
+<!-- Footer -->
+<footer class="py-4 text-center" style="background: linear-gradient(135deg, #0b0015, #1a0033); border-top: 3px solid var(--neon-cyan);">
+    <p>© 2026 @Leonard1thecode • Built with pure code & neon energy</p>
+</footer>
 
-            <!-- Full Name -->
-            <div class="field">
-                <label class="label" for="fullName">Full Name</label>
-                <input class="input" type="text" id="fullName" name="userFullName" required />
-                <div class="error-text" id="fullNameError"></div>
-            </div>
+<!-- Scroll to Top -->
+<div id="scrollTop"><i class="fas fa-rocket"></i></div>
 
-            <!-- Age -->
-            <div class="field">
-                <label class="label" for="age">Age</label>
-                <input class="input" type="number" id="age" name="userAge" required />
-                <div class="error-text" id="ageError"></div>
-            </div>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
-            <!-- Status -->
-            <div class="field">
-                <label class="label" for="status">Status</label>
-                <input class="input" type="number" id="status" name="userStatus" required />
-                <div class="error-text" id="statusError"></div>
-            </div>
+<script>
+    // Particles
+    particlesJS("particles-js", {
+        particles: {
+            number: { value: 150, density: { enable: true, value_area: 1200 } },
+            color: { value: ["#00f0ff", "#ff00ea", "#a100ff", "#39ff14"] },
+            shape: { type: ["circle", "triangle", "star", "polygon"] },
+            opacity: { value: 0.9, random: true },
+            size: { value: 6, random: true },
+            line_linked: { enable: true, distance: 220, color: "#00f0ff", opacity: 0.5, width: 2.5 },
+            move: { enable: true, speed: 6, direction: "none", random: true, straight: false, out_mode: "bounce" }
+        },
+        interactivity: {
+            detect_on: "canvas",
+            events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+            modes: { grab: { distance: 250, line_linked: { opacity: 0.9 } }, push: { particles_nb: 8 } }
+        },
+        retina_detect: true
+    });
 
-            <!-- Registration Date -->
-            <div class="field">
-                <label class="label" for="registrationDate">Registration Date</label>
-                <input class="input" type="date" id="registrationDate" name="userRegistrationDate" required />
-                <div class="error-text" id="registrationDateError"></div>
-            </div>
+    // 3D Tilt Effect
+    document.querySelectorAll('.tilt-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
 
-            <!-- Modified Date -->
-            <div class="field">
-                <label class="label" for="modifiedDate">Modified Date</label>
-                <input class="input" type="date" id="modifiedDate" name="userModifiedDate" required />
-                <div class="error-text" id="modifiedDateError"></div>
-            </div>
+            const rotateX = (y - centerY) / 15;
+            const rotateY = (centerX - x) / 15;
 
-            <!-- Password Update Status -->
-            <div class="field">
-                <label class="label" for="passwordUpdateStatus">Password Update Status</label>
-                <input class="input" type="number" id="passwordUpdateStatus" name="passwordUpdateStatus" />
-                <div class="error-text" id="passwordUpdateStatusError"></div>
-            </div>
+            card.querySelector('.tilt-inner').style.transform =
+                `perspective(1500px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(40px)`;
+        });
 
-            <div class="actions">
-                <button class="btn btn-primary" type="submit">Sign Up</button>
-            </div>
+        card.addEventListener('mouseleave', () => {
+            card.querySelector('.tilt-inner').style.transform =
+                'perspective(1500px) rotateX(0) rotateY(0) translateZ(0)';
+        });
+    });
 
+    // Navbar active link
+    const sections = document.querySelectorAll('section[id]');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            if (pageYOffset >= sectionTop) current = section.getAttribute('id');
+        });
 
-        </form>
-    </section>
-</main>
-<script src="/js/signup.js"></script>
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
+        });
+    });
+
+    // Scroll to top
+    const scrollBtn = document.getElementById('scrollTop');
+    window.addEventListener('scroll', () => {
+        scrollBtn.classList.toggle('show', window.scrollY > 600);
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    // === CONTACT FORM LOGIC ===
+    const form = document.getElementById('cyberForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formMessage = document.getElementById('formMessage');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        formMessage.style.display = 'none';
+        formMessage.className = 'mt-4 text-center';
+
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        setTimeout(() => {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                formMessage.textContent = "TRANSMISSION FAILED — Check your signal!";
+                formMessage.classList.add('error');
+                formMessage.style.display = 'block';
+                return;
+            }
+
+            formMessage.textContent = "TRANSMISSION RECEIVED! I'll hack back soon. 🚀⚡";
+            formMessage.classList.add('success');
+            formMessage.style.display = 'block';
+
+            form.reset();
+            form.classList.remove('was-validated');
+        }, 1800);
+    });
+</script>
 </body>
 </html>
