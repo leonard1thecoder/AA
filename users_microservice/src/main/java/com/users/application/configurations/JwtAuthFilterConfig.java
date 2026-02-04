@@ -18,11 +18,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import com.utils.application.RedisService;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-
+import com.users.application.dtos.*;
 import static com.utils.application.ExceptionHandlerReporter.formatDateTime;
 
 @Component
@@ -30,9 +30,10 @@ public class JwtAuthFilterConfig extends OncePerRequestFilter {
     private final static Logger logger = LoggerFactory.getLogger(JwtAuthFilterConfig.class);
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-
-    public JwtAuthFilterConfig(JwtService jwtService, UserDetailsService userDetailsService) {
+private final RedisService redisService;
+    public JwtAuthFilterConfig( RedisService redisService,JwtService jwtService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
+		this.redisService = redisService;
         this.userDetailsService = userDetailsService;
         logger.info("jwt service : {}, userDetails : {}", jwtService, userDetailsService);
 
@@ -58,13 +59,19 @@ public class JwtAuthFilterConfig extends OncePerRequestFilter {
             userEmailAddress = jwtService.extractUsername(jwt);
             logger.info("jwt config  : {}", jwt);
         } catch (ExpiredJwtException e) {
+ String expiredUser = e.getClaims().getSubject();
 
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            String msg = "[{" + '"' + "error " + '"' + ":" + '"' + "Expired Token" + '"' +
+ 
+ 
+ String msg = "[{" + '"' + "error " + '"' + ":" + '"' + "Expired Token" + '"' +
                     ", " + '"' + "message " + '"' + ":" + '"' + "log in again " + '"' +
                     "," + '"' + "timestamp" + '"' + ":" + '"' + formatDateTime(LocalDateTime.now()) + '"' + "}]";
-            logger.warn("User tried using expired jwt : {} ", msg);
+
+            logger.warn("User "+expiredUser+" using expired jwt : {} ", msg);
+if(redisService.get(expiredUser,UsersResponse.class) != null)
+                    redisService.delete(expiredUser);
             response.getOutputStream().write(msg.getBytes(StandardCharsets.UTF_8));
             return;
         } catch (SignatureException e) {
