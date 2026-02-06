@@ -40,8 +40,7 @@ public class ServiceConcurrentExecutor {
     private ServiceConcurrentExecutor() {
 
         int threads = Runtime.getRuntime().availableProcessors();
-        this.executorService = Executors.newFixedThreadPool(threads);
-    }
+this.executorService = Executors.newVirtualThreadPerTaskExecutor();    }
 
     private ExecutorService setThreadName(boolean isContactForm) {
         ThreadFactory threadFactory = new ThreadFactory() {
