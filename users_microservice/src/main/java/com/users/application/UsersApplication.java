@@ -21,7 +21,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
         ,"com.users.application.configurations"
         ,"com.users.application.mappers",
         "com.utils.application",
-        "com.utils.application.configurations"
+        "com.utils.application.configurations",
+        "com.privileges.application.service"
         
         
 } )
