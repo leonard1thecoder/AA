@@ -148,6 +148,12 @@
             <artifactId>utils_microservice</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.aa</groupId>
+            <artifactId>privileges_microservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
