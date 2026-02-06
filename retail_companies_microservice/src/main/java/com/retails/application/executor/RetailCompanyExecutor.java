@@ -28,7 +28,7 @@ public class RetailCompanyExecutor {
     private RetailCompanyExecutor() {
 
         int threads = Runtime.getRuntime().availableProcessors();
-        this.executorService = Executors.newFixedThreadPool(threads);
+        this.executorService = Executors.defaultThreadFactory();
     }
 
     private ExecutorService setThreadName(boolean isContactForm) {
