@@ -2,151 +2,144 @@ package com.retails.application.service;
 
 
 import com.retails.application.dto.*;
-import com.retails.application.mapper.RetailCompanyMapper;
+import com.retails.application.entity.RetailCompany;
 import com.retails.application.repository.RetailCompanyRepository;
-import com.utils.application.Execute;
 import com.utils.application.RedisService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 import com.retails.application.exceptions.*;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-@Service
-public class RetailCompanyService implements Execute<List<RetailCompanyResponse>> {
+import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
 
-    private RetailCompanyRepository retailCompanyRepository;
+@Service
+public class RetailCompanyService implements Callable<List<RetailCompanyResponse>> {
+    private final RetailCompanyRepository retailCompanyRepository;
     public static String serviceHandler;
-    private RedisService redisService;
+    private final RedisService redisService;
+    @Setter
     private RegisterRetailCompanyRequest registerRetailCompanyRequest;
-    private RetailCompanyMapper retailCompanyMapper;
-    private PasswordEncoder passwordEncoder;
-    private DisplayRetailCompanyByRetailCoRegNoRequest displayRetailCompanyByRetailCoRegNoRequest;
+    @Setter
+    private DisplayRetailCompanyByIdRequest displayRetailCompanyByIdRequest;
+    @Setter
     private DisplayRetailCompanyByNameRequest displayRetailCompanyByNameRequest;
+    @Setter
     private DisplayRetailCompaniesByOwnerNameRequest displayRetailCompaniesByOwnerNameRequest;
 
-    public RetailCompanyService(@Autowired RetailCompanyMapper retailCompanyMapper, @Autowired RetailCompanyRepository retailCompanyRepository) {
+    public RetailCompanyService(RetailCompanyRepository retailCompanyRepository, RedisService redisService) {
         this.retailCompanyRepository = retailCompanyRepository;
-        this.retailCompanyMapper = retailCompanyMapper;
-    }
-
-    public void setDisplayRetailCompanyByRetailCoRegNoRequest(DisplayRetailCompanyByRetailCoRegNoRequest displayRetailCompanyByRetailCoRegNoRequest) {
-        this.displayRetailCompanyByRetailCoRegNoRequest = displayRetailCompanyByRetailCoRegNoRequest;
-    }
-
-    public void setDisplayRetailCompanyByNameRequest(DisplayRetailCompanyByNameRequest displayRetailCompanyByNameRequest) {
-        this.displayRetailCompanyByNameRequest = displayRetailCompanyByNameRequest;
-    }
-
-    public void setDisplayRetailCompaniesByOwnerNameRequest(DisplayRetailCompaniesByOwnerNameRequest displayRetailCompaniesByOwnerNameRequest) {
-        this.displayRetailCompaniesByOwnerNameRequest = displayRetailCompaniesByOwnerNameRequest;
-    }
-
-    public void setRegisterLiquorStoreRequest(RegisterRetailCompanyRequest registerRetailCompanyRequest) {
-        this.registerRetailCompanyRequest = registerRetailCompanyRequest;
+        this.redisService = redisService;
     }
 
     private List<RetailCompanyResponse> registerRetailCompany() {
-        List<RetailCompanyResponse> retailCompanyResponseList;
-        var entity = retailCompanyMapper.toEntity(registerRetailCompanyRequest);
-        if (retailCompanyRepository.findByLiquorStoreCertNo(registerRetailCompanyRequest.getLiquorStoreCertNo()).isPresent() || retailCompanyRepository.findByLiquorStoreName(registerRetailCompanyRequest.getLiquorStoreName()).isPresent()) {
-            throw new RetailCompanyAlreadyExistException("Retail company you trying to already exists, confirm your license or name");
+        var optRetailCompany = retailCompanyRepository.findByRetailCompanyName(registerRetailCompanyRequest.getRetailCompanyName());
+        if (optRetailCompany.isPresent()) {
+            var errorMessage = " Retail Company already";
+            var resolveIssue = "Change the name of retail company";
+            throw throwExceptionAndReport(new RetailCompanyAlreadyExistException(errorMessage), errorMessage, resolveIssue);
         } else {
-            retailCompanyResponseList = List.of(retailCompanyRepository.save(entity))
-                    .stream()
-                    .map(retailCompanyMapper::toDto)
-                    .toList();
+
+            var retailCompany = retailCompanyRepository.save(RetailCompany
+                    .builder()
+                    .fkUsersId(registerRetailCompanyRequest.getFk_user_id())
+                    .registrationDate(formatDateTime(LocalDateTime.now()))
+                    .modifiedDate(formatDateTime(LocalDateTime.now()))
+                    .fkPrivilegeId(registerRetailCompanyRequest.getFk_privilege_id())
+                    .retailCompanyName(registerRetailCompanyRequest.getRetailCompanyName())
+                    .countryName(registerRetailCompanyRequest.getCountryName()).
+                    cityName(registerRetailCompanyRequest.getCityName())
+                    .retailCompanyCertNo(registerRetailCompanyRequest.getRetailCompanyCertNo())
+                    .retailCompanyStatus(registerRetailCompanyRequest.getRetailCompanyStatus())
+                    .build());
+
+            return mapToResponse(List.of(retailCompany));
         }
-        return retailCompanyResponseList;
     }
 
-    private List<RetailCompanyResponse> displayAllRetailCompanies() {
-        return retailCompanyRepository.findAll()
-                .stream()
-                .map(retailCompanyMapper::toDto)
+    private List<RetailCompanyResponse> mapToResponse(List<RetailCompany> list) {
+        return list
+                .parallelStream()
+                .map(s ->
+                        RetailCompanyResponse
+                                .builder()
+                                .id(s.getId())
+                                .retailCompanyName(s.getRetailCompanyName())
+                                .countryName(s.getCountryName())
+                                .cityName(s.getCityName())
+                                .retailCompanyCertNo(s.getRetailCompanyCertNo())
+                                .registrationDate(s.getRegistrationDate())
+                                .modifiedDate(s.getModifiedDate())
+                                .retailCompanyStatus(s.getRetailCompanyStatus())
+                                .build())
                 .toList();
     }
 
+    private String formatDateTime(LocalDateTime issueDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return issueDate.format(formatter);
+    }
+
+    private List<RetailCompanyResponse> displayAllRetailCompanies() {
+        return mapToResponse(retailCompanyRepository.findAll());
+    }
+
     private List<RetailCompanyResponse> displayRetailCompanyByName() {
-        var encrypt = passwordEncoder.encode(displayRetailCompanyByNameRequest.getRetailCompanyName());
+        var encrypt = displayRetailCompanyByNameRequest.getRetailCompanyName();
         var redisRetailCompanyResponse = redisService.get(encrypt, RetailCompanyResponse.class);
         if (redisRetailCompanyResponse != null) {
             return List.of(redisRetailCompanyResponse);
         } else {
-            var retailCompanyOptionalEntity = retailCompanyRepository.findByLiquorStoreName(displayRetailCompanyByNameRequest.getRetailCompanyName());
+            var retailCompanyOptionalEntity = retailCompanyRepository.findByRetailCompanyName(displayRetailCompanyByNameRequest.getRetailCompanyName());
             if (retailCompanyOptionalEntity.isPresent()) {
-                var jpaRetailCompanyResponse = retailCompanyOptionalEntity.stream()
-                        .map(retailCompanyMapper::toDto)
-                        .toList();
-                redisService.set(encrypt, jpaRetailCompanyResponse, 5L, TimeUnit.HOURS);
+                var jpaRetailCompanyResponse = mapToResponse(retailCompanyOptionalEntity
+                        .stream()
+                        .toList());
+                redisService.set(encrypt, jpaRetailCompanyResponse.get(0), 5L, TimeUnit.HOURS);
                 return jpaRetailCompanyResponse;
             } else
                 throw new RetailCompanyNotFoundException("Retail company not found when searching by name");
         }
     }
 
-    private List<RetailCompanyResponse> displayRetailCompanyByRetailCoRegNo() {
-        var encrypt = passwordEncoder.encode(displayRetailCompanyByRetailCoRegNoRequest.getRetailCompanyRetailRegNo());
-        var redisRetailCompanyResponse = redisService.get(encrypt, RetailCompanyResponse.class);
-        if (redisRetailCompanyResponse != null) {
-            return List.of(redisRetailCompanyResponse);
-        } else {
-            var retailCompanyOptionalEntity = retailCompanyRepository.findByLiquorStoreCertNo(displayRetailCompanyByRetailCoRegNoRequest.getRetailCompanyRetailRegNo());
-            if (retailCompanyOptionalEntity.isPresent()) {
-                var jpaRetailCompanyResponse = retailCompanyOptionalEntity.stream()
-                        .map(retailCompanyMapper::toDto)
-                        .toList();
-                redisService.set(encrypt, jpaRetailCompanyResponse, 5L, TimeUnit.HOURS);
-                return jpaRetailCompanyResponse;
-            } else
-                throw new RetailCompanyNotFoundException("Retail company not found when searching by registration no");
-        }
-    }
-
-    private List<RetailCompanyResponse> displayRetailCompaniesByOwnerName() {
-        var encrypt = passwordEncoder.encode(displayRetailCompaniesByOwnerNameRequest.getUsersEntity().getUserIdentityNo());
-        var redisRetailCompanyResponse = redisService.get(encrypt, RetailCompanyResponse.class);
-        if (redisRetailCompanyResponse != null) {
-            return List.of(redisRetailCompanyResponse);
-        } else {
-            var retailCompanyOptionalEntity = retailCompanyRepository.findByOwnerName(displayRetailCompaniesByOwnerNameRequest.getUsersEntity());
-            if (retailCompanyOptionalEntity.isPresent()) {
-                var jpaRetailCompanyResponse = retailCompanyOptionalEntity.stream()
-                        .map(retailCompanyMapper::toDto)
-                        .toList();
-                redisService.set(encrypt,jpaRetailCompanyResponse,5L, TimeUnit.HOURS);
-                return jpaRetailCompanyResponse;
-            }else
-                throw new RetailCompanyNotFoundException("Retail company not found when searching by owner");
-        }
-    }
-
     @Override
     public List<RetailCompanyResponse> call() throws Exception {
-        switch (serviceHandler) {
-            case "registerRetailCompany":
-                return registerRetailCompany();
-            case "displayRetailCompaniesByOwnerName":
-                return displayRetailCompaniesByOwnerName();
-            case "displayRetailCompanyByRetailCoRegNo":
-                return displayRetailCompanyByRetailCoRegNo();
-            case "displayRetailCompanyByName":
-                return displayRetailCompanyByName();
-            case "displayAllRetailCompanies":
-                return displayAllRetailCompanies();
-            default:
-                throw new RuntimeException();
+        return switch (serviceHandler) {
+            case "registerRetailCompany" -> registerRetailCompany();
+            case "displayRetailCompanyByName" -> displayRetailCompanyByName();
+            case "displayAllRetailCompanies" -> displayAllRetailCompanies();
+            case "displayRetailCompanyById" -> displayRetailCompanyById();
+
+            default -> throw new RuntimeException();
+        };
+    }
+
+    private List<RetailCompanyResponse> displayRetailCompanyById() {
+
+        var redisRetailCompanyResponse = redisService.get(displayRetailCompanyByIdRequest.getRetailCompanyId().toString(), RetailCompanyResponse.class);
+        if(redisRetailCompanyResponse != null)
+            return List.of(redisRetailCompanyResponse);
+        else {
+            var optRetailCompany = this.retailCompanyRepository.findById(displayRetailCompanyByIdRequest.getRetailCompanyId());
+
+            if (optRetailCompany.isPresent()) {
+                var  list = optRetailCompany
+                        .stream()
+                        .toList();
+                var jpaRetailCompanyResponse = mapToResponse(list);
+                redisService.set(displayRetailCompanyByIdRequest.getRetailCompanyId().toString(), jpaRetailCompanyResponse.get(0), 5L, TimeUnit.HOURS);
+
+                return jpaRetailCompanyResponse;
+            } else {
+                var errorMessage = " Retail Company with id : " + displayRetailCompanyByIdRequest.getRetailCompanyId();
+                var resolveIssue = "Check out company id";
+                throw throwExceptionAndReport(new RetailCompanyNotFoundException(errorMessage), errorMessage, resolveIssue);
+            }
         }
     }
 
-    @Override
-    public void setCache(@Autowired RedisService redisService) {
-        this.redisService = redisService;
-    }
-
-    @Override
-    public void setEncodeCacheKey(@Autowired PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
 }

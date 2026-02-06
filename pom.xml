@@ -21,8 +21,10 @@
 
     <modules>
         <module>utils_microservice</module>
+        <module>privileges_microservice</module>
         <module>users_microservice</module>
-        <!-- add other modules here -->
+        <module>retail_companies_microservice</module>
+                <!-- add other modules here -->
     </modules>
 
     <properties>

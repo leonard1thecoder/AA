@@ -1,6 +1,7 @@
 package com.users.application.executor;
 
 
+import com.privileges.application.service.PrivilegesService;
 import com.users.application.dtos.ContactFormRequest;
 import com.users.application.dtos.ContactUsResponse;
 import com.users.application.dtos.UsersResponse;
@@ -50,9 +51,9 @@ public class ServiceConcurrentExecutor {
             public Thread newThread(Runnable r) {
                 Thread t = defaultFactory.newThread(r);
 
-                if(isContactForm){
- t.setName("Contact form");
-              }else {
+                if (isContactForm) {
+                    t.setName("Contact form");
+                } else {
                     t.setName("AA-" + UsersService.serviceHandler); // "AA" prefix for Alcohol Agent
                 }
                 return t;
@@ -82,7 +83,7 @@ public class ServiceConcurrentExecutor {
         }
     }
 
-    public String buildContactFormServiceExecutor(ContactFormService service, ContactFormRequest request, boolean  isList) {
+    public String buildContactFormServiceExecutor(ContactFormService service, ContactFormRequest request, boolean isList) {
 
         Future<String> future = this.setThreadName(true).submit(() -> service.save(request));
         try {
@@ -92,12 +93,31 @@ public class ServiceConcurrentExecutor {
             ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
             throw new ServiceInterruptedException(errorMessage);
         } catch (ExecutionException e) {
-                throw throwExceptionAndReport(new InvalidArgumentException(getMessage()), getMessage(), getResolveIssueDetails());
+            throw throwExceptionAndReport(new InvalidArgumentException(getMessage()), getMessage(), getResolveIssueDetails());
         } catch (TimeoutException e) {
             var errorMessage = ExecutorControllerAdvice.setMessage("Time out occurred  while executing service : " + service + " reason service waited 15 seconds");
             ExecutorControllerAdvice.setResolveIssueDetails("please try again later");
             throw new ServiceTimeoutException(errorMessage);
         }
+    }
+
+    public List<? extends ResponseContract> buildServiceExecutor(PrivilegesService repo, String privilegeServiceManager) {
+        Future<List<? extends ResponseContract>> future = this
+                .setThreadName(false)
+                .submit(()-> repo.call(privilegeServiceManager));
+        try {
+            return future.get(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            return returnErrorResponse(false, "Error occurred while executing privilege service, service was interrupted" , "Contact AA Administrator");
+
+        } catch (ExecutionException e) {
+            return returnErrorResponse(false, "Error occurred while executing privilege service trace :  " + e.getStackTrace(), "Contact AA Administrator");
+
+        } catch (TimeoutException e) {
+            return returnErrorResponse(false, "Timeout Error occurred while executing privilege service :  ", "Contact AA Administrator");
+
+        }
+
     }
 
     public List<? extends ResponseContract> buildServiceExecutor(UsersService service) {
@@ -155,7 +175,7 @@ public class ServiceConcurrentExecutor {
                 else if (e.getMessage().contains("ResetPasswordSessionException"))
                     return returnErrorResponse(false, getMessage(), getResolveIssueDetails());
 
-			e.printStackTrace();
+                e.printStackTrace();
                 return returnErrorResponse(false, "Unknown Exception occurred trace :  " + e.getStackTrace(), "Contact AA Administrator");
             } catch (TimeoutException e) {
                 retryAttempt++;
