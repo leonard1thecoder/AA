@@ -1,20 +1,18 @@
 package com.retails.application.dto;
 
-
-import com.privileges.application.entity.Privileges;
-import com.users.application.entities.Users;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
-
+@AllArgsConstructor
 @Data
+@Builder
 public class RegisterRetailCompanyRequest {
 
-    private Users usersEntity;
+    private Long fk_user_id;
 
-    private Privileges privilegeEntity;
+    private String retailCompanyName,countryName,cityName,retailCompanyCertNo;
 
-    private String liquorStoreName,countryName,cityName,liquorStoreCertNo;
-
-    private Byte liquorStoreStatus;
+    private Byte retailCompanyStatus,fk_privilege_id;
 
     }
