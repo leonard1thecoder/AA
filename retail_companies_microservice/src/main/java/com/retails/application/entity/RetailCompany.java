@@ -1,31 +1,33 @@
 package com.retails.application.entity;
 
-import com.privileges.application.entity.Privileges;
-import com.users.application.entities.Users;
 import jakarta.persistence.*;
 import lombok.*;
 
-@ToString
-@Getter
-@Setter
 @Entity
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+
 public class RetailCompany {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name="pkUsersId", nullable = false)
-    private Users usersEntity;
+    @Column(unique = true, nullable = false)
+    private Long fkUsersId;
 
-    @OneToOne
-    @JoinColumn(name="pkPrivilegeId", nullable = false)
-    private Privileges privilegeEntity;
+    @Column(unique = true, nullable = false)
+    private String registrationDate,modifiedDate;
+    @Column(unique = true, nullable = false)
+    private Byte fkPrivilegeId;
 
-    private String liquorStoreName,countryName,cityName,liquorStoreCertNo;
+    @Column(unique = true, nullable = false)
+    private String retailCompanyName, countryName, cityName, retailCompanyCertNo;
 
-    private Byte liquorStoreStatus;
+    @Column(unique = true, nullable = false)
+    private Byte retailCompanyStatus;
 
 
-   }
+}
