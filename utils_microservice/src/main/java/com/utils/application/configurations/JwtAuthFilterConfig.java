@@ -1,4 +1,4 @@
-package com.users.application.configurations;
+package com.utils.application.configurations;
 
 
 import com.users.application.services.JwtService;
