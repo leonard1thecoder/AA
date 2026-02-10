@@ -1,4 +1,4 @@
-package com.users.application.configurations;
+package com.utils.application.configurations;
 
 import jakarta.servlet.Filter;
 import org.springframework.context.annotation.Bean;
