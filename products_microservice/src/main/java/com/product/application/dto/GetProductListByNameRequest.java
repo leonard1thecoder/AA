@@ -7,6 +7,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class GetProductByNameRequest implements RequestContract {
+public class GetProductListByNameRequest implements RequestContract {
     private String productName;
 }
