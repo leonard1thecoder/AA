@@ -1,7 +1,7 @@
 package com.product.application.services;
 
 
-import com.product.application.dto.GetProductByNameRequest;
+import com.product.application.dto.GetProductListByNameRequest;
 import com.product.application.dto.ProductListResponse;
 import com.product.application.dto.RegisterProductListRequest;
 import com.product.application.entities.ProductList;
@@ -38,21 +38,22 @@ private Logger logger = LoggerFactory.getLogger(ProductServicesListService.class
         this.redisService = redisService;
     }
 
-    private void addProduct(RequestContract request) {
+    private List<ProductListResponse> addProduct(RequestContract request) {
 
         if (request instanceof RegisterProductListRequest castedRequest) {
             var optionalAdministrator = usersRepository.findByUserFullName(castedRequest.getAdministrator().getFullName());
 
             if (optionalAdministrator.isPresent()) {
                 if (optionalAdministrator.get().getPrivileges().getPrivilegeName().equals("Administrator")) {
-                    productListRepository.save(ProductList
+                    return mapToResponse( productListRepository.save(ProductList
                             .builder()
                             .productName(castedRequest.getProductName())
                             .productStatus((byte) 1)
                             .productImagePath(castedRequest.getProductImagePath())
 
                             .administrator(optionalAdministrator.get())
-                            .build());
+                            .build()));
+
                 }else{
                     var errorMessage = "User submitting request to add product,  is not privileged";
                     var resolveIssue = "Ensure you administrator before sending request to add product list";
@@ -76,7 +77,7 @@ private Logger logger = LoggerFactory.getLogger(ProductServicesListService.class
     }
 
     private List<ProductListResponse> getProductByName(RequestContract request){
-        if(request instanceof GetProductByNameRequest castedRequest){
+        if(request instanceof GetProductListByNameRequest castedRequest){
            var optionalProduct= productListRepository.findByProductName(castedRequest.getProductName());
             if(optionalProduct.isPresent()){
                 return mapToResponse(optionalProduct.get());
@@ -120,9 +121,11 @@ private Logger logger = LoggerFactory.getLogger(ProductServicesListService.class
 
     @Override
     public List<? extends ResponseContract> call(String serviceRunner, RequestContract request) {
-        switch(serviceRunner) {
-
-        }
-        return List.of();
+        return switch (serviceRunner) {
+            case "getAllAddedProducts" -> this.getAllAddedProducts();
+            case "addProduct" -> this.addProduct(request);
+            case "getProductByName" -> this.getProductByName(request);
+            default -> throw new IllegalStateException("Unexpected value: " + serviceRunner);
+        };
     }
 }

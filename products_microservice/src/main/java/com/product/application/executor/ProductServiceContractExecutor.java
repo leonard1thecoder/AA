@@ -34,13 +34,16 @@ public class ProductServiceContractExecutor {
         var retryTime = 3;
         var retryAttempt = 0;
         Future<List<? extends ResponseContract>> future;
-        if(service instanceof ProductsLitersService casteService)
-           future = this.executorService.submit(() -> casteService.call(serviceRunner,request));
-        else  if(service instanceof ProductServicesListService casteService)
+        if(service instanceof ProductsLitersService casteService) {
+           logger.info("Executing Product liters Service");
+            future = this.executorService.submit(() -> casteService.call(serviceRunner, request));
+        }else  if(service instanceof ProductServicesListService casteService) {
+            logger.info("Executing Product List Service");
+            future = this.executorService.submit(() -> casteService.call(serviceRunner, request));
+        }else if(service instanceof CompanyProductsService casteService){
+            logger.info("Executing Company Product  Service");
             future = this.executorService.submit(() -> casteService.call(serviceRunner,request));
-        else if(service instanceof CompanyProductsService casteService)
-            future = this.executorService.submit(() -> casteService.call(serviceRunner,request));
-        else
+        } else
             future = null;
 
         while (retryAttempt < retryTime) {

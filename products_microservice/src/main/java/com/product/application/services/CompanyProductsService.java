@@ -1,28 +1,30 @@
 package com.product.application.services;
 
-import com.product.application.dto.CompanyProductRequest;
-import com.product.application.dto.CompanyProductResponse;
+import com.product.application.dto.*;
 import com.product.application.entities.CompanyProducts;
-
 import com.product.application.entities.ProductList;
 import com.product.application.entities.ProductsLiters;
+import com.product.application.exceptions.CompanyProductListNotFoundException;
+import com.product.application.exceptions.ProductLiterNotFoundException;
 import com.product.application.repositories.CompanyProductsRepository;
 import com.product.application.repositories.ProductListRepository;
 import com.product.application.repositories.ProductLitersRepository;
-import com.product.application.services.ProductServicesContract;
 import com.retails.application.entity.RetailCompany;
+import com.retails.application.exceptions.RetailCompanyNotFoundException;
 import com.retails.application.repository.RetailCompanyRepository;
 import com.utils.application.RequestContract;
 import com.utils.application.ResponseContract;
+import com.utils.application.globalExceptions.IncorrectRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.persistence.EntityNotFoundException;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static com.utils.application.CommonMethods.formatDateTime;
+import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
 
 @Slf4j
 @Service
@@ -35,115 +37,153 @@ public class CompanyProductsService implements ProductServicesContract {
     private final ProductListRepository productListRepo;
     private final ProductLitersRepository productsLitersRepo;
 
-    public CompanyProductResponse createProduct(CompanyProductRequest request) {
+    private List<CompanyProductResponse> createProduct(RequestContract request) {
 
-        log.info("Creating company product for companyId={}, productListId={}",
-                request.getCompanyId(), request.getProductListId());
+        if (request instanceof CompanyProductRequest castedRequest) {
+            log.info("Creating company product for companyId={}, productListId={}",
+                    castedRequest.getCompanyId(), castedRequest.getProductListId());
 
-        RetailCompany company = retailCompanyRepo.findById(request.getCompanyId())
-                .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+            RetailCompany company = retailCompanyRepo.findById(castedRequest.getCompanyId())
+                    .orElseThrow(() -> {   var errorMessage = "Retail company  not found";
+                        var resolveIssue = "Please check your retail company id";
+                        return throwExceptionAndReport(new RetailCompanyNotFoundException(errorMessage), errorMessage, resolveIssue);
+                    });
 
-        ProductList productList = productListRepo.findById(request.getProductListId())
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+            ProductList productList = productListRepo.findById(castedRequest.getProductListId())
+                    .orElseThrow(() ->{    var errorMessage = "Product list not found";
+                        var resolveIssue = "Please check product list id";
+                        return throwExceptionAndReport(new CompanyProductListNotFoundException(errorMessage), errorMessage, resolveIssue);
 
-        ProductsLiters liters = productsLitersRepo.findById(request.getProductsLitersId())
-                .orElseThrow(() -> new EntityNotFoundException("Liters not found"));
+                    });
 
-        CompanyProducts entity = CompanyProducts.builder()
-                .companyProduct_owner(company)
-                .productList(productList)
-                .productsLiters(liters)
-                .productQuantity(request.getProductQuantity())
-                .productPrice(request.getProductPrice())
-                .returnableBottlePrice(request.getReturnableBottlePrice())
-                .lateNightPriceIncrease(request.getLateNightPriceIncrease())
-                .companyProductStatus(request.getCompanyProductStatus())
-                .lateNightPriceStatus(request.getLateNightPriceStatus())
-                .registrationDate(LocalDateTime.now().toString())
-                .modifiedDate(LocalDateTime.now().toString())
-                .build();
+            ProductsLiters liters = productsLitersRepo.findById(castedRequest.getProductsLitersId())
+                    .orElseThrow(() ->{    var errorMessage = "Product liter not found";
+                        var resolveIssue = "Please  check product liter id";
+                        return throwExceptionAndReport(new ProductLiterNotFoundException(errorMessage), errorMessage, resolveIssue);
+                    });
 
-        CompanyProducts saved = companyProductsRepo.save(entity);
+            CompanyProducts entity = CompanyProducts.builder()
+                    .companyProduct_owner(company)
+                    .productList(productList)
+                    .productsLiters(liters)
+                    .productQuantity(castedRequest.getProductQuantity())
+                    .productPrice(castedRequest.getProductPrice())
+                    .returnableBottlePrice(castedRequest.getReturnableBottlePrice())
+                    .lateNightPriceIncrease(castedRequest.getLateNightPriceIncrease())
+                    .companyProductStatus(castedRequest.getCompanyProductStatus())
+                    .lateNightPriceStatus(castedRequest.getLateNightPriceStatus())
+                    .registrationDate(formatDateTime(LocalDateTime.now()))
+                    .modifiedDate(formatDateTime(LocalDateTime.now()))
+                    .build();
 
-        log.info("Company product created successfully id={}", saved.getCompanyProductId());
+            CompanyProducts saved = companyProductsRepo.save(entity);
 
-        return mapToResponse(saved);
+            log.info("Company product created successfully id={}", saved.getCompanyProductId());
+
+            return mapToResponse(saved);
+        } else {
+            var errorMessage = "Request sent is not correct to submit add product request";
+            var resolveIssue = "Use correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+
+        }
     }
 
-    public CompanyProductResponse updateProduct(Long id, CompanyProductRequest request) {
-
-        log.info("Updating company product id={}", id);
-
-        CompanyProducts product = companyProductsRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Company product not found"));
-
-        product.setProductQuantity(request.getProductQuantity());
-        product.setProductPrice(request.getProductPrice());
-        product.setReturnableBottlePrice(request.getReturnableBottlePrice());
-        product.setLateNightPriceIncrease(request.getLateNightPriceIncrease());
-        product.setCompanyProductStatus(request.getCompanyProductStatus());
-        product.setLateNightPriceStatus(request.getLateNightPriceStatus());
-        product.setModifiedDate(LocalDateTime.now().toString());
-
-        CompanyProducts updated = companyProductsRepo.save(product);
-
-        log.info("Company product updated id={}", id);
-
-        return mapToResponse(updated);
-    }
 
     @Transactional(readOnly = true)
-    public List<CompanyProductResponse> getProductsByCompany(Long companyId) {
+    protected List<CompanyProductResponse> getProductsByCompany(RequestContract request) {
 
-        log.info("Fetching products for companyId={}", companyId);
+        if (request instanceof GetProductByCompanyId castedRequest) {
+            log.info("Fetching products for companyId={}", castedRequest.getCompanyId());
 
-        return companyProductsRepo.findByCompanyProduct_owner_Id(companyId)
-                .stream()
-                .map(this::mapToResponse)
+            return companyProductsRepo.findByCompanyProduct_owner_Id(castedRequest.getCompanyId())
+                    .stream()
+                    .map(s->CompanyProductResponse.builder()
+                            .companyProductId(s.getCompanyProductId())
+                            .companyName(s.getCompanyProduct_owner().getRetailCompanyName())
+                            .productName(s.getProductList().getProductName())
+                            .productQuantity(s.getProductQuantity())
+                            .productPrice(s.getProductPrice())
+                            .status(s.getCompanyProductStatus())
+                            .registrationDate(s.getRegistrationDate())
+                            .modifiedDate(s.getModifiedDate())
+                            .build())
+                    .toList();
+        } else {
+            var errorMessage = "Request sent is not correct to submit add product request";
+            var resolveIssue = "Use correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+
+        }
+    }
+
+
+    @Transactional(readOnly = true)
+    protected List<CompanyProductResponse> getProductById(RequestContract request) {
+        if (request instanceof GetProductByCompanyProductId castedRequest) {
+            log.info("Fetching company product id={}", castedRequest.getCompanyProductId());
+
+            CompanyProducts product = companyProductsRepo.findById(castedRequest.getCompanyProductId())
+                    .orElseThrow(() ->{   var errorMessage = "Request sent is not correct to submit add product request";
+                        var resolveIssue = "Use correct request";
+                        return throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+                    });
+
+            return mapToResponse(product);
+        } else {
+            var errorMessage = "Request sent is not correct to submit add product request";
+            var resolveIssue = "Use correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+
+        }
+    }
+
+
+    private List<CompanyProductResponse> updateQuantity(RequestContract request) {
+
+        if (request instanceof UpdateCompanyProductQuantityRequest castedRequest) {
+            log.info("Updating quantity productId={}, newQuantity={}", castedRequest.getCompanyProductId(), castedRequest.getQuantity());
+
+            CompanyProducts product = companyProductsRepo.findById(castedRequest.getCompanyProductId())
+                    .orElseThrow(() -> {   var errorMessage = "Request sent is not correct to submit add product request";
+                        var resolveIssue = "Use correct request";
+                        return throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+                    });
+
+            product.setProductQuantity(castedRequest.getQuantity());
+            product.setModifiedDate(formatDateTime(LocalDateTime.now()));
+
+           return mapToResponse( companyProductsRepo.save(product));
+        }else{
+            var errorMessage = "Request sent is not correct to submit add product request";
+            var resolveIssue = "Use correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+        }
+    }
+
+    private List<CompanyProductResponse> mapToResponse(CompanyProducts entity) {
+        return Stream.of(entity)
+                .map(s->CompanyProductResponse.builder()
+                .companyProductId(s.getCompanyProductId())
+                .companyName(s.getCompanyProduct_owner().getRetailCompanyName())
+                .productName(s.getProductList().getProductName())
+                .productQuantity(s.getProductQuantity())
+                .productPrice(s.getProductPrice())
+                .status(s.getCompanyProductStatus())
+                .registrationDate(s.getRegistrationDate())
+                .modifiedDate(s.getModifiedDate())
+                .build())
                 .toList();
-    }
-
-    
-    @Transactional(readOnly = true)
-    public CompanyProductResponse getProductById(Long id) {
-
-        log.info("Fetching company product id={}", id);
-
-        CompanyProducts product = companyProductsRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-        return mapToResponse(product);
-    }
-
-
-    public void updateQuantity(Long id, Integer quantity) {
-
-        log.info("Updating quantity productId={}, newQuantity={}", id, quantity);
-
-        CompanyProducts product = companyProductsRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-        product.setProductQuantity(quantity);
-        product.setModifiedDate(LocalDateTime.now().toString());
-
-        companyProductsRepo.save(product);
-    }
-
-    private CompanyProductResponse mapToResponse(CompanyProducts entity) {
-        return CompanyProductResponse.builder()
-                .companyProductId(entity.getCompanyProductId())
-                .companyName(entity.getCompanyProduct_owner().getRetailCompanyName())
-                .productName(entity.getProductList().getProductName())
-                .productQuantity(entity.getProductQuantity())
-                .productPrice(entity.getProductPrice())
-                .status(entity.getCompanyProductStatus())
-                .registrationDate(entity.getRegistrationDate())
-                .modifiedDate(entity.getModifiedDate())
-                .build();
     }
 
     @Override
     public List<? extends ResponseContract> call(String serviceRunner, RequestContract request) {
-        return List.of();
+        return switch (serviceRunner) {
+            case "createProduct" -> this.createProduct(request);
+            case "getProductById" -> this.getProductById(request);
+            case "updateQuantity" -> this.updateQuantity(request);
+            case "getProductsByCompany" -> this.getProductsByCompany(request);
+            default -> throw new IllegalStateException("Unexpected value: " + serviceRunner);
+        };
     }
 }

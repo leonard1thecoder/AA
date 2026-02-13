@@ -38,7 +38,8 @@ public class ProductsLitersService implements ProductServicesContract {
 
             if (optionalAdministrator.isPresent()) {
                 if (optionalAdministrator.get().getPrivileges().getPrivilegeName().equals("Administrator")) {
-                 return   mapToResponse(productLitersRepository.save(ProductsLiters
+
+                    return   mapToResponse(productLitersRepository.save(ProductsLiters
                             .builder()
                             .productLiters(castedRequest.getLiters())
                             .status((byte) 1)
@@ -67,7 +68,7 @@ public class ProductsLitersService implements ProductServicesContract {
         return mapToResponse(this.productLitersRepository.findAll());
     }
 
-    private List<ProductLitersResponse> getAllProductLitersByLitersName(RequestContract request) {
+    private List<ProductLitersResponse> getProductLiterByLitersName(RequestContract request) {
         if (request instanceof GetProductLiterByNameRequest castedRequest) {
             var optionalProductLiter = this.productLitersRepository.findByProductLiters(castedRequest.getProductLiters());
             if (optionalProductLiter.isPresent()) {
@@ -114,9 +115,11 @@ public class ProductsLitersService implements ProductServicesContract {
 
     @Override
     public List<? extends ResponseContract> call(String serviceRunner, RequestContract request) {
-     switch(serviceRunner) {
-
-     }
-        return List.of();
+        return switch (serviceRunner) {
+            case "getAllProductLiters" -> this.getAllProductLiters();
+            case "addProduct" -> this.addProduct(request);
+            case "getProductLiterByLitersName" -> this.getProductLiterByLitersName(request);
+            default -> throw new IllegalStateException("Unexpected value: " + serviceRunner);
+        };
     }
 }

@@ -1,9 +1,10 @@
 package com.product.application.dto;
 
+import com.utils.application.RequestContract;
 import lombok.Data;
 
 @Data
-public class CompanyProductRequest {
+public class CompanyProductRequest implements RequestContract {
 
     private Long companyId;
     private Long productListId;
