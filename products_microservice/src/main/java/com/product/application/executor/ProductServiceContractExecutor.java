@@ -46,7 +46,7 @@ public class ProductServiceContractExecutor {
         } else
             future = null;
 
-        while (retryAttempt < retryTime) {
+        while (true) {
             try {
                 return future.get(15, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
@@ -73,7 +73,5 @@ public class ProductServiceContractExecutor {
                 }
             }
         }
-        return returnErrorResponse(false, ExceptionHandlerReporter.getMessage(), ExceptionHandlerReporter.getResolveIssueDetails());
-
     }
 }
