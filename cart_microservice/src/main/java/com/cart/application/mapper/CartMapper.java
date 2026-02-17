@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public class CartMapper {
 
-    public CartResponseDTO toDTO(Cart cart) {
+    public List<CartResponseDTO> toDTO(Cart cart) {
 
         List<CartItemResponseDTO> itemDTOs = cart.getItems().stream()
                 .map(item -> CartItemResponseDTO.builder()
@@ -29,12 +29,12 @@ public class CartMapper {
                 .mapToDouble(CartItemResponseDTO::getTotalPrice)
                 .sum();
 
-        return CartResponseDTO.builder()
+        return List.of(CartResponseDTO.builder()
                 .cartId(cart.getCartId())
                 .userId(cart.getUser().getId())
                 .items(itemDTOs)
                 .grandTotal(total)
-                .build();
+                .build());
     }
 }
 

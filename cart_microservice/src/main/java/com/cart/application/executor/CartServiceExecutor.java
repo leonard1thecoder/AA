@@ -1,14 +1,10 @@
-package com.product.application.executor;
+package com.cart.application.executor;
 
+import com.cart.application.service.CartService;
 import com.product.application.services.CompanyProductsService;
-import com.product.application.services.ProductServicesContract;
 import com.product.application.services.ProductServicesListService;
-import com.product.application.services.ProductsLitersService;
-import com.utils.application.ExceptionHandlerReporter;
-import com.utils.application.RequestContract;
-import com.utils.application.ResponseContract;
+import com.utils.application.*;
 import com.utils.application.controllerAdvice.ExecutorControllerAdvice;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,44 +13,45 @@ import java.util.concurrent.*;
 
 import static com.utils.application.ExceptionHandler.returnErrorResponse;
 
-public class ProductServiceContractExecutor {
-    private final Logger logger = LoggerFactory.getLogger(ProductServiceContractExecutor.class);
-    @Getter
-    private final static ProductServiceContractExecutor instance = new ProductServiceContractExecutor();
+public abstract class CartServiceExecutor {
+    private final Logger logger = LoggerFactory.getLogger(CartServiceExecutor.class);
     private final ExecutorService executorService;
 
 
-
-    private ProductServiceContractExecutor() {
-        this.executorService = Executors.newVirtualThreadPerTaskExecutor();
+    protected CartServiceExecutor(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 
-
-    public List<? extends ResponseContract> buildContactFormServiceExecutor(ProductServicesContract service, RequestContract request, String serviceRunner) {
+    public List<? extends ResponseContract> executeService(ServiceContract service, RequestContract request, String serviceRunner) {
         var retryTime = 3;
         var retryAttempt = 0;
         Future<List<? extends ResponseContract>> future;
-        if(service instanceof ProductsLitersService casteService) {
-           logger.info("Executing Product liters Service");
-            future = this.executorService.submit(() -> casteService.call(serviceRunner, request));
-        }else  if(service instanceof ProductServicesListService casteService) {
-            logger.info("Executing Product List Service");
-            future = this.executorService.submit(() -> casteService.call(serviceRunner, request));
-        }else if(service instanceof CompanyProductsService casteService){
-            logger.info("Executing Company Product  Service");
-            future = this.executorService.submit(() -> casteService.call(serviceRunner,request));
-        } else
-            future = null;
+        switch (service) {
+            case CartService casteService -> {
+                logger.info("Executing Product liters Service");
+                future = this.executorService.submit(() -> casteService.call(serviceRunner, request));
+            }
+            case ProductServicesListService casteService -> {
+                logger.info("Executing Product List Service");
+                future = this.executorService.submit(() -> casteService.call(serviceRunner, request));
+            }
+            case CompanyProductsService casteService -> {
+                logger.info("Executing Company Product  Service");
+                future = this.executorService.submit(() -> casteService.call(serviceRunner, request));
+            }
+            case null, default -> future = null;
+        }
 
         while (true) {
             try {
+                assert future != null;
                 return future.get(15, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 var errorMessage = ExecutorControllerAdvice.setMessage("Interruption occurred while executing service : " + service + " reason " + e.getMessage());
                 ExecutorControllerAdvice.setResolveIssueDetails("issue is under investigation, please try again later");
                 return returnErrorResponse(false, errorMessage, "please reload the application");
             } catch (ExecutionException e) {
-                return returnErrorResponse(false, ExceptionHandlerReporter.getMessage() +" "+ e.getMessage(), ExceptionHandlerReporter.getResolveIssueDetails());
+                return returnErrorResponse(false, ExceptionHandlerReporter.getMessage() + " " + e.getMessage(), ExceptionHandlerReporter.getResolveIssueDetails());
             } catch (TimeoutException e) {
                 retryAttempt++;
                 if (retryAttempt >= retryTime) {

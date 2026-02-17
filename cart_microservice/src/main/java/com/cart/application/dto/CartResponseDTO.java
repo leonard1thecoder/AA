@@ -1,5 +1,6 @@
 package com.cart.application.dto;
 
+import com.utils.application.ResponseContract;
 import lombok.*;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CartResponseDTO {
+public class CartResponseDTO implements ResponseContract {
 
     private Long cartId;
     private Long userId;

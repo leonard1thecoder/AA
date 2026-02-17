@@ -45,5 +45,5 @@ public class CompanyProducts {
 
     private Double returnableBottlePrice,lateNightPriceIncrease;
 
-    private byte lateNightPriceStatus;
+    private byte lateNightPriceStatus,returnableBottleStatus;
 }
