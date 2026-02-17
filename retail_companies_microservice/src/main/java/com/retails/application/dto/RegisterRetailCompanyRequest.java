@@ -1,5 +1,8 @@
 package com.retails.application.dto;
 
+import com.privileges.application.entity.Privileges;
+import com.users.application.entities.Users;
+import com.utils.application.RequestContract;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,12 +10,12 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 @Builder
-public class RegisterRetailCompanyRequest {
+public class RegisterRetailCompanyRequest implements RequestContract {
 
-    private Long fk_user_id;
-
+    private Users user;
+    private Privileges privilege;
     private String retailCompanyName,countryName,cityName,retailCompanyCertNo;
 
-    private Byte retailCompanyStatus,fk_privilege_id;
+    private Byte retailCompanyStatus;
 
     }
