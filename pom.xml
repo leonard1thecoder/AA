@@ -23,6 +23,10 @@
         <module>utils_microservice</module>
         <module>privileges_microservice</module>
         <module>users_microservice</module>
+        <module>users_followers_retails_microservice</module>
+        <module>cart_microservice</module>
+        <module>products_microservice</module>
+        <module>payment_microservice</module>
         <module>retail_companies_microservice</module>
                 <!-- add other modules here -->
     </modules>
