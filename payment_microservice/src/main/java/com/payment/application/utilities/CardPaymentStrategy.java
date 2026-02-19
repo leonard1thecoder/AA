@@ -1,10 +1,15 @@
 package com.payment.application.utilities;
 
+import com.payment.application.dtos.CardDetails;
 import com.payment.application.entity.Payment;
+import lombok.Data;
 import org.springframework.stereotype.Component;
 
 @Component
+@Data
 public class CardPaymentStrategy implements PaymentStrategy {
+
+    private  CardDetails cardDetails;
 
     @Override
     public PaymentMethod getMethod() {
@@ -18,5 +23,9 @@ public class CardPaymentStrategy implements PaymentStrategy {
         System.out.println("Processing CARD payment...");
 
         return PaymentStatus.SUCCESS;
+    }
+
+    private CardDetails getCardDetails(){
+        return this.cardDetails;
     }
 }
