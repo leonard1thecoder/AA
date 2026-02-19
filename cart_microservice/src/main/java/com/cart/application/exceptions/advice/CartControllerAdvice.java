@@ -1,6 +1,7 @@
 package com.cart.application.exceptions.advice;
 
 import com.cart.application.exceptions.CartNotAvailableException;
+import com.cart.application.exceptions.OrderNotFoundException;
 import com.cart.application.exceptions.ProductNotInCartException;
 import com.utils.application.ExceptionHandlerReporter;
 import com.utils.application.globalExceptions.errorResponse.ErrorResponse;
@@ -30,5 +31,13 @@ public class CartControllerAdvice extends ExceptionHandlerReporter {
         logger.warn("Error response : {}, error code : {}", list, HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<List<ErrorResponse>> manageOrderNotFoundException() {
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(), getResolveIssueDetails(), getMessage(), getException()));
+        logger.warn("Error response : {}, error code : {}", list, HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    }
+
 
 }
