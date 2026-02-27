@@ -1,5 +1,6 @@
 package com.users.application.entities;
 
+import com.privileges.application.entity.Privileges;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,8 +21,10 @@ public class Users implements UserDetails {
     @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(nullable = false)
     private Long id;
-    @Column( nullable = false)
-    private Integer fk_privilege_id;
+
+    @OneToOne
+    @JoinColumn(name = "fk_privilege_id", nullable = false)
+    private Privileges privileges;
 
     @Column(unique = true,nullable = false)
 
@@ -48,16 +51,20 @@ public class Users implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(fk_privilege_id == 1)
-        return List.of(new SimpleGrantedAuthority("Alcohol Agent"));
-        else if (fk_privilege_id == 2)
-             return List.of(new SimpleGrantedAuthority("Alcohol Agent Artists"));
-        else if (fk_privilege_id == 3)
-            return List.of(new SimpleGrantedAuthority("Alcohol Agent Event hosts"));
-        else if(fk_privilege_id == 4)
-             return List.of(new SimpleGrantedAuthority("Alcohol Agent Retails"));
-        else
-            throw new IllegalArgumentException("Incorrect privilege");
+if (privileges == null) {
+        throw new IllegalStateException("User has no associated privilege");
+    }
+
+    String roleName = switch (privileges.getId()) {  
+        case 1  -> "Alcohol Agent";
+        case 2  -> "Alcohol Agent Artists";
+        case 3  -> "Alcohol Agent Event hosts";
+        case 4  -> "Alcohol Agent Retails";
+        default  -> throw new IllegalArgumentException(
+            "Incorrect privilege: " + privileges.getId());
+    };
+
+    return List.of(new SimpleGrantedAuthority(roleName));
     }
 
     @Override
