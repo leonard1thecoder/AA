@@ -18,23 +18,36 @@ import java.util.List;
 public class ExecutorControllerAdvice extends ExceptionHandlerReporter {
     private static final Logger logger = LoggerFactory.getLogger(ExecutorControllerAdvice.class);
 
-
-
     @ExceptionHandler(ServiceTimeoutException.class)
     public ResponseEntity<List<ErrorResponse>> manageServiceTimeoutException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ServiceRunnerNotFoundException.class)
+    public ResponseEntity<List<ErrorResponse>> manageServiceRunnerNotFoundException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
+        logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
+    }
+
+
+    @ExceptionHandler(IncorrectRequestException.class)
+    public ResponseEntity<List<ErrorResponse>> manageIncorrectRequestException(){
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(ServiceInterruptedException.class)
     public ResponseEntity<ErrorResponse> manageServiceInterruptedException(){
-        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()),HttpStatus.BAD_GATEWAY);
     }
 
     @ExceptionHandler(ServiceExecutionException.class)
     public ResponseEntity<ErrorResponse> manageServiceExecutionException(){
-        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()),HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity<>(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()),HttpStatus.BAD_GATEWAY);
     }
 
 }

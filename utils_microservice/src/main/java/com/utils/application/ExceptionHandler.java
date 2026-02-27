@@ -21,32 +21,12 @@ public class ExceptionHandler {
             throw ex;
         }catch (RuntimeException reportException){
             logger.warn("Error thrown by exception : {}\n Time thrown : {}\n Trace exception :{}", ex,formatDateTime(LocalDateTime.now()) , Arrays.stream(reportException.getStackTrace()).toList());
+            ExceptionHandlerReporter.setException(reportException);
             return reportException;
         }
     }
 
-    public static List<ErrorResponse> returnErrorResponse(boolean logging,RuntimeException ex, String errorMessage, String resolveIssueDetails){
-        try{
-            ExceptionHandlerReporter.setMessage(errorMessage);
-            ExceptionHandlerReporter.setResolveIssueDetails(resolveIssueDetails);
-            throw ex;
-        }catch (RuntimeException reportException){
-            if(logging)
-                logger.warn("Error thrown by exception : {}\n Time thrown : {}\n Trace exception :{}", ex,formatDateTime(LocalDateTime.now()) , Arrays.stream(reportException.getStackTrace()).toList());
-
-            return List.of(new ErrorResponse(errorMessage,formatDateTime(),resolveIssueDetails));
-        }
-    }
-
-    public static List<ErrorResponse> returnErrorResponse(boolean logging, String errorMessage, String resolveIssueDetails){
-
-            ExceptionHandlerReporter.setMessage(errorMessage);
-            ExceptionHandlerReporter.setResolveIssueDetails(resolveIssueDetails);
-
-            if(logging)
-                logger.warn("Exception trhown by controller advicer exception details ");
-
-            return List.of(new ErrorResponse(errorMessage,formatDateTime(),resolveIssueDetails));
-
+    public static List<ErrorResponse> returnErrorResponse(String errorMessage, String resolveIssueDetails,Throwable throwable){
+            return List.of(new ErrorResponse(errorMessage,formatDateTime(),resolveIssueDetails,throwable));
     }
 }

@@ -12,6 +12,8 @@ public class ExceptionHandlerReporter {
     private static String resolveIssueDetails;
     @Getter
     private static String issueDateFormatted;
+    @Getter
+    private static RuntimeException exception;
 
     public static String formatDateTime(LocalDateTime issueDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -35,4 +37,7 @@ public class ExceptionHandlerReporter {
         ExceptionHandlerReporter.resolveIssueDetails = resolveIssueDetails;
     }
 
+    public static void setException(RuntimeException exception) {
+        ExceptionHandlerReporter.exception = exception;
+    }
 }
