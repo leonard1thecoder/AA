@@ -1,30 +1,29 @@
 package com.users.application.services;
 
 
+import com.privileges.application.entity.Privileges;
+import com.privileges.application.exceptions.PrivilegeNotFoundException;
+import com.privileges.application.repository.PrivilegesRepository;
 import com.users.application.exceptions.*;
 import com.users.application.exceptions.controllerAdvice.UsersControllerAdvice;
-import com.users.application.validators.UsersFieldsDataValidator;
-import com.utils.application.Execute;
+import com.users.application.repository.UsersRepository;
+import com.utils.application.JwtService;
 import com.utils.application.RedisService;
 import com.users.application.dtos.*;
 import com.users.application.entities.Users;
-import com.users.application.mappers.UsersMapper;
-import com.users.application.repository.UsersRepository;
 
+
+import com.utils.application.RequestContract;
+import com.utils.application.ServiceContract;
+import com.utils.application.globalExceptions.IncorrectRequestException;
 import com.utils.application.globalExceptions.ServiceHandlerException;
-import com.utils.application.mailing.VerifyCustomerEmail;
 import com.utils.application.mailing.dto.VerifyCustomerEvent;
 import com.utils.application.mailing.dto.VerifyUpdatePasswordEvent;
-import jakarta.transaction.Transactional;
-import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -36,116 +35,44 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+
 import static com.users.application.validators.UsersFieldsDataValidator.getInstance;
 import static com.utils.application.ExceptionHandler.throwExceptionAndReport;
-import static com.utils.application.HandlingLoadingService.handleServiceHandler;
 
 
 @Service
-public class UsersService implements Execute<List<UsersResponse>> {
+public class UsersService implements ServiceContract {
     private static final Logger logger = LoggerFactory.getLogger(UsersService.class);
 
     private final ApplicationEventPublisher publisher;
 
+    private final UsersRepository userRepository;
 
-    public static String serviceHandler;
-    @Setter
-    private static FindByTokenRequest findByTokenRequest;
-    private UsersFullNameRequest usersFullNameRequest;
-    @Setter
-    private static FindByEmailRequest findByEmailRequest;
-    @Setter
-    private static UsersRepository usersRepository;
-    private UsersRegisterRequest usersRegisterRequest;
-    private UpdatePasswordRequest updatePasswordRequest;
-    private static LoginRequest loginRequest;
-    private static IdentityNoRequest identityNoRequest;
-    @Getter
-    private FindByIdRequest findByIdRequest;
-    private static JwtService jwtService;
+    private final PrivilegesRepository privilegeRepository;
 
-    private static AuthenticationManager authenticationManager;
-    @Setter
-    private static UsersMapper usersMapper;
-    private static PasswordEncoder passwordEncoder;
-    private static RedisService redisService;
-    private UsersFieldsDataValidator validator;
 
-    @Autowired
-    public UsersService(@Autowired ApplicationEventPublisher publisher, @Autowired RedisTemplate redisTemplate, PasswordEncoder passwordEncoder, @Autowired JwtService jwtService, @Autowired AuthenticationManager authenticationManager, @Autowired UsersRepository usersRepository, @Autowired UsersMapper usersMapper) {
-        setUsersRepository(usersRepository);
+    private final com.utils.application.JwtService jwtService;
+
+    private final AuthenticationManager authenticationManager;
+
+    private final PasswordEncoder passwordEncoder;
+    private final RedisService redisService;
+
+    public UsersService(ApplicationEventPublisher publisher, UsersRepository userRepository, PrivilegesRepository privilegeRepository, JwtService jwtService, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, RedisService redisService) {
         this.publisher = publisher;
-        UsersService.passwordEncoder = passwordEncoder;
-        UsersService.usersMapper = usersMapper;
-        UsersService.jwtService = jwtService;
-        UsersService.redisService = new RedisService(redisTemplate);
-        UsersService.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.privilegeRepository = privilegeRepository;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
+        this.redisService = redisService;
     }
 
-    @Setter
-   private  static RollBackPasswordRequest rollBackPasswordRequest;
-    public UsersFullNameRequest usersFullNameRequest() {
-        return usersFullNameRequest;
-    }
-
-    public void setUsersFullNameRequest(UsersFullNameRequest usersFullNameRequest) {
-        this.usersFullNameRequest = usersFullNameRequest;
-    }
-
-    public void setFindByIdRequest(FindByIdRequest findByIdRequest) {
-        this.findByIdRequest = findByIdRequest;
-    }
-
-    public UsersRegisterRequest usersRegisterRequest() {
-        return usersRegisterRequest;
-    }
-
-    public void setUsersRegisterRequest(UsersRegisterRequest usersRegisterRequest) {
-        this.usersRegisterRequest = usersRegisterRequest;
-    }
-
-    public LoginRequest loginRequest() {
-        return loginRequest;
-    }
-
-    public IdentityNoRequest identityNoRequest() {
-        return identityNoRequest;
-    }
-
-    public void setIdentityNoRequest(IdentityNoRequest identityNoRequest) {
-        this.identityNoRequest = identityNoRequest;
-    }
-
-    public void setLoginRequest(LoginRequest loginRequest) {
-        this.loginRequest = loginRequest;
-    }
-
-    public UpdatePasswordRequest updatePasswordRequest() {
-        return updatePasswordRequest;
-    }
-
-    public void setUpdatePasswordRequest(UpdatePasswordRequest updatePasswordRequest) {
-        this.updatePasswordRequest = updatePasswordRequest;
-    }
-
-
-    public static void setServiceHandler(String serviceHandler) {
-        UsersService.serviceHandler = serviceHandler;
-    }
-
-    /*
-        Need to implement redis cache
-     */
-    
-    private List<UsersResponse> registerUsers() {
-        var request = this.usersRegisterRequest();
-        if (request == null) {
-            var errorMessage = "Users registration request is  null";
-            var resolveIssue = "Some of your data is registered, contact AA for verification";
-            throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
-        } else {
+    private List<UsersResponse> registerUsers(RequestContract request) {
+        if (request instanceof UsersRegisterRequest castedRequest) {
             Optional<Users> entitiesList;
-            entitiesList = usersRepository.findByUserCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo()));
+            var optionalPrivilege = privilegeRepository.findByPrivilegeName(castedRequest.getPrivileges().getPrivilegeName());
+            entitiesList = userRepository.findByUserCellphoneNo(getInstance().validateCellphoneNo(castedRequest.getUserCellphoneNo()));
 
             logger.info("entities list : {} ", entitiesList);
             if (entitiesList.isPresent()) {
@@ -160,50 +87,64 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 }
             } else {
 
-                if (request.getPrivileges() > 4 || request.getPrivileges() < 1) {
-                    var errorMessage = "AA agent do not have privilege id of : " + request.getPrivileges();
+                if (castedRequest.getPrivileges().getId() > 4 || castedRequest.getPrivileges().getId()  < 1) {
+                    var errorMessage = "AA agent do not have privilege id of : " + castedRequest.getPrivileges();
                     var resolveIssue = "use registration form to register in official website or app";
                     throw throwExceptionAndReport(new PrivilegeIdOutOfBoundException(errorMessage), errorMessage, resolveIssue);
                 }
 
-                if(request.getUserPassword().equals(request.getConfirmPassword())){
-                Users users = Users.builder()
-                        .userIdentityNo(getInstance().validateIdentityNo(request.getUserIdentityNo()))
-                        .userPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(usersRegisterRequest().getUserPassword().trim())))
-                        .userRegistrationDate(getInstance().formatDateTime(LocalDateTime.now()))
-                        .userModifiedDate(getInstance().formatDateTime(LocalDateTime.now()))
-                        .fk_privilege_id(request.getPrivileges())
-                        .userStatus((short) 0)
-                        .userCellphoneNo(getInstance().validateCellphoneNo(request.getUserCellphoneNo().trim()))
-                        .userFullName(request.getUserFullName().trim())
-                        .userEmailAddress(request.getUserEmailAddress().trim())
-                        .userAge(getInstance().getValidatedAge())
-                        .passwordUpdateStatus((short) 0)
-                        .build();
-
-                try {
-                    logger.info("users was successfully registered : data : {}", usersRepository.save(users));
-
-                    var responseList = mapToResponse(List.of(users));
-
-                    if (redisService.get("ALL_USERS", UsersResponse.class) != null) {
-                        logger.info("Cached data for all users deleted  : {}", redisService.delete("ALL_USERS"));
+                if (castedRequest.getUserPassword().equals(castedRequest.getConfirmPassword())) {
+                    Privileges privileges;
+                    if(optionalPrivilege.isPresent()){
+                        privileges = optionalPrivilege.get();
+                    }else{
+                        var errorMessage = "AA agent do not have privilege id of : " + castedRequest.getPrivileges();
+                        var resolveIssue = "use registration form to register in official website or app";
+                        throw throwExceptionAndReport(new PrivilegeNotFoundException(errorMessage), errorMessage, resolveIssue);
                     }
 
-                    logger.info("User : {} successfully registered data : {}", usersRegisterRequest().getUserFullName(), responseList);
-                    return responseList;
+                    Users users = Users.builder()
+                            .userIdentityNo(getInstance().validateIdentityNo(castedRequest.getUserIdentityNo()))
+                            .userPassword(passwordEncoder.encode(getInstance().checkPasswordValidity(castedRequest.getUserPassword().trim())))
+                            .userRegistrationDate(getInstance().formatDateTime(LocalDateTime.now()))
+                            .userModifiedDate(getInstance().formatDateTime(LocalDateTime.now()))
+                            .privileges(privileges)
+                            .userStatus((short) 0)
+                            .userCellphoneNo(getInstance().validateCellphoneNo(castedRequest.getUserCellphoneNo().trim()))
+                            .userFullName(castedRequest.getUserFullName().trim())
+                            .userEmailAddress(castedRequest.getUserEmailAddress().trim())
+                            .userAge(getInstance().getValidatedAge())
+                            .passwordUpdateStatus((short) 0)
+                            .build();
 
-                } catch (DataIntegrityViolationException e) {
-                    var errorMessage = "User has already been registered";
-                    var resolveIssue = "Some of your data is registered, contact AA for verification";
-                    throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
-                }
-                }else{
+                    try {
+                        logger.info("users was successfully registered : data : {}", userRepository.save(users));
+
+                        var responseList = mapToResponse(List.of(users));
+
+                        if (redisService.get("ALL_USERS", UsersResponse.class) != null) {
+                            logger.info("Cached data for all users deleted  : {}", redisService.delete("ALL_USERS"));
+                        }
+
+                        logger.info("User : {} successfully registered data : {}", castedRequest.getUserFullName(), responseList);
+                        return responseList;
+
+                    } catch (DataIntegrityViolationException e) {
+                        var errorMessage = "User has already been registered";
+                        var resolveIssue = "Some of your data is registered, contact AA for verification";
+                        throw throwExceptionAndReport(new UsersExistsException(errorMessage), errorMessage, resolveIssue);
+                    }
+                } else {
                     var errorMessage = "Password inserted  does not match";
                     var resolveIssue = "Please ensure password and confirm password matches";
                     throw throwExceptionAndReport(new PasswordMisMatchException(errorMessage), errorMessage, resolveIssue);
                 }
             }
+        } else {
+            var errorMessage = "request insert doesn't match user register request";
+            var resolveIssue = "Please insert correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+
         }
     }
 
@@ -213,14 +154,14 @@ public class UsersService implements Execute<List<UsersResponse>> {
           this code is out of scope v1
      */
 //    private List<UsersResponse> findUserByUsersIdentityNo() {
-//        String encrypt = getInstance().validateIdentityNo(identityNoRequest.getUsersIdentityNo());
+//        String encrypt = getInstance().validateIdentityNo(identityNocastedRequest.getUsersIdentityNo());
 //        UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
 //
 //        if (redisUserResponse != null) {
 //            logger.info("User with identity no : {} successfully found from cache, data is {}  ", redisUserResponse.getUsersIdentityNo(), redisUserResponse);
 //            return List.of(redisUserResponse);
 //        } else {
-//            var responseList = usersRepository.findByUserIdentityNo(identityNoRequest.getUsersIdentityNo()).stream().map(usersMapper::toDto).toList();
+//            var responseList = userRepository.findByUserIdentityNo(identityNocastedRequest.getUsersIdentityNo()).stream().map(usersMapper::toDto).toList();
 //
 //            if (responseList.size() == 1) {
 //                var jpaUserResponse = responseList.get(0);
@@ -229,7 +170,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
 //
 //                return responseList;
 //            } else {
-//                var errorMessage = "User with identity no ending with XXX-XXX-XXX-" + identityNoRequest.getUsersIdentityNo().substring(9) + "not found";
+//                var errorMessage = "User with identity no ending with XXX-XXX-XXX-" + identityNocastedRequest.getUsersIdentityNo().substring(9) + "not found";
 //                var resolveIssue = "Please review the identity number inserted";
 //                throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
 //            }
@@ -237,38 +178,45 @@ public class UsersService implements Execute<List<UsersResponse>> {
 //
 //    }
 
-    
-    private List<UsersResponse> resetPassword() {
 
+    private List<UsersResponse> resetPassword(RequestContract request) {
 
-        try {
-            var dbEntity = usersRepository.findByUserEmailAddress(this.updatePasswordRequest().getUsersEmailAddress());
-            if (dbEntity.isPresent()) {
-                var user = dbEntity.get();
-                if (getInstance().checkPasswordValidity(this.updatePasswordRequest().getUsersPassword()).equals(getInstance().checkPasswordValidity(this.updatePasswordRequest().getUsersConfirmPassword()))) {
-                    user.setUserPassword(passwordEncoder.encode(this.updatePasswordRequest().getUsersPassword()));
-                    user.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
-                    var updateEntity = usersRepository.save(user);
+        if (request instanceof UpdatePasswordRequest castedRequest) {
+            try {
+                var dbEntity = userRepository.findByUserEmailAddress(castedRequest.getUsersEmailAddress());
+                if (dbEntity.isPresent()) {
+                    var user = dbEntity.get();
+                    if (getInstance().checkPasswordValidity(castedRequest.getUsersPassword()).equals(getInstance().checkPasswordValidity(castedRequest.getUsersConfirmPassword()))) {
+                        user.setUserPassword(passwordEncoder.encode(castedRequest.getUsersPassword()));
+                        user.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
+                        var updateEntity = userRepository.save(user);
 
-                    if (redisService.get(updateEntity.getUserEmailAddress(), UsersResponse.class) != null) {
-                        logger.info("user with email address {} successfully successfully removed from cache", redisService.delete(updateEntity.getUserEmailAddress()));
+                        if (redisService.get(updateEntity.getUserEmailAddress(), UsersResponse.class) != null) {
+                            logger.info("user with email address {} successfully successfully removed from cache", redisService.delete(updateEntity.getUserEmailAddress()));
+                        }
+                        logger.info("user with email address {} successfully updated password", updateEntity.getUserEmailAddress());
+                        return mapToResponse(List.of(updateEntity));
+                    } else {
+                        var errorMessage = "new password and confirm password don't match";
+                        var resolveIssue = "Please confirm your new password and confirmation password";
+                        throw throwExceptionAndReport(new PasswordMisMatchException(errorMessage), errorMessage, resolveIssue);
                     }
-                    logger.info("user with email address {} successfully updated password", updateEntity.getUserEmailAddress());
-                    return mapToResponse(List.of(updateEntity));
                 } else {
-                    var errorMessage = "new password and confirm password don't match";
-                    var resolveIssue = "Please confirm your new password and confirmation password";
-                    throw throwExceptionAndReport(new PasswordMisMatchException(errorMessage), errorMessage, resolveIssue);
+                    var errorMessage = "User doesn't exists, check your email address";
+                    var resolveIssue = "Please check your email address, re-enter email address";
+                    throw throwExceptionAndReport(new UserEmailDoesNotExistException(errorMessage), errorMessage, resolveIssue);
                 }
-            } else {
-                var errorMessage = "User doesn't exists, check your email address";
-                var resolveIssue = "Please check your email address, re-enter email address";
-                throw throwExceptionAndReport(new UserEmailDoesNotExistException(errorMessage), errorMessage, resolveIssue);
+            } catch (NullPointerException e) {
+                var errorMessage = "Update password castedRequest is null";
+                var resolveIssue = "contact AA administrator";
+                throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
             }
-        } catch (NullPointerException e) {
-            var errorMessage = "Update password request is null";
-            var resolveIssue = "contact AA administrator";
-            throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
+        } else {
+            var errorMessage = "request insert doesn't match update passord request";
+            var resolveIssue = "Please insert correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+
+
         }
     }
 
@@ -284,46 +232,55 @@ public class UsersService implements Execute<List<UsersResponse>> {
                 .usersFullName(s.getUserFullName())
                 .usersIdentityNo(s.getUserIdentityNo())
                 .cellphoneNo(s.getUserCellphoneNo())
-                .privileges(s.getFk_privilege_id())
+                .privileges(s.getPrivileges().getId())
                 .token(s.getToken())
                 .updatePasswordStatus(s.getPasswordUpdateStatus())
+                .privilege(s.getPrivileges())
                 .build()).toList();
 
     }
 
-    private List<UsersResponse> findUserById() {
-        String encrypt;
-        try {
-            encrypt = this.getFindByIdRequest().getId().toString();
+    private List<UsersResponse> findUserById(RequestContract request) {
 
-            UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
+        if (request instanceof FindByIdRequest castedRequest) {
+            String encrypt;
+            try {
+                encrypt = castedRequest.getId().toString();
 
-            if (redisUserResponse != null) {
-                logger.info("user with id {} successfully retrieved from cache data : {}", redisUserResponse.getId(), redisUserResponse);
+                UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
 
-                return List.of(redisUserResponse);
-            } else {
-                var responseList = usersRepository.findById(this.getFindByIdRequest().getId());
+                if (redisUserResponse != null) {
+                    logger.info("user with id {} successfully retrieved from cache data : {}", redisUserResponse.getId(), redisUserResponse);
 
-                if (responseList.isPresent()) {
-                    var users = responseList.get();
-
-                    var jpaUserResponse = mapToResponse(List.of(users));
-
-                    redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
-                    logger.info("cached data : {}", redisService.get(encrypt, UsersResponse.class));
-                    logger.info("user with id {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getId(), jpaUserResponse);
-                    return jpaUserResponse;
+                    return List.of(redisUserResponse);
                 } else {
-                    var errorMessage = "user id : " + this.getFindByIdRequest().getId() + " not found";
-                    var resolveIssue = "Please review id inserted";
-                    throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                    var responseList = userRepository.findById(castedRequest.getId());
+
+                    if (responseList.isPresent()) {
+                        var users = responseList.get();
+
+                        var jpaUserResponse = mapToResponse(List.of(users));
+
+                        redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
+                        logger.info("cached data : {}", redisService.get(encrypt, UsersResponse.class));
+                        logger.info("user with id {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getId(), jpaUserResponse);
+                        return jpaUserResponse;
+                    } else {
+                        var errorMessage = "user id : " + castedRequest.getId() + " not found";
+                        var resolveIssue = "Please review id inserted";
+                        throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                    }
                 }
+            } catch (NullPointerException e) {
+                var errorMessage = "Find by id castedRequest is null ";
+                var resolveIssue = "Contact AA System administrator";
+                throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
             }
-        } catch (NullPointerException e) {
-            var errorMessage = "Find by id request is null ";
-            var resolveIssue = "Contact AA System administrator";
-            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
+        } else {
+            var errorMessage = "request insert doesn't match find by id request";
+            var resolveIssue = "Please insert correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+
         }
 
     }
@@ -336,7 +293,7 @@ public class UsersService implements Execute<List<UsersResponse>> {
             logger.info("get all users from cache, data from redis : {}", returnRedisResponse);
             return returnRedisResponse;
         } else {
-            var jpaResponse = mapToResponse(usersRepository.findAll());
+            var jpaResponse = mapToResponse(userRepository.findAll());
 
             redisService.set("ALL_USERS", jpaResponse, 1L, TimeUnit.HOURS);
             var redisResponseChecker = redisService.get("ALL_USERS", List.class);
@@ -345,36 +302,42 @@ public class UsersService implements Execute<List<UsersResponse>> {
         }
     }
 
-    private List<UsersResponse> findAllUsersByName() {
+    private List<UsersResponse> findAllUsersByName(RequestContract request) {
 
-        try {
-            String encrypt = usersFullNameRequest().getUsersFullName();
-            UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
-            if (redisUserResponse != null) {
-                logger.info("user with name {} successfully retrieved from cache data : {}", redisUserResponse.getUsersFullName(), redisUserResponse);
+        if (request instanceof UsersFullNameRequest castedRequest) {
+            try {
+                String encrypt = castedRequest.getUsersFullName();
+                UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
+                if (redisUserResponse != null) {
+                    logger.info("user with name {} successfully retrieved from cache data : {}", redisUserResponse.getUsersFullName(), redisUserResponse);
 
-                return List.of(redisUserResponse);
-            } else {
-                var responseList = usersRepository.findByUserFullName(usersFullNameRequest().getUsersFullName());
-
-                if (responseList.isPresent()) {
-                    var users = responseList.get();
-                    var jpaUserResponse = mapToResponse(List.of(users));
-                    redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
-                    logger.info("user with name {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getUsersFullName(), jpaUserResponse);
-
-                    return jpaUserResponse;
+                    return List.of(redisUserResponse);
                 } else {
-                    var errorMessage = "user with full name :" + usersFullNameRequest().getUsersFullName() + " not found";
-                    var resolveIssue = "Please review the full name inserted";
-                    throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
-                }
-            }
+                    var responseList = userRepository.findByUserFullName(castedRequest.getUsersFullName());
 
-        } catch (NullPointerException e) {
-            var errorMessage = "Full name request is null";
-            var resolveIssue = "Contact AA Administrator";
-            throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
+                    if (responseList.isPresent()) {
+                        var users = responseList.get();
+                        var jpaUserResponse = mapToResponse(List.of(users));
+                        redisService.set(encrypt, jpaUserResponse.get(0), 1L, TimeUnit.HOURS);
+                        logger.info("user with name {} successfully retrieved from jpa data : {}", jpaUserResponse.get(0).getUsersFullName(), jpaUserResponse);
+
+                        return jpaUserResponse;
+                    } else {
+                        var errorMessage = "user with full name :" + castedRequest.getUsersFullName() + " not found";
+                        var resolveIssue = "Please review the full name inserted";
+                        throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                    }
+                }
+
+            } catch (NullPointerException e) {
+                var errorMessage = "Full name castedRequest is null";
+                var resolveIssue = "Contact AA Administrator";
+                throw throwExceptionAndReport(new RuntimeException(errorMessage), errorMessage, resolveIssue);
+            }
+        } else {
+            var errorMessage = "request insert doesn't match find by full name request";
+            var resolveIssue = "Please insert correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
         }
 
 
@@ -383,241 +346,249 @@ public class UsersService implements Execute<List<UsersResponse>> {
     private boolean passwordStatus;
 
 
-    
-    private List<UsersResponse> login() {
+    private List<UsersResponse> login(RequestContract request) {
 
-        try {
-            var encrypt = loginRequest().getUsersEmailAddress();
-            UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
-            UsersResponse jpaUserResponse;
-            boolean redisStatus;
-            if (redisUserResponse != null) {
-                logger.info("redis executing...");
-                jpaUserResponse = null;
-                if (redisUserResponse.getUsersStatus() == 0) {
-                    var errorMessage = "User already got email to verify account";
-                    var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
-                    throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
-                }
-
-                redisStatus = true;
-
-
-            } else {
-                logger.info("Jpa executing...");
-                redisStatus = false;
-
-
-                var optionalEntity = usersRepository.findByUserEmailAddress(loginRequest().getUsersEmailAddress());
-
-
-                if (optionalEntity.isPresent()) {
-                    logger.info("email address {} found", loginRequest().getUsersEmailAddress());
-
-
-                    var users = optionalEntity.get();
-                    var jwt = jwtService.generateToken(optionalEntity.get());
-                    users.setToken(jwt);
-                    logger.info("JWT Token : {}", jwt);
-                    logger.info("User with set token  : {}", users);
-
-
-                    var userWithToken = usersRepository.save(users);
-                    logger.info("User with set token from db : {}", userWithToken);
-
-                    jpaUserResponse = mapToResponse(List.of(userWithToken)).get(0);
-// send mail when status is 0, pub sub pattern will be used
-                    if (optionalEntity.get().getUserStatus() == 0) {
-                        publisher.publishEvent(VerifyCustomerEvent
-                                .builder()
-                                .emailFrom("softwareaa65@gmail.com")
-                                .emailTo(jpaUserResponse.getUsersEmailAddress())
-                                .name(jpaUserResponse.getUsersFullName())
-                                .token(jpaUserResponse.getToken())
-                                        .privilegeId(optionalEntity.get().getFk_privilege_id())
-                                .build()
-                        );
-
-                        logger.info("user : {} has not been verified, email sent to verify customer", jpaUserResponse.getUsersFullName());
-                    } else if (optionalEntity.get().getUserStatus() == 1) {
-                        passwordStatus = true;
-                        logger.info("user : {} has  been verified,trying to login...", jpaUserResponse.getUsersFullName());
-
-                    } else {
-
-                        var errorMessage = "log in failed due to invalid user status ";
-                        var resolveIssue = "Contact AA Administrator";
-                        throw throwExceptionAndReport(new InvalidUserStatusException(errorMessage), errorMessage, resolveIssue);
-                    }
-                } else {
-                    logger.info("email address {} not found", loginRequest().getUsersEmailAddress());
-                    jpaUserResponse = null;
-                    passwordStatus = false;
-                }
-
-            }
-
+        if (request instanceof LoginRequest castedRequest) {
             try {
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest().getUsersEmailAddress(), loginRequest().getUsersPassword()));
-                if (redisStatus) {
-                    logger.info("user with email {} successfully logged in using cache data : {}", redisUserResponse.getUsersEmailAddress(), redisUserResponse);
-
-                    return List.of(redisUserResponse);
-                } else {
-
-                    logger.info("user with email {} successfully logged in using jpa data : {}", loginRequest().getUsersEmailAddress(), jpaUserResponse);
-
-                    redisService.set(encrypt, jpaUserResponse, 1L, TimeUnit.HOURS);
-
-                    logger.info("cached login data : {}", redisService.get(encrypt, UsersResponse.class));
-
-
-                    return List.of(jpaUserResponse);
-                }
-            } catch (AuthenticationException e) {
-                if (redisStatus) {
-
-                    logger.info("delete cached data for login : {}", redisService.delete(encrypt));
-                    var errorMessage = "cached data shows change of password ";
-                    var resolveIssue = "please log in again";
-                    throw throwExceptionAndReport(new CachedUsersPasswordChangedException(errorMessage), errorMessage, resolveIssue);
-                } else {
-                    if (passwordStatus) {
-                        var errorMessage = UsersControllerAdvice.setMessage("password inserted is incorrect");
-                        var resolveIssue = "please provide correct password or update password";
-                        throw throwExceptionAndReport(new UsersPasswordIncorrectException(errorMessage), errorMessage, resolveIssue);
-                    } else {
-                        var errorMessage = UsersControllerAdvice.setMessage("email address " + loginRequest().getUsersEmailAddress() + " not found, verify your email or register");
-                        var resolveIssue = "Enter correct email address or register using the email entered";
-                        throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                var encrypt = castedRequest.getUsersEmailAddress();
+                UsersResponse redisUserResponse = redisService.get(encrypt, UsersResponse.class);
+                UsersResponse jpaUserResponse;
+                boolean redisStatus;
+                if (redisUserResponse != null) {
+                    logger.info("redis executing...");
+                    jpaUserResponse = null;
+                    if (redisUserResponse.getUsersStatus() == 0) {
+                        var errorMessage = "User already got email to verify account";
+                        var resolveIssue = "check emails and click the link from email : verify@aa.com. New link will be generated after Hour";
+                        throw throwExceptionAndReport(new VerifyEmailAddressException(errorMessage), errorMessage, resolveIssue);
                     }
+
+                    redisStatus = true;
+
+
+                } else {
+                    logger.info("Jpa executing...");
+                    redisStatus = false;
+
+
+                    var optionalEntity = userRepository.findByUserEmailAddress(castedRequest.getUsersEmailAddress());
+
+
+                    if (optionalEntity.isPresent()) {
+                        logger.info("email address {} found", castedRequest.getUsersEmailAddress());
+
+
+                        var users = optionalEntity.get();
+                        var jwt = jwtService.generateToken(optionalEntity.get());
+                        users.setToken(jwt);
+                        logger.info("JWT Token : {}", jwt);
+                        logger.info("User with set token  : {}", users);
+
+
+                        var userWithToken = userRepository.save(users);
+                        logger.info("User with set token from db : {}", userWithToken);
+
+                        jpaUserResponse = mapToResponse(List.of(userWithToken)).get(0);
+// send mail when status is 0, pub sub pattern will be used
+                        if (optionalEntity.get().getUserStatus() == 0) {
+                            publisher.publishEvent(VerifyCustomerEvent
+                                    .builder()
+                                    .emailFrom("softwareaa65@gmail.com")
+                                    .emailTo(jpaUserResponse.getUsersEmailAddress())
+                                    .name(jpaUserResponse.getUsersFullName())
+                                    .token(jpaUserResponse.getToken())
+                                    .privilegeId(optionalEntity.get().getPrivileges().getId())
+                                    .build()
+                            );
+
+                            logger.info("user : {} has not been verified, email sent to verify customer", jpaUserResponse.getUsersFullName());
+                        } else if (optionalEntity.get().getUserStatus() == 1) {
+                            passwordStatus = true;
+                            logger.info("user : {} has  been verified,trying to login...", jpaUserResponse.getUsersFullName());
+
+                        } else {
+
+                            var errorMessage = "log in failed due to invalid user status ";
+                            var resolveIssue = "Contact AA Administrator";
+                            throw throwExceptionAndReport(new InvalidUserStatusException(errorMessage), errorMessage, resolveIssue);
+                        }
+                    } else {
+                        logger.info("email address {} not found", castedRequest.getUsersEmailAddress());
+                        jpaUserResponse = null;
+                        passwordStatus = false;
+                    }
+
                 }
 
-            }
+                try {
+                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(castedRequest.getUsersEmailAddress(), castedRequest.getUsersPassword()));
+                    if (redisStatus) {
+                        logger.info("user with email {} successfully logged in using cache data : {}", redisUserResponse.getUsersEmailAddress(), redisUserResponse);
 
-        } catch (NullPointerException e) {
-            var errorMessage = UsersControllerAdvice.setMessage("Login request is null");
-            var resolveIssue = "Contact AA Administrator";
-            throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                        return List.of(redisUserResponse);
+                    } else {
+
+                        logger.info("user with email {} successfully logged in using jpa data : {}", castedRequest.getUsersEmailAddress(), jpaUserResponse);
+
+                        redisService.set(encrypt, jpaUserResponse, 1L, TimeUnit.HOURS);
+
+                        logger.info("cached login data : {}", redisService.get(encrypt, UsersResponse.class));
+
+
+                        return List.of(jpaUserResponse);
+                    }
+                } catch (AuthenticationException e) {
+                    if (redisStatus) {
+
+                        logger.info("delete cached data for login : {}", redisService.delete(encrypt));
+                        var errorMessage = "cached data shows change of password ";
+                        var resolveIssue = "please log in again";
+                        throw throwExceptionAndReport(new CachedUsersPasswordChangedException(errorMessage), errorMessage, resolveIssue);
+                    } else {
+                        if (passwordStatus) {
+                            var errorMessage = UsersControllerAdvice.setMessage("password inserted is incorrect");
+                            var resolveIssue = "please provide correct password or update password";
+                            throw throwExceptionAndReport(new UsersPasswordIncorrectException(errorMessage), errorMessage, resolveIssue);
+                        } else {
+                            var errorMessage = UsersControllerAdvice.setMessage("email address " + castedRequest.getUsersEmailAddress() + " not found, verify your email or register");
+                            var resolveIssue = "Enter correct email address or register using the email entered";
+                            throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+                        }
+                    }
+
+                }
+            } catch (NullPointerException e) {
+                var errorMessage = UsersControllerAdvice.setMessage("Login castedRequest is null");
+                var resolveIssue = "Contact AA Administrator";
+                throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
+            }
+        } else {
+            var errorMessage = UsersControllerAdvice.setMessage("Request is not matching Login request");
+            var resolveIssue = "Please provide the correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
         }
 
     }
 
     @Override
-    public List<UsersResponse> call() {
-        if (!handleServiceHandler(serviceHandler).equals("START_SERVICE"))
+    public List<UsersResponse> call(String serviceRunner, RequestContract request) {
 
-            return switch (serviceHandler) {
-                case "registerUsers" -> this.registerUsers();
-                case "getAllUsers" -> this.findAllUsers();
-                case "getUsersByFullName" -> this.findAllUsersByName();
-                //code is out of scope v1
+        return switch (serviceRunner) {
+            case "registerUsers" -> this.registerUsers(request);
+            case "getAllUsers" -> this.findAllUsers();
+            case "getUsersByFullName" -> this.findAllUsersByName(request);
+            //code is out of scope v1
 //                case "getUsersByIdentityNo":
 //                    return this.findUserByUsersIdentityNo();
-                case "getUsersById" -> this.findUserById();
-                case "userLogin" -> this.login();
-                case "reset-password" -> this.resetPassword();
-                case "verifyUser" -> this.verifyCustomer();
-                case "forgot-password" -> this.forgotPassword();
-                case "verifyPasswordUpdate" -> this.verifyPasswordUpdate();
-                default -> throw new ServiceHandlerException("Failed execute service due to incorrect service string");
-            };
-        else
-            return null;
+            case "getUsersById" -> this.findUserById(request);
+            case "userLogin" -> this.login(request);
+            case "reset-password" -> this.resetPassword(request);
+            case "verifyUser" -> this.verifyCustomer(request);
+            case "forgot-password" -> this.forgotPassword(request);
+            case "verifyPasswordUpdate" -> this.verifyPasswordUpdate(request);
+            default -> throw new ServiceHandlerException("Failed execute service due to incorrect service string");
+        };
+
     }
 
 
+    private List<UsersResponse> forgotPassword(RequestContract request) {
+        if (request instanceof FindByEmailRequest castedRequest) {
+            var encrypt = castedRequest.getEmailAddress();
 
-    private List<UsersResponse> forgotPassword() {
+            if (redisService.get("Reset-" + encrypt, UsersResponse.class) != null) {
+                var errorMessage = "email sent to reset password sent please check your email to continue updating your password";
+                var resolveIssue = "Please check emails and click the reset link or wait hour to get new link";
+                throw throwExceptionAndReport(new ResetPasswordSessionException(errorMessage), errorMessage, resolveIssue);
 
-var encrypt = findByEmailRequest.getEmailAddress();
+            } else {
+                Optional<Users> user = userRepository.findByUserEmailAddress(encrypt);
 
-       if(redisService.get("Reset-"+encrypt,UsersResponse.class) != null){
-           var errorMessage = "email sent to reset password sent please check your email to continue updating your password";
-           var resolveIssue = "Please check emails and click the reset link or wait hour to get new link";
-           throw throwExceptionAndReport(new ResetPasswordSessionException(errorMessage), errorMessage, resolveIssue);
+                if (user.isPresent()) {
+                    var jpaEntity = user.get();
 
-       }else {
-           Optional<Users> user = usersRepository.findByUserEmailAddress(encrypt);
+                    var jwt = jwtService.generateToken(jpaEntity);
+                    jpaEntity.setToken(jwt);
+                    var jpaResponse = mapToResponse(List.of(userRepository.save(jpaEntity)));
+                    publisher.publishEvent(VerifyUpdatePasswordEvent
+                            .builder()
+                            .emailFrom("softwareaa65@gmail.com")
+                            .emailTo(jpaResponse.get(0).getUsersEmailAddress())
+                            .name(jpaResponse.get(0).getUsersFullName())
+                            .token(jpaResponse.get(0).getToken())
+                            .build()
+                    );
+                    redisService.set("Reset-" + encrypt, jpaResponse.get(0), 1L, TimeUnit.HOURS);
+                    if (redisService.get(encrypt, UsersResponse.class) != null)
+                        redisService.delete(encrypt);
+                    return jpaResponse;
+                } else {
+                    var errorMessage = "user with email:" + castedRequest.getEmailAddress() + " not found";
+                    var resolveIssue = "Please provide correct email";
+                    throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
 
-           if (user.isPresent()) {
-               var jpaEntity = user.get();
-
-                var jwt = jwtService.generateToken(jpaEntity);
-                jpaEntity.setToken(jwt);
-                var jpaResponse = mapToResponse(List.of(usersRepository.save(jpaEntity)));
-               publisher.publishEvent(VerifyUpdatePasswordEvent
-                       .builder()
-                       .emailFrom("softwareaa65@gmail.com")
-                       .emailTo(jpaResponse.get(0).getUsersEmailAddress())
-                       .name(jpaResponse.get(0).getUsersFullName())
-                       .token(jpaResponse.get(0).getToken())
-                       .build()
-               );
-                redisService.set("Reset-"+encrypt, jpaResponse.get(0), 1L, TimeUnit.HOURS);
-                if(redisService.get(encrypt,UsersResponse.class) != null)
-                    redisService.delete(encrypt);
-                return jpaResponse;
-           }  else {
-            var errorMessage = "user with email:" + rollBackPasswordRequest.getEmailAddress() + " not found";
-            var resolveIssue = "Please provide correct email";
-            throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
-
-        }
-
+                }
 
 
-       }
-    }
-
-    private List<UsersResponse> verifyPasswordUpdate() {
-        Optional<Users> user = usersRepository.findByToken(findByTokenRequest.getToken());
-        if (user.isPresent()) {
-            var verifiedUser = user.get();
-            verifiedUser.setPasswordUpdateStatus((short) 1);
-            verifiedUser.setPreviousPassword(verifiedUser.getPassword());
-            verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
-
-            logger.info("User : {} has been successfully verified", verifiedUser.getUserFullName());
-            redisService.delete(verifiedUser.getUserEmailAddress());
-
-            return mapToResponse(List.of(usersRepository.save(verifiedUser)));
-
+            }
         } else {
-            var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
-            var resolveIssue = "Please log in again to get new token in your mail";
-            throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
+            var errorMessage = UsersControllerAdvice.setMessage("Request is not matching find by email request");
+            var resolveIssue = "Please provide the correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
         }
     }
 
-    
-    private List<UsersResponse> verifyCustomer() {
-        Optional<Users> user = usersRepository.findByToken(findByTokenRequest.getToken());
+    private List<UsersResponse> verifyPasswordUpdate(RequestContract request) {
+        if (request instanceof FindByTokenRequest castedRequest) {
+            Optional<Users> user = userRepository.findByToken(castedRequest.getToken());
+            if (user.isPresent()) {
+                var verifiedUser = user.get();
+                verifiedUser.setPasswordUpdateStatus((short) 1);
+                verifiedUser.setPreviousPassword(verifiedUser.getPassword());
+                verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
 
-        if (user.isPresent()) {
-            var verifiedUser = user.get();
-            verifiedUser.setUserStatus((short) 1);
-            verifiedUser.setPasswordUpdateStatus((short) 1);
-            verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
-            logger.info("User : {} has been successfully verified", verifiedUser.getUserFullName());
-            redisService.delete(verifiedUser.getUserEmailAddress());
+                logger.info("User : {} has been successfully verified", verifiedUser.getUserFullName());
+                redisService.delete(verifiedUser.getUserEmailAddress());
 
-            return mapToResponse(List.of(usersRepository.save(verifiedUser)));
+                return mapToResponse(List.of(userRepository.save(verifiedUser)));
+
+            } else {
+                var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
+                var resolveIssue = "Please log in again to get new token in your mail";
+                throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
+            }
         } else {
-            var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
-            var resolveIssue = "Please click forgot password again";
-            throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
+            var errorMessage = UsersControllerAdvice.setMessage("Request is not matching find token request");
+            var resolveIssue = "Please provide the correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
         }
     }
 
 
-    @Override
-    public void setCache(@Autowired RedisService redisService) {
-        this.redisService = redisService;
+    private List<UsersResponse> verifyCustomer(RequestContract request) {
+        if (request instanceof FindByTokenRequest castedRequest) {
+            Optional<Users> user = userRepository.findByToken(castedRequest.getToken());
+
+            if (user.isPresent()) {
+                var verifiedUser = user.get();
+                verifiedUser.setUserStatus((short) 1);
+                verifiedUser.setPasswordUpdateStatus((short) 1);
+                verifiedUser.setUserModifiedDate(getInstance().formatDateTime(LocalDateTime.now()));
+                logger.info("User : {} has been successfully verified", verifiedUser.getUserFullName());
+                redisService.delete(verifiedUser.getUserEmailAddress());
+
+                return mapToResponse(List.of(userRepository.save(verifiedUser)));
+            } else {
+                var errorMessage = UsersControllerAdvice.setMessage("User token to verify customer has expired");
+                var resolveIssue = "Please click forgot password again";
+                throw throwExceptionAndReport(new VerificationTokenIncorrectException(errorMessage), errorMessage, resolveIssue);
+            }
+        } else {
+            var errorMessage = UsersControllerAdvice.setMessage("Request is not matching find token request");
+            var resolveIssue = "Please provide the correct request";
+            throw throwExceptionAndReport(new IncorrectRequestException(errorMessage), errorMessage, resolveIssue);
+        }
     }
 
-    @Override
-    public void setEncodeCacheKey(@Autowired PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+
 }

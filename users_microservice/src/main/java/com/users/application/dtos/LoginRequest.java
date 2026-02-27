@@ -1,6 +1,7 @@
 package com.users.application.dtos;
 
 
+import com.utils.application.RequestContract;
 import lombok.*;
 
 
@@ -8,7 +9,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @Builder
-public class LoginRequest {
+public class LoginRequest implements RequestContract {
     private String usersEmailAddress;
     private String usersPassword;
 

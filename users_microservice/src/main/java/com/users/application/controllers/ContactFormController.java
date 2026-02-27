@@ -2,33 +2,29 @@ package com.users.application.controllers;
 
 import com.users.application.dtos.ContactFormRequest;
 import com.users.application.dtos.ContactUsResponse;
-import com.users.application.entities.ContactForm;
-import com.users.application.executor.ServiceConcurrentExecutor;
+import com.users.application.executor.UserServiceConcurrentExecutor;
 import com.users.application.services.ContactFormService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-import java.util.*;
+import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping("/api/contact")
 @Validated
-public class ContactFormController {
+public class ContactFormController extends UserServiceConcurrentExecutor {
 
     private final ContactFormService service;
-    private final ServiceConcurrentExecutor serviceConcurrentExecutor;
     public ContactFormController(ContactFormService service) {
-        this.serviceConcurrentExecutor = ServiceConcurrentExecutor.getInstance();
-
+        super(Executors.newVirtualThreadPerTaskExecutor());
         this.service = service;
     }
 
     @PostMapping("/submit")
     public ResponseEntity<ContactUsResponse> submitEnquiry( @RequestBody ContactFormRequest request) {
 
-        var response = serviceConcurrentExecutor.buildContactFormServiceExecutor(service,request,false);
+        var response = super.buildContactFormServiceExecutor(service,request,false);
         if (response.equals("Enquiry successfully submitted")) {
             return ResponseEntity.ok(new ContactUsResponse("success", "Enquiry successfully submitted"));
         }else{

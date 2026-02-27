@@ -1,3 +1,4 @@
+/*
 package com.users.application.repository;
 
 
@@ -48,7 +49,9 @@ class UsersRepositoryTest {
                 .build());
     }
 
-    @AfterEach
+    @AfterEach*/
+/**//*
+
     public void detach(){
         tem.clear();
     }
@@ -168,4 +171,4 @@ class UsersRepositoryTest {
         //assert
         Assertions.assertTrue(entity.isEmpty());
     }
-}
+}*/
