@@ -1,5 +1,6 @@
 package com.users.application.dtos;
 
+import com.utils.application.RequestContract;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +8,6 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class FindByEmailRequest {
+public class FindByEmailRequest implements RequestContract {
     private String emailAddress;
 }
