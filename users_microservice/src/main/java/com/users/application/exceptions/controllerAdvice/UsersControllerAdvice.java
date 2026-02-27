@@ -24,113 +24,113 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
 
     @ExceptionHandler(ResetPasswordSessionException.class)
     public ResponseEntity<List<ErrorResponse>> manageResetPasswordSessionException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(CellphoneNuException.class)
     public ResponseEntity<List<ErrorResponse>> manageCellphoneNuException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(InvalidArgumentException.class)
     public ResponseEntity<ContactUsResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
-        var errorResponse = new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage());
+        var errorResponse = new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException());
         logger.warn("Error response : {}, error code : {}", errorResponse,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(new ContactUsResponse("Failure",errorResponse.getResolveIssueDetails()), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(IdentityNoIsEmptyException.class)
     public ResponseEntity<List<ErrorResponse>> manageIdentityNoIsEmptyException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     } @ExceptionHandler(IdentityNuContainsIncorrectValuesException.class)
     public ResponseEntity<List<ErrorResponse>> manageIdentityNuContainsIncorrectValuesException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     } @ExceptionHandler(IdentityNuException.class)
     public ResponseEntity<List<ErrorResponse>> manageIdentityNuException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     } @ExceptionHandler(UserDateTimeException.class)
     public ResponseEntity<List<ErrorResponse>> manageUserDateTimeException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     } @ExceptionHandler(VerifyEmailAddressException.class)
     public ResponseEntity<List<ErrorResponse>> manageVerifyEmailAddressException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(VerificationTokenIncorrectException.class)
     public ResponseEntity<List<ErrorResponse>> manageVerificationTokenExpiredException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<List<ErrorResponse>> manageUserNotFoundException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(list, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InvalidUserStatusException.class)
     public ResponseEntity<List<ErrorResponse>> manageInvalidUserStatusException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(UserAgeException.class)
     public ResponseEntity<List<ErrorResponse>> manageUserAgeException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(list, HttpStatus.NOT_FOUND);    }
 
     @ExceptionHandler(UsersExistsException.class)
     public ResponseEntity<List<ErrorResponse>> manageUsersExistsException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);    }
 
     @ExceptionHandler(PasswordMisMatchException.class)
     public ResponseEntity<List<ErrorResponse>> managePasswordMisMatchException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);    }
 
     @ExceptionHandler(ConcurrentExecutionException.class)
     public ResponseEntity<List<ErrorResponse>> manageConcurrentExecutionException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);    }
 
     @ExceptionHandler(UserEmailDoesNotExistException.class)
     public ResponseEntity<List<ErrorResponse>> manageUserEmailDoesNotExistException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(list, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(CachedUsersPasswordChangedException.class)
     public ResponseEntity<List<ErrorResponse>> manageCachedUsersPasswordChangedException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);      }
 
     @ExceptionHandler(UsersPasswordIncorrectException.class)
     public ResponseEntity<List<ErrorResponse>> manageUsersPasswordIncorrectException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);
     }
@@ -138,27 +138,27 @@ public class UsersControllerAdvice extends ExceptionHandlerReporter {
 
     @ExceptionHandler(PrivilegeIdOutOfBoundException.class)
     public ResponseEntity<List<ErrorResponse>> managePrivilegeIdOutOfBoundException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);    }
 
     @ExceptionHandler(PasswordStandardException.class)
     public ResponseEntity<List<ErrorResponse>> managePasswordStandardException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NullRequestException.class)
     public ResponseEntity<List<ErrorResponse>> manageNullRequestException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(list, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserNotVerifiedException.class)
     public ResponseEntity<List<ErrorResponse>> manageUserNotVerifiedException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list,HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.FORBIDDEN);
     }
