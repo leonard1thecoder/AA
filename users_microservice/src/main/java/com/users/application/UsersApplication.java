@@ -10,8 +10,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
 @EnableJpaRepositories(
-        basePackages = {
-                "com.users.application.repository"})
+        basePackages = {"com.privileges.application.repository",
+                "com.users.application.repository",})
 @EntityScan({"com.privileges.application.entity","com.users.application.entities"})
 
 @ComponentScan(basePackages ={
