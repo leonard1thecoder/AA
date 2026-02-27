@@ -191,7 +191,9 @@ public class UsersFieldsDataValidator {
             var resolveIssue = "Contact AA Administrator";
             throw throwExceptionAndReport(new NullRequestException(errorMessage), errorMessage, resolveIssue);
         } else if (validateCellphoneNo.isEmpty()) {
-            throw new IllegalArgumentException("Cellphone Number  is empty");
+            var errorMessage = "Cellphone nu is not entered";
+            var resolveIssue = "Please enter cellphone number";
+            throw throwExceptionAndReport(new CellphoneNuException(errorMessage), errorMessage, resolveIssue);
         } else if (validateCellphoneNo.startsWith("0")) {
             if (validateCellphoneNo.length() == 10) {
                 checkCellphoneNoHasSpecialCharactersOrAlphabets(validateCellphoneNo);
