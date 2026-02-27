@@ -17,7 +17,7 @@ public class PrivilegeNameControllerAdvice extends ExceptionHandlerReporter {
     private static final Logger logger = LoggerFactory.getLogger(PrivilegeNameControllerAdvice.class);
     @ExceptionHandler(PrivilegeNotFoundException.class)
     public ResponseEntity<List<ErrorResponse>> managePrivilegeNotFoundException(){
-        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage()));
+        var list = List.of(new ErrorResponse(getIssueDateFormatted(),getResolveIssueDetails(), getMessage(),getException()));
         logger.warn("Error response : {}, error code : {}", list, HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(list, HttpStatus.NOT_FOUND);
     }
