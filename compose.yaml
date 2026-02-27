@@ -6,11 +6,15 @@ services:
       dockerfile: users_microservice/Dockerfile
     image: leonard1thecoder/aa-users-microservice:latest  
     environment:
-     SPRING_PROFILES_ACTIVE: docker
-     SPRING_REDIS_HOST: redis
-     SPRING_REDIS_PORT: 6379
+     SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev} 
+     SPRING_REDIS_HOST: ${REDIS_HOST:-redis}
+     SPRING_REDIS_PORT: ${REDIS_PORT:-6379}
+     SUPABASE_URL: ${SUPABASE_URL}      # ← pulled from .env
+     MAIL_USERNAME: ${MAIL_USERNAME}
+     MAIL_PASSWORD: ${MAIL_PASSWORD}
+     PORT: ${CONTAINER_PORT:-9098}
     ports:
-      - "8080:9098"                     # Adjust if needed
+      - "${APP_EXTERNAL_PORT:-8080}:${CONTAINER_PORT:-9098}"                     # Adjust if needed
     depends_on:
       redis:
         condition: service_healthy      # Waits until Redis reports healthy

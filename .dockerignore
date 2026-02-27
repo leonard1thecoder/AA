@@ -1,0 +1,50 @@
+# Git & version control
+.git
+.gitignore
+.gitattributes
+
+# Build artifacts (very important!)
+target/
+build/
+*.jar               # unless you COPY it explicitly – but usually not needed
+*.war
+
+# IDE & editor files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.swp
+*.swo
+.DS_Store
+
+# Logs, temp, local configs
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Maven/Gradle wrapper & cache
+.mvn/
+gradle/
+gradlew
+gradlew.bat
+.m2/
+.gradle/
+
+# Docker & compose files (optional – prevents sending them unnecessarily)
+Dockerfile*
+docker-compose*
+*.dockerignore
+
+# Environment & secrets (critical!)
+.env
+.env.*
+*.secret
+application-secrets.yml
+
+# Tests & coverage
+coverage/
+jacoco.exec
