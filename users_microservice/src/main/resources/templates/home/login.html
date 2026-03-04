@@ -10,105 +10,10 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/global-styles.css">
+    <link rel="stylesheet" href="/css/login-style.css">
 
-    <style>
-        :root {
-          --black: #000;
-          --light-orange: #ffb74d;
-          --light-green: #81c784;
-          --focus-green: #4caf50;
-          --light-grey: #f8f9fa;
-          --nav-height: 70px;
-        }
 
-        body {
-          font-family: 'Space Grotesk', sans-serif;
-          padding-top: var(--nav-height);
-        }
-
-        nav {
-          border-bottom: 3px solid var(--black);
-          background: #fff;
-        }
-
-        .nav-link {
-          color: var(--black) !important;
-          position: relative;
-        }
-
-        .nav-link::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 5%;
-          width: 0;
-          height: 3px;
-          background: var(--light-green);
-          transition: .35s;
-        }
-
-        .nav-link.active::after,
-        .nav-link:hover::after {
-          width: 90%;
-        }
-
-        .hero {
-          min-height: 40vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-bottom: 4px solid var(--black);
-          margin-bottom: 3rem;
-          text-align: center;
-        }
-
-        .section-grey {
-          border: 2px solid var(--black);
-          border-radius: 12px;
-          background: var(--light-grey);
-          max-width: 600px;
-          margin: auto;
-          padding: 2rem;
-          margin-bottom: 3rem; /* ensures footer doesn't touch */
-        }
-
-        .btn-primary-custom {
-          background: var(--black);
-          color: #fff;
-          border: 2px solid var(--black);
-          font-weight: 600;
-        }
-
-        .btn-primary-custom:hover {
-          background: var(--light-orange);
-          color: #222;
-          border-color: var(--light-orange);
-        }
-
-        /* Keep custom button green instead of Bootstrap blue when clicked */
-        .btn-primary-custom:active,
-        .btn-primary-custom.active,
-        .show > .btn-primary-custom.dropdown-toggle {
-          background-color: var(--focus-green) !important;
-          color: #fff !important;
-          border-color: var(--focus-green) !important;
-          box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.4) !important;
-        }
-
-        /* Input fields: green border & glow when focused */
-        .form-control:focus {
-          border-color: var(--focus-green) !important;
-          box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25) !important;
-          outline: none;
-        }
-
-        footer {
-          background: var(--light-grey);
-          border-top: 4px solid var(--black);
-          text-align: center;
-          padding: 3rem 2rem 2rem;
-        }
-    </style>
 </head>
 <body>
 
