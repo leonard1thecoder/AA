@@ -1,0 +1,64 @@
+
+.hero {
+    min-height: 35vh;           /* shorter than landing page */
+    padding: 5rem 1rem 4rem;    /* good breathing room top/bottom */
+    margin-bottom: 2.5rem;
+    background-color: #0a0a0a;
+    border-bottom: 4px solid var(--pink);
+}
+
+/* Force center in all directions */
+.hero {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.hero .container {
+    max-width: 600px;           /* prevents text from stretching too wide */
+}
+
+.hero h1 {
+    color: var(--light-orange);
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+}
+
+.hero .lead {
+    font-size: 1.25rem;
+    max-width: 520px;
+    margin: 0 auto;
+    color: var(--text-muted);
+}
+
+/* Mobile / smaller screens */
+@media (max-width: 576px) {
+    .hero {
+        min-height: 30vh;
+        padding: 4rem 1rem 3rem;
+    }
+    
+    .hero h1 {
+        font-size: 2.4rem;
+    }
+    
+    .hero .lead {
+        font-size: 1.1rem;
+    }
+}
+
+/* Optional: make form container narrower & more centered */
+.section-grey {
+    max-width: 460px;          /* tighter than default 1400px max */
+    padding: 2.25rem 1.75rem;
+    margin: 0 auto 3rem auto;
+}
+
+/* Optional: slightly larger button for better touch target */
+.btn-primary-custom {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.05rem;
+}
+
