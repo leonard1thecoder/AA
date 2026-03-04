@@ -15,7 +15,7 @@ public class PagesController {
 
     @GetMapping("/sign-up")
     public String signupPage() {
-        return "home/sign-up"; // looks for signup.html in src/main/resources/templates
+        return "home/registration"; // looks for signup.html in src/main/resources/templates
     }
 
     @GetMapping("/reset")
