@@ -1,0 +1,43 @@
+/* css/landing.css */
+
+.hero {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%);
+  border-bottom: 4px solid var(--pink);
+  text-align: center;
+  padding: 6rem 1rem 8rem;
+}
+
+.hero h1 {
+  color: var(--light-orange);
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  margin-bottom: 1.5rem;
+}
+
+.hero .lead {
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  max-width: 720px;
+  margin: 0 auto 2.5rem;
+}
+
+.section-features {
+  padding: 6rem 1rem;
+}
+
+.feature-card {
+  background: var(--light-grey);
+  border: 2px solid var(--pink);
+  border-radius: 12px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 32px rgba(255, 105, 180, 0.18);
+}
+
+/* ... add your other landing sections: CTA, testimonials, etc. ... */
