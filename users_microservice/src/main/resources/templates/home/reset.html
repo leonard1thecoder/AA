@@ -1,47 +1,164 @@
 <!DOCTYPE html>
-<html  xmlns:th="http://www.thymeleaf.org"  lang="en">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reset Password</title>
-    <link href="/css/login-style.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Alcohol Agent - Reset Password</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+          --black: #000;
+          --light-orange: #ffb74d;
+          --light-green: #81c784;
+          --focus-green: #4caf50;
+          --light-grey: #f8f9fa;
+          --nav-height: 70px;
+        }
+
+        body {
+          font-family: 'Space Grotesk', sans-serif;
+          padding-top: var(--nav-height);
+        }
+
+        nav {
+          border-bottom: 3px solid var(--black);
+          background: #fff;
+        }
+
+        .nav-link {
+          color: var(--black) !important;
+          position: relative;
+        }
+
+        .nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 5%;
+          width: 0;
+          height: 3px;
+          background: var(--light-green);
+          transition: .35s;
+        }
+
+        .nav-link.active::after,
+        .nav-link:hover::after {
+          width: 90%;
+        }
+
+        .hero {
+          min-height: 40vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-bottom: 4px solid var(--black);
+          margin-bottom: 3rem;
+          text-align: center;
+        }
+
+        .section-grey {
+          border: 2px solid var(--black);
+          border-radius: 12px;
+          background: var(--light-grey);
+          max-width: 600px;
+          margin: auto;
+          padding: 2rem;
+          margin-bottom: 3rem;
+        }
+
+        .btn-primary-custom {
+          background: var(--black);
+          color: #fff;
+          border: 2px solid var(--black);
+          font-weight: 600;
+        }
+
+        .btn-primary-custom:hover {
+          background: var(--light-orange);
+          color: #222;
+          border-color: var(--light-orange);
+        }
+
+        .btn-primary-custom:active,
+        .btn-primary-custom.active,
+        .show > .btn-primary-custom.dropdown-toggle {
+          background-color: var(--focus-green) !important;
+          color: #fff !important;
+          border-color: var(--focus-green) !important;
+          box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.4) !important;
+        }
+
+        .form-control:focus {
+          border-color: var(--focus-green) !important;
+          box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25) !important;
+          outline: none;
+        }
+
+        footer {
+          background: var(--light-grey);
+          border-top: 4px solid var(--black);
+          text-align: center;
+          padding: 3rem 2rem 2rem;
+        }
+    </style>
 </head>
 <body>
-<main class="wrap">
-    <section class="card" role="form" aria-labelledby="reset-title">
-        <div class="brand">
-            <span class="dot" aria-hidden="true"></span>
-            <h1>Glow</h1>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="registration.html">Alcohol Agent</a>
+        <div class="collapse navbar-collapse justify-content-end">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="registration.html">Register</a></li>
+                <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+                <li class="nav-item"><a class="nav-link active" href="reset-password.html">Reset Password</a></li>
+            </ul>
         </div>
+    </div>
+</nav>
 
-        <h2 id="reset-title" class="title">Reset Password</h2>
-        <p class="subtitle">Enter your new password below to complete the reset.</p>
+<!-- Hero -->
+<section class="hero">
+    <div class="container">
+        <h1 class="fw-bold">Reset Your Password</h1>
+        <p class="lead">Enter a new password to secure your account.</p>
+    </div>
+</section>
 
-        <form id="resetForm" novalidate>
-            <div class="field">
-                <label class="label" for="password">New Password</label>
-                <input class="input" type="password" id="password" name="password" placeholder="New password" required minlength="6" />
-                <div id="passwordError" class="error-text"></div>
+<!-- Reset Password Form -->
+<section>
+    <div class="section-grey">
+        <h2 class="mb-4 text-center">Reset Password</h2>
+        <form>
+            <div class="mb-3">
+                <label class="form-label">New Password</label>
+                <input type="password" class="form-control" placeholder="Enter new password" required>
             </div>
-
-            <div class="field">
-                <label class="label" for="confirm">Confirm Password</label>
-                <input class="input" type="password" id="confirm" name="confirm" placeholder="Confirm password" required minlength="6" />
-                <div id="confirmError" class="error-text"></div>
+            <div class="mb-3">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" class="form-control" placeholder="Confirm new password" required>
             </div>
-
-            <div class="actions">
-                <button class="btn btn-primary" type="submit">Update Password</button>
+            <button type="submit" class="btn btn-primary-custom w-100">Update Password</button>
+            <div class="text-center mt-3">
+                <a href="login.html" class="text-decoration-none">Back to Login</a>
             </div>
-
-            <div class="or">or</div>
-
-            <a class="btn btn-secondary" type="button" th:href="@{/login}">
-                Back to Login
-            </a>
         </form>
-    </section>
-</main>
-<script src="/js/reset.js"></script>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <p>&copy; 2026 Alcohol Agent. All rights reserved.</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
