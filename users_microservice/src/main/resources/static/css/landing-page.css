@@ -40,4 +40,22 @@
   box-shadow: 0 16px 32px rgba(255, 105, 180, 0.18);
 }
 
+/* Optional: make it even more visible or add italic style */
+#contactForm .form-control::placeholder {
+  /* color: rgba(255, 255, 255, 0.9); */   /* alternative - almost fully white */
+  /* font-style: italic; */
+}
+
+/* If your background is dark → ensure inputs have dark background so white text shows */
+#contactForm .form-control {
+  background-color: #2c2c2c;            /* dark grey/black - adjust to your theme */
+  color: #ffffff;                       /* white text when typing */
+  border: 1px solid #555;               /* subtle border */
+}
+
+/* Optional: placeholder changes color slightly on focus */
+#contactForm .form-control:focus::placeholder {
+  color: rgba(255, 255, 255, 0.4);      /* fades a bit when focused */
+}
+
 /* ... add your other landing sections: CTA, testimonials, etc. ... */
