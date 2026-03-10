@@ -13,6 +13,9 @@ public class PagesController {
         return "home/index";
     }
 
+    @GetMapping("/add-privilege")
+    public String addPrivilege(){return "home/add-privilege";}
+
     @GetMapping("/sign-up")
     public String signupPage() {
         return "home/registration"; // looks for signup.html in src/main/resources/templates

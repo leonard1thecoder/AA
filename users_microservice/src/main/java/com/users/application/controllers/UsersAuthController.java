@@ -37,7 +37,7 @@ public class UsersAuthController extends UserServiceConcurrentExecutor {
             var uri = uriBuilder.path("/dev/api/findUserByIdentityNumber/{id}").buildAndExpand(request.getUserIdentityNo()).toUri();
             return ResponseEntity.created(uri).body(set);
         } else {
-            ErrorResponse error = (ErrorResponse) set;
+            ErrorResponse error = (ErrorResponse) set.getFirst();
             logger.warn("Error response : {}", error);
             return ResponseEntity.badRequest().body(List.of(error));
         }
@@ -77,7 +77,7 @@ public class UsersAuthController extends UserServiceConcurrentExecutor {
         if (response.getFirst() instanceof UsersResponse) {
             return ResponseEntity.ok(response);
         } else {
-            ErrorResponse error = (ErrorResponse) response;
+            ErrorResponse error = (ErrorResponse) response.getFirst();
             logger.warn("Error response : {}", error);
             return ResponseEntity.badRequest().body(List.of(error));
         }

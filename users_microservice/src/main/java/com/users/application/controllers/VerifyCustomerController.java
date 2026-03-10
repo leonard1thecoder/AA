@@ -42,7 +42,7 @@ public class VerifyCustomerController extends UserServiceConcurrentExecutor{
         var response = super.executeUserService(service,"verifyUser",new FindByTokenRequest(qTokq1)).getFirst();
 
         if (response instanceof UsersResponse users) {
-            return "redirect:/reset?emailAddess="+users.getUsersEmailAddress();
+            return "redirect:/reset?token="+qTokq1;
         } else {
             return "redirect:/login";
         }

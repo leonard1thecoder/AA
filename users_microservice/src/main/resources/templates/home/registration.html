@@ -37,17 +37,56 @@
 <section>
     <div class="section-grey">
         <h2 class="mb-4 text-center">Registration Form</h2>
-        <form>
-            <div class="mb-3"><label class="form-label">Username</label><input type="text" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Password</label><input type="password" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Confirm Password</label><input type="password" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Date of Birth</label><input type="date" class="form-control" required></div>
-            <button type="submit" class="btn btn-primary-custom w-100">Register</button>
+
+        <!-- Alert for success/error -->
+        <div id="registerAlert" class="alert d-none mb-3" role="alert"></div>
+
+        <form id="registerForm">
+            <div class="mb-3">
+                <label for="fullName" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="fullName" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="cellphone" class="form-label">Cellphone Number</label>
+                <input type="tel" class="form-control" id="cellphone" required>
+            </div>
+            <div class="mb-3">
+                <label for="identityNo" class="form-label">Identity Number</label>
+                <input type="text" class="form-control" id="identityNo" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" required>
+            </div>
+           
+            <!-- Privileges Dropdown -->
+            <div class="mb-3">
+                <label for="privileges" class="form-label">Select Alcohol Agent Type</label>
+                <select class="form-select" id="privileges" name="privileges" required>
+                    <option value="" disabled selected>Loading privileges...</option>
+                </select>
+            </div>
+
+            <!-- Optional hidden ID (usually not needed for registration) -->
+            <input type="hidden" id="id" value="">
+
+            <button type="submit" class="btn btn-primary-custom w-100" id="registerBtn">Register</button>
         </form>
     </div>
 </section>
 
+
 <footer><p>&copy; 2026 Alcohol Agent. All rights reserved.</p></footer>
+
+<script src="/js/register.js"></script>
+
 </body>
 </html>

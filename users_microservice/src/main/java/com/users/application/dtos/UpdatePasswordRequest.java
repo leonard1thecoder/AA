@@ -12,7 +12,7 @@ import lombok.Data;
 public class UpdatePasswordRequest implements RequestContract {
 
 
-    private String usersPassword,usersEmailAddress;
+    private String usersPassword,userToken;
     private String usersConfirmPassword;
 
 }

@@ -11,7 +11,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/global-styles.css">
-    <link rel="stylesheet" href="/css/login-style.css">
+    <link rel="stylesheet" href="/css/reset-password-style.css">
 
 
 </head>
@@ -38,40 +38,42 @@
     </div>
 </section>
 
-<!-- Login Form -->
 <section>
     <div class="section-grey">
-        <h2 class="mb-4 text-center">Login Form</h2>
+        <h2 class="mb-4 text-center">Add New Privilege</h2>
 
-        <!-- Error alert will appear here -->
-        <div id="errorAlert" class="alert alert-danger d-none mb-3" role="alert">
-            <!-- Message inserted by JS -->
-        </div>
+        <!-- Alert messages (success / error) -->
+        <div id="privilegeAlert" class="alert d-none mb-4" role="alert"></div>
 
-        <form id="loginForm">
+        <form id="addPrivilegeForm">
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" required>
+                <label for="privilegeName" class="form-label">Privilege Name</label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="privilegeName" 
+                    placeholder="e.g. ADMIN, MODERATOR, VIEWER" 
+                    required 
+                    maxlength="50">
+                <div class="form-text text-muted">
+                    Unique name for the privilege/role (will be displayed in dropdowns)
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary-custom w-100">Login</button>
-            <div class="text-center mt-3">
-                <a href="/forgot-password" class="text-decoration-none">Forgot Password?</a>
-            </div>
+
+
+            <button type="submit" class="btn btn-primary-custom w-100 mt-3" id="submitBtn">
+                Create Privilege
+            </button>
         </form>
     </div>
 </section>
-
 <!-- Footer -->
 <footer>
     <p>&copy; 2026 Alcohol Agent. All rights reserved.</p>
 </footer>
 
 <!-- Bootstrap JS -->
-<script src="/js/login-script.js"></script>
+<script src="/js/Privilege-script.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
