@@ -1,0 +1,93 @@
+/* Make the form a positioning context */
+#contactForm {
+  position: relative;
+}
+
+/* Loader container – covers the form */
+.loader-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* Very subtle overlay (almost invisible – keeps form readable) */
+.loader-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border-radius: inherit;
+}
+
+/* The spinning colorful circle */
+.loader {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  background: conic-gradient(
+    #ff0000 0deg,
+    #ff7f00 45deg,
+    #ffff00 90deg,
+    #00ff00 135deg,
+    #0000ff 180deg,
+    #4b0082 225deg,
+    #8b00ff 270deg,
+    #ff0000 315deg,
+    #ff0000 360deg
+  );
+  
+  box-shadow: 
+    0 0 25px #ff0000aa,
+    0 0 50px #ffff00aa,
+    0 0 75px #00ff00aa,
+    0 0 100px #0000ffaa,
+    inset 0 0 20px rgba(255,255,255,0.6);
+  
+  animation: rotate 1.6s linear infinite;
+}
+
+/* Text INSIDE the loader circle */
+.loader-text {
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  
+  /* Black outline around the white text */
+  -webkit-text-stroke: 0.5px black;
+  
+  /* Extra contrast & shadow */
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  
+  /* Gentle pulse animation */
+  animation: pulseText 2.2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulseText {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1.00; }
+}
+
+/* Hide class */
+.d-none {
+  display: none !important;
+}
