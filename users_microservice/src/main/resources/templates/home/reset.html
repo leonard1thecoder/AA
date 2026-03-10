@@ -25,25 +25,48 @@
     </div>
 </section>
 
-<!-- Reset Password Form -->
+<!-- Reset Password Form (with id and alerts) -->
 <section>
-    <div class="section-grey">
-        <h2 class="mb-4 text-center">Reset Password</h2>
-        <form>
-            <div class="mb-3">
-                <label class="form-label">New Password</label>
-                <input type="password" class="form-control" placeholder="Enter new password" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Confirm New Password</label>
-                <input type="password" class="form-control" placeholder="Confirm new password" required>
-            </div>
-            <button type="submit" class="btn btn-primary-custom w-100">Update Password</button>
-            <div class="text-center mt-3">
-                <a href="/login" class="text-decoration-none">Back to Login</a>
-            </div>
-        </form>
-    </div>
+  <div class="section-grey">
+    <h2 class="mb-4 text-center">Reset Password</h2>
+
+    <div id="errorAlert"   class="alert alert-danger d-none" role="alert"></div>
+    <div id="successAlert" class="alert alert-success d-none" role="alert"></div>
+
+    <form id="resetPasswordForm">
+      <div class="mb-3">
+        <label for="newPassword" class="form-label">New Password</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="newPassword" 
+          placeholder="Enter new password" 
+          
+          minlength="8" 
+		  required
+        >
+      </div>
+
+      <div class="mb-3">
+        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="confirmPassword" 
+          placeholder="Confirm new password" 
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary-custom w-100">
+        Update Password
+      </button>
+
+      <div class="text-center mt-3">
+        <a href="/login" class="text-decoration-none">Back to Login</a>
+      </div>
+    </form>
+  </div>
 </section>
 
 <!-- Footer -->
@@ -53,5 +76,7 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/reset-password.js"></script>
+
 </body>
 </html>
