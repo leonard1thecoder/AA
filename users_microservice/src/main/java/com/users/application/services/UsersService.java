@@ -183,7 +183,7 @@ public class UsersService implements ServiceContract {
 
         if (request instanceof UpdatePasswordRequest castedRequest) {
             try {
-                var dbEntity = userRepository.findByUserEmailAddress(castedRequest.getUsersEmailAddress());
+                var dbEntity = userRepository.findByToken(castedRequest.getUserToken());
                 if (dbEntity.isPresent()) {
                     var user = dbEntity.get();
                     if (getInstance().checkPasswordValidity(castedRequest.getUsersPassword()).equals(getInstance().checkPasswordValidity(castedRequest.getUsersConfirmPassword()))) {
