@@ -1,97 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alcohol Agent</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/css/global-styles.css">
   <link rel="stylesheet" href="/css/landing-page.css">
-  <link rel="stylesheet" href="/css/loader.css">
+  <link rel="stylesheet" href="/css/inputs.css">
 
 </head>
 <body>
 
-<!-- Navigation -->
-<nav class="py-3 fixed-top">
+<!-- ==================== NAVIGATION ==================== -->
+<nav class="py-3 fixed-top" id="main-nav">
   <div class="container">
-    <div class="d-flex flex-wrap align-items-center justify-content-between">
-      <a href="#" class="d-flex align-items-center text-decoration-none fw-bold fs-4" style="color: var(--dark-orange);">
-        <img src="https://raw.githubusercontent.com/leonard1thecoder/AA/main/users_microservice/src/main/resources/templates/images/logo.png"
-             alt="Logo" width="40" class="me-2">
-        Alcohol Agent
-      </a>
+    
+    <!-- Mobile Logo (top) -->
+    <div id="mobile-logo-wrapper" class="text-center mb-3">
+      <img src="https://raw.githubusercontent.com/leonard1thecoder/AA/main/users_microservice/src/main/resources/templates/images/logo.png" alt="Logo" width="70" id="mobile-logo">
+    </div>
 
-      <div class="d-flex gap-3 align-items-center">
-        <a href="#features"   class="nav-link">Features</a>
-        <a href="#pricing"    class="nav-link">Pricing</a>
-        <a href="#contact"    class="nav-link">Contact</a>
-        <a href="#pricing"    class="btn btn-black px-4">Get Started</a>
-        <a href="/login"           class="btn btn-login btn-sm">Login</a>
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+      
+      <!-- Desktop Brand Name -->
+      <span id="desktop-brand" class="fw-bold fs-4 d-none d-lg-block" style="color: var(--dark-orange);">
+        Alcohol Agent
+      </span>
+
+      <!-- Nav Items -->
+      <div class="nav-items d-flex gap-4 align-items-center flex-wrap justify-content-center mx-auto">
+        
+        <!-- Full Links - Desktop only -->
+        <div id="desktop-links" class="d-none d-lg-flex gap-4">
+          <a href="#about" class="nav-link">About us</a>
+          <a href="#retail-feature" class="nav-link">Services</a>
+          <a href="#pricing" class="nav-link">Pricing</a>
+          <a href="#contact" class="nav-link">Contact</a>
+        </div>
+
+        <!-- Buttons -->
+        <a href="#pricing" class="btn btn-black px-4 py-2">Get Started</a>
+        <a href="/login" class="btn btn-login btn-sm px-3 py-2">Login</a>
       </div>
     </div>
   </div>
 </nav>
 
-<!-- Hero -->
+<!-- ==================== HERO ==================== -->
 <section class="hero">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-6 hero-text">
-        <h1 class="display-4 fw-bold mb-4">Alcohol Agent</h1>
-        <p class="lead fs-4 mb-5" style="max-width: 540px;">
-          Your smart companion for responsible choices, tracking, and awareness.
-        </p>
-        <div class="d-flex gap-3 flex-wrap justify-content-start">
-          <a href="#pricing" class="btn btn-primary-custom btn-lg px-5">Get Started</a>
-          <a href="#features" class="btn btn-learn-more btn-lg px-5">Learn More</a>
-        </div>
-      </div>
+  <div class="container text-center">
+    <h1 class="fw-bold mb-4 hero-title" style="color: var(--light-orange);">
+      Alcohol Agent
+    </h1>
 
-      <div class="col-lg-6 hero-img">
-        <img src="https://s.alicdn.com/@sc02/kf/Ae4250815c3494a519d8f9a374d6f73e53.jpg"
-             alt="Alcohol Agent mobile app showing BAC tracking and awareness features"
-             class="img-fluid">
+    <!-- Desktop Hero Logo -->
+    <div id="hero-logo-wrapper" class="d-none d-lg-block mb-5">
+      <img src="https://raw.githubusercontent.com/leonard1thecoder/AA/main/users_microservice/src/main/resources/templates/images/logo.png" alt="Alcohol Agent Logo" id="hero-logo" class="img-fluid" style="max-width: 280px;">
+    </div>
+
+    <p class="lead fs-4 mb-5 mx-auto" style="max-width: 540px;">
+      Your smart companion for responsible choices, tracking, and awareness.
+    </p>
+
+    <div class="d-flex gap-3 flex-wrap justify-content-center mb-5">
+      <a href="#pricing" class="btn btn-primary-custom btn-lg px-5">Get Started</a>
+      <a href="#features" class="btn btn-learn-more btn-lg px-5">Learn More</a>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <img src="https://s.alicdn.com/@sc02/kf/Ae4250815c3494a519d8f9a374d6f73e53.jpg" alt="Alcohol Agent mobile app" class="img-fluid rounded-4 shadow-lg">
       </div>
     </div>
   </div>
 </section>
 
-<!-- Features - Retail Companies -->
-<section id="retail-feature" class="section-grey">
+
+<!-- About Alcohol Agent -->
+<section id="about" class="section-grey py-5">
+  <div class="container">
+    <h2 class="text-center display-5 fw-bold mb-5">About Alcohol Agent</h2>
+    
+    <div class="row align-items-center mb-5 g-5">
+      <div class="col-lg-5">
+        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&amp;fit=crop&amp;q=80&amp;w=800" alt="Person tracking alcohol consumption responsibly on phone" class="img-fluid rounded-3 shadow-lg">
+      </div>
+      <div class="col-lg-7">
+        <p class="lead fs-5 mb-4">
+          Alcohol Agent was created to help people make smarter, safer, and more aware choices around alcohol consumption. 
+          We believe that better information leads to better decisions — without judgment or shame.
+        </p>
+        <p>
+          Our mission is simple: provide accurate, private, and easy-to-use tools that empower individuals to understand 
+          their habits, track their intake responsibly, and stay informed about the real effects of alcohol on body and mind.
+        </p>
+      </div>
+    </div>
+
+    <div class="row align-items-center g-5 flex-lg-row-reverse">
+      <div class="col-lg-5">
+        <img src="https://images.unsplash.com/photo-1515378960530-7c0da6231fb1?auto=format&amp;fit=crop&amp;q=80&amp;w=800" alt="Health awareness and hydration tracking illustration" class="img-fluid rounded-3 shadow-lg">
+      </div>
+      <div class="col-lg-7">
+        <p class="lead fs-5 mb-4">
+          Whether you're looking to cut back, maintain moderation, or simply become more mindful, Alcohol Agent is your 
+          personal companion — always available, always discreet, and focused on long-term well-being.
+        </p>
+        <p>
+          Built with care in South Africa, we combine science-backed insights with modern, intuitive design 
+          to support healthier relationships with alcohol — one conscious choice at a time.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Retail Companies Features -->
+<section id="retail-feature" class="section-grey py-5">
   <div class="container">
     <h2 class="text-center display-5 fw-bold mb-5">Retail Companies Features</h2>
     <div class="row g-4">
       <div class="col-md-6 col-lg-4">
         <div class="card h-100 p-4 text-center">
-          <img src="https://bottlepos.com/hs-fs/hubfs/Blog%20Images/Bottle%20Blog%20Body%20Images/BPOS%20Blog%20-%20Bottle%20POS%20Dashboard.webp?width=3254&height=1910&name=BPOS%20Blog%20-%20Bottle%20POS%20Dashboard.webp"
-               alt="Retail POS dashboard overview" class="feature-img img-fluid">
+          <img src="https://bottlepos.com/hs-fs/hubfs/Blog%20Images/Bottle%20Blog%20Body%20Images/BPOS%20Blog%20-%20Bottle%20POS%20Dashboard.webp?width=3254&amp;height=1910&amp;name=BPOS%20Blog%20-%20Bottle%20POS%20Dashboard.webp" alt="Retail POS dashboard overview" class="feature-img img-fluid">
           <h4>Consumption Tracking</h4>
-          <p class="mt-3">Log drinks, see patterns, set limits — simple & private.</p>
+          <p class="mt-3">Log drinks, see patterns, set limits — simple &amp; private.</p>
         </div>
       </div>
       <div class="col-md-6 col-lg-4">
         <div class="card h-100 p-4 text-center">
-          <img src="https://cdn.dribbble.com/userupload/46502498/file/ef1594d83f74493c94999b2d89f89059.png?resize=2048x1536&vertical=center"
-               alt="Inventory and sales management dashboard" class="feature-img img-fluid">
+          <img src="https://cdn.dribbble.com/userupload/46502498/file/ef1594d83f74493c94999b2d89f89059.png?resize=2048x1536&amp;vertical=center" alt="Inventory and sales management dashboard" class="feature-img img-fluid">
           <h4>Real-time Awareness</h4>
           <p class="mt-3">BAC estimation, hydration reminders, risk alerts.</p>
         </div>
       </div>
       <div class="col-md-6 col-lg-4">
         <div class="card h-100 p-4 text-center">
-          <img src="https://cloudretailer.com/wp-content/uploads/2024/05/BO-DashboardConcept.webp"
-               alt="Liquor store sales analytics dashboard" class="feature-img img-fluid">
-          <h4>Goal & Progress</h4>
+          <img src="https://cloudretailer.com/wp-content/uploads/2024/05/BO-DashboardConcept.webp" alt="Liquor store sales analytics dashboard" class="feature-img img-fluid">
+          <h4>Goal &amp; Progress</h4>
           <p class="mt-3">Set personal goals, view streaks, celebrate milestones.</p>
         </div>
       </div>
@@ -99,41 +147,95 @@
   </div>
 </section>
 
-<!-- Features - Users -->
-<section id="features" class="section-grey">
+<!-- Users Features -->
+<section id="features" class="section-grey py-5">
   <div class="container">
     <h2 class="text-center display-5 fw-bold mb-5">Alcohol Agent Users Features</h2>
     <div class="row g-4">
       <div class="col-md-6 col-lg-4">
         <div class="card h-100 p-4 text-center">
-          <img src="https://preview.redd.it/habit-tracker-habit-radar-is-lifetime-free-for-the-next-24-v0-g5x3qbejn5of1.png?width=1080&crop=smart&auto=webp&s=2efb0e6b5a2bca5d9caeec437c5708786d683684"
-               alt="Drink logging and habit tracking calendar" class="feature-img img-fluid">
+          <img src="https://preview.redd.it/habit-tracker-habit-radar-is-lifetime-free-for-the-next-24-v0-g5x3qbejn5of1.png?width=1080&amp;crop=smart&amp;auto=webp&amp;s=2efb0e6b5a2bca5d9caeec437c5708786d683684" alt="Drink logging and habit tracking calendar" class="feature-img img-fluid">
           <h4>Consumption Tracking</h4>
-          <p class="mt-3">Log drinks, see patterns, set limits — simple & private.</p>
+          <p class="mt-3">Log drinks, see patterns, set limits — simple &amp; private.</p>
         </div>
       </div>
       <div class="col-md-6 col-lg-4">
         <div class="card h-100 p-4 text-center">
-          <img src="https://s3-alpha.figma.com/hub/file/2282926361341585248/af0e2a61-f33c-4f06-8a96-b81d9c96dc3b-cover.png"
-               alt="Real-time hydration and level tracker UI" class="feature-img img-fluid">
+          <img src="https://s3-alpha.figma.com/hub/file/2282926361341585248/af0e2a61-f33c-4f06-8a96-b81d9c96dc3b-cover.png" alt="Real-time hydration and level tracker UI" class="feature-img img-fluid">
           <h4>Real-time Awareness</h4>
           <p class="mt-3">BAC estimation, hydration reminders, risk alerts.</p>
         </div>
       </div>
       <div class="col-md-6 col-lg-4">
         <div class="card h-100 p-4 text-center">
-          <img src="https://s3-us-west-2.amazonaws.com/public.notion-static.com/template/0dc9b9bd-d643-420c-9866-20928250458b/1759411861960/desktop.jpg"
-               alt="Goal and progress streaks tracker" class="feature-img img-fluid">
-          <h4>Goal & Progress</h4>
+          <img src="https://s3-us-west-2.amazonaws.com/public.notion-static.com/template/0dc9b9bd-d643-420c-9866-20928250458b/1759411861960/desktop.jpg" alt="Goal and progress streaks tracker" class="feature-img img-fluid">
+          <h4>Goal &amp; Progress</h4>
           <p class="mt-3">Set personal goals, view streaks, celebrate milestones.</p>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section id="stats" class="py-5">
+  <div class="container">
+    <h2 class="text-center display-5 fw-bold mb-5">Our Growing Community</h2>
+    
+    <div class="row justify-content-center g-3 g-lg-5">
+      <div class="col-md-5 col-lg-4 text-center bg-black bg-opacity-10 border border-secondary-subtle border-opacity-50 rounded-4 p-4">
+        <div class="avatar-circle mx-auto mb-4">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Community member Sarah" class="img-fluid rounded-circle">
+        </div>
+        <h4 class="mb-2">Sarah Mthembu</h4>
+        <div class="stats-number fw-bold display-5" data-target="12470">0</div>
+  <p class="text-white fs-5">Registered Users</p>   <!-- changed here -->
+      </div>
+
+      <div class="col-md-5 col-lg-4 text-center bg-black bg-opacity-10 border border-secondary-subtle border-opacity-50 rounded-4 p-4">
+        <div class="avatar-circle mx-auto mb-4">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Community member Thabo" class="img-fluid rounded-circle">
+        </div>
+        <h4 class="mb-2">Thabo Nkosi</h4>
+        <div class="stats-number fw-bold display-5" data-target="8750">0</div>
+  <p class="text-white fs-5">Registered Users</p>   <!-- changed here -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials" class="py-5">
+  <div class="container">
+    <h2 class="text-center display-5 fw-bold mb-5">What Our Community Says</h2>
+
+    <div id="testimonialsCarousel" class="carousel slide carousel-fade mx-auto" style="max-width: 760px;" data-bs-ride="carousel" data-bs-interval="3000" data-bs-pause="hover">
+
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <div class="testimonial-card text-center bg-black bg-opacity-10 border border-secondary-subtle border-opacity-50 rounded-4 p-4">
+            <p class="fs-5 mb-4 fst-italic">"Alcohol Agent helped me become more aware without feeling judged..."</p>
+            <h5 class="mb-1">Sipho Dlamini</h5>
+            <p class="text-muted small">Johannesburg</p>
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <div class="testimonial-card text-center bg-black bg-opacity-10 border border-secondary-subtle border-opacity-50 rounded-4 p-4">
+            <p class="fs-5 mb-4 fst-italic">"The BAC tracker is incredibly accurate..."</p>
+            <h5 class="mb-1">Lerato Khumalo</h5>
+            <p class="text-muted small">Cape Town</p>
+          </div>
+        </div>
+
+        <!-- Add more testimonials here -->
       </div>
     </div>
   </div>
 </section>
 
 <!-- Pricing -->
-<section id="pricing" class="section-medium">
+<section id="pricing" class="section-medium py-5">
   <div class="container">
     <h2 class="text-center display-5 fw-bold mb-5">Pricing Plans</h2>
     <div class="row g-4 justify-content-center">
@@ -141,12 +243,12 @@
         <div class="card h-100 p-4 text-center">
           <h4>Free</h4>
           <div class="fs-1 fw-bold my-3">R0</div>
-          <p class="mb-4">Basic tracking & awareness tools</p>
+          <p class="mb-4">Basic tracking &amp; awareness tools</p>
           <a href="/sign-up" class="btn btn-black w-100">Start Free</a>
         </div>
       </div>
       <div class="col-md-5 col-lg-4">
-        <div class="card h-100 p-4 text-center border-3 border-pink">
+        <div class="card h-100 p-4 text-center">
           <h4>Premium</h4>
           <div class="fs-1 fw-bold my-3">R49<span class="fs-5">/mo</span></div>
           <p class="mb-4">Advanced insights • Reports • No ads</p>
@@ -158,7 +260,7 @@
 </section>
 
 <!-- Contact Form -->
-<section id="contact" class="section-grey">
+<section id="contact" class="section-grey py-5">
   <div class="container">
     <h2 class="text-center display-5 fw-bold mb-5">Get in Touch</h2>
     <p class="text-center lead mb-5" style="max-width: 680px; margin: 0 auto;">
@@ -168,93 +270,85 @@
     <div class="row justify-content-center">
       <div class="col-lg-7 col-xl-6">
         <form id="contactForm">
-  <div class="row g-3">
-    <div class="col-md-6 form-group">
-      <label class="form-label fw-medium" for="firstName">First Name</label>
-      <input 
-        type="text" 
-        class="form-control" 
-        id="firstName" 
-        name="name" 
-        placeholder="Enter your first name"
-        required
-      >
-    </div>
-    <div class="col-md-6 form-group">
-      <label class="form-label fw-medium" for="lastName">Last Name</label>
-      <input 
-        type="text" 
-        class="form-control" 
-        id="lastName" 
-        name="surname" 
-        placeholder="Enter your last name"
-        required
-      >
-    </div>
-  </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-medium" for="firstName">First Name</label>
+              <input type="text" class="form-control" id="firstName" name="name" placeholder="Enter your first name" required="">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-medium" for="lastName">Last Name</label>
+              <input type="text" class="form-control" id="lastName" name="surname" placeholder="Enter your last name" required="">
+            </div>
+          </div>
 
-  <div class="mb-3 mt-3 form-group">
-    <label class="form-label fw-medium" for="email">Email Address</label>
-    <input 
-      type="email" 
-      class="form-control" 
-      id="email" 
-      name="email" 
-      placeholder="your.email@example.com"
-      required
-    >
-  </div>
+          <div class="mb-3 mt-3">
+            <label class="form-label fw-medium" for="email">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" required="">
+          </div>
 
-  <div class="mb-4 form-group">
-    <label class="form-label fw-medium" for="message">Message</label>
-    <textarea 
-      class="form-control" 
-      id="message" 
-      name="message" 
-      rows="6" 
-      placeholder="How can we help you? Write your message here..."
-      required
-    ></textarea>
-  </div>
+          <div class="mb-4">
+            <label class="form-label fw-medium" for="message">Message</label>
+            <textarea class="form-control" id="message" name="message" rows="6" placeholder="How can we help you?..." required=""></textarea>
+          </div>
 
-  <div class="text-center">
-    <button 
-      type="submit" 
-      class="btn btn-black px-5 py-3 fs-5" 
-      id="submitBtn"
-    >
-      Send Message
-    </button>
-  </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-black px-5 py-3 fs-5" id="submitBtn">
+              Send Message
+            </button>
+          </div>
 
-  <!-- Loader container -->
           <div id="loaderContainer" class="loader-container d-none">
             <div class="loader-overlay"></div>
             <div class="loader">
               <span class="loader-text">Loading</span>
             </div>
           </div>
-		  
-  <div id="formStatus" class="mt-4 text-center fw-medium" style="min-height: 1.5rem;"></div>
-</form>
-		
-</div>
+
+          <div id="formStatus" class="mt-4 text-center fw-medium" style="min-height: 1.5rem;"></div>
+        </form>
+      </div>
     </div>
   </div>
 </section>
- 
+
 <!-- Footer -->
-<footer class="text-center">
+<footer class="text-center py-4">
   <div class="container">
     <p class="mb-2">© 2026 Alcohol Agent • All rights reserved</p>
-    <p class="text-muted small mb-0">Made with focus on clarity & responsibility</p>
+    <p class="text-muted small mb-0">Made with focus on clarity &amp; responsibility</p>
   </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ==================== RESPONSIVE NAV JS ==================== -->
+<script>
+// Responsive Navigation Script
+function initNav() {
+  const mobileLogoWrapper = document.getElementById('mobile-logo-wrapper');
+  const desktopLinks = document.getElementById('desktop-links');
+  const heroLogoWrapper = document.getElementById('hero-logo-wrapper');
+  const desktopBrand = document.getElementById('desktop-brand');
+
+  function update() {
+    const isMobile = window.innerWidth <= 991;
+
+    if (mobileLogoWrapper) mobileLogoWrapper.style.display = isMobile ? 'flex' : 'none';
+    if (desktopLinks) desktopLinks.style.display = isMobile ? 'none' : 'flex';
+    if (heroLogoWrapper) heroLogoWrapper.style.display = isMobile ? 'none' : 'block';
+    if (desktopBrand) desktopBrand.style.display = isMobile ? 'none' : 'block';
+  }
+
+  update();
+  window.addEventListener('resize', update);
+}
+
+// Run when page loads
+document.addEventListener('DOMContentLoaded', initNav);
+</script>
 <script src="/js/script.js"></script>
+<script src="/js/count.js"></script>
 <script src="/js/sendContactUsFormRequest.js"></script>
 
 
-</body>
-</html>
+</body></html>
