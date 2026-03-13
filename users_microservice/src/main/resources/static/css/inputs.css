@@ -1,0 +1,111 @@
+/* Reset default input/textarea styling */
+#contactForm input,
+#contactForm textarea {
+  background-color: #fff;
+  border: 2px solid #dee2e6;           /* light gray default border */
+  border-radius: 9999px;                /* fully circular/rounded */
+  padding: 0.75rem 1.25rem;             /* comfortable inner spacing */
+  font-size: 1rem;
+  transition: all 0.25s ease;
+  outline: none;
+  box-shadow: none;
+}
+
+/* Remove Bootstrap's default focus shadow and change to green */
+#contactForm input:focus,
+#contactForm textarea:focus {
+  border-color: #28a745;                /* Bootstrap success green */
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25); /* subtle green glow */
+}
+
+/* Hover state (optional but nice) */
+#contactForm input:hover:not(:focus),
+#contactForm textarea:hover:not(:focus) {
+  border-color: #adb5bd;
+}
+
+/* Make sure placeholder looks good */
+#contactForm input::placeholder,
+#contactForm textarea::placeholder {
+  color: #adb5bd;
+  opacity: 1;
+}
+
+/* Textarea specific - still rounded but looks natural */
+#contactForm textarea {
+  border-radius: 1.5rem;                /* slightly less extreme rounding for textarea */
+  resize: vertical;                     /* allow vertical resize only */
+  min-height: 140px;
+}
+
+/* Optional: make labels look better with rounded inputs */
+#contactForm .form-label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+/* Success message (optional styling) */
+#formStatus.text-success {
+  color: #28a745 !important;
+}
+
+/* Error message (optional) */
+#formStatus.text-danger {
+  color: #dc3545 !important;
+}
+
+/* Reset and base styling for inputs + textarea */
+#contactForm input,
+#contactForm textarea {
+  background-color: #2d2d2d;            /* dark grey background */
+  color: #ffffff;                       /* white text when typing */
+  border: 2px solid #444444;            /* darker default border */
+  border-radius: 9999px;                /* pill / very round shape */
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  outline: none;
+  box-shadow: none;
+}
+
+/* Placeholder - plain white, no extra styling */
+#contactForm input::placeholder,
+#contactForm textarea::placeholder {
+  color: #ffffff;                       /* white placeholder */
+  opacity: 0.7;                         /* slightly faded so it's readable but not too strong */
+}
+
+/* Focus state - green border + subtle glow */
+#contactForm input:focus,
+#contactForm textarea:focus {
+  border-color: #28a745;                /* green on focus */
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+  background-color: #2d2d2d;            /* keep dark even when focused */
+}
+
+/* Hover (optional - subtle feedback) */
+#contactForm input:hover:not(:focus),
+#contactForm textarea:hover:not(:focus) {
+  border-color: #666666;
+}
+
+/* Textarea adjustments - still rounded but comfortable */
+#contactForm textarea {
+  border-radius: 1.5rem;                /* softer rounding for multiline */
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* Optional: make sure form looks cohesive in dark mode */
+#contactForm .form-label {
+  color: #e0e0e0;                       /* light grey labels for contrast */
+  font-weight: 500;
+}
+
+/* Status messages (if you use success/error) */
+#formStatus.text-success {
+  color: #28a745 !important;
+}
+#formStatus.text-danger {
+  color: #ff6b6b !important;
+}
