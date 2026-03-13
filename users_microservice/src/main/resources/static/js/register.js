@@ -1,4 +1,43 @@
 // ────────────────────────────────────────────────────────────────
+// Reusable showAlert with scroll
+// ────────────────────────────────────────────────────────────────
+function showAlert(text, type = 'danger') {
+    const alertDiv = document.getElementById('registerAlert');
+    if (!alertDiv) {
+        console.error('registerAlert element not found');
+        return;
+    }
+
+    // Reset classes & set new style
+    alertDiv.textContent = text;
+    alertDiv.className = `alert alert-${type} mb-3`;  // clean reset
+    alertDiv.classList.remove('d-none');
+
+    // Force browser reflow (critical after display change)
+    void alertDiv.offsetHeight;
+
+    // Scroll after short delay (timing fix for most cases)
+    setTimeout(() => {
+        alertDiv.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',     // 'center' / 'nearest' / 'start' — try different if needed
+            inline: 'nearest'
+        });
+
+        // Optional fallback if scrollIntoView fails (e.g. fixed header issue)
+        // Uncomment and adjust offset if alert hides behind navbar
+        /*
+        const rect = alertDiv.getBoundingClientRect();
+        const offset = -100; // negative = scroll higher (navbar height + margin)
+        window.scrollTo({
+            top: rect.top + window.scrollY + offset,
+            behavior: 'smooth'
+        });
+        */
+    }, 150);   // 120–200 ms — increase to 250/300 if still not working
+}
+
+// ────────────────────────────────────────────────────────────────
 // Load privileges when the page loads
 // ────────────────────────────────────────────────────────────────
 async function loadPrivileges() {
@@ -10,9 +49,7 @@ async function loadPrivileges() {
     try {
         const response = await fetch('http://localhost:8081/dev/privileges/api/printPrivilege', {
             method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
+            headers: { 'Accept': 'application/json' }
         });
 
         if (!response.ok) {
@@ -21,23 +58,20 @@ async function loadPrivileges() {
 
         const data = await response.json();
 
-        // Clear loading state
         select.innerHTML = '<option value="" disabled>Select role / privilege</option>';
 
-        // Normalize to array (in case single object is returned)
         const privilegesList = Array.isArray(data) ? data : [data];
 
         privilegesList.forEach(item => {
             if (item && typeof item === 'object' && 'id' in item && 'privilegeName' in item) {
                 const option = document.createElement('option');
-                option.value = item.id;                      // value = id (for easy retrieval)
-                option.textContent = item.privilegeName;     // what the user sees
-                option.dataset.name = item.privilegeName;    // store name in data attribute
+                option.value = item.id;
+                option.textContent = item.privilegeName;
+                option.dataset.name = item.privilegeName;
                 select.appendChild(option);
             }
         });
 
-        // Optional: auto-select first real option
         if (select.options.length > 1) {
             select.selectedIndex = 1;
         }
@@ -56,7 +90,7 @@ async function loadPrivileges() {
 // Form submission handler
 // ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    loadPrivileges(); // Load privileges immediately
+    loadPrivileges();
 
     const form = document.getElementById('registerForm');
     if (!form) return;
@@ -64,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const alertDiv = document.getElementById('registerAlert');
+        const alertDiv  = document.getElementById('registerAlert');
         const submitBtn = document.getElementById('registerBtn');
 
         // Reset alert
@@ -72,26 +106,22 @@ document.addEventListener('DOMContentLoaded', () => {
         alertDiv.classList.remove('alert-success', 'alert-danger');
         alertDiv.textContent = '';
 
-        // Disable button during request
         submitBtn.disabled = true;
         submitBtn.textContent = 'Registering...';
 
-        // Gather form values
         const fullName        = document.getElementById('fullName')?.value.trim() || '';
         const email           = document.getElementById('email')?.value.trim() || '';
         const cellphone       = document.getElementById('cellphone')?.value.trim() || '';
         const identityNo      = document.getElementById('identityNo')?.value.trim() || '';
         const password        = document.getElementById('password')?.value || '';
         const confirmPassword = document.getElementById('confirmPassword')?.value || '';
-        const dob             = document.getElementById('dob')?.value || '';
+        // const dob          = document.getElementById('dob')?.value || '';
 
-        // Get selected privilege
-        const select = document.getElementById('privileges');
+        const select         = document.getElementById('privileges');
         const selectedOption = select.options[select.selectedIndex];
         const privilegesId   = selectedOption.value ? parseInt(selectedOption.value, 10) : NaN;
         const privilegeName  = selectedOption.dataset.name || selectedOption.textContent || '';
 
-        // Basic client-side validation
         if (password !== confirmPassword) {
             showAlert('Passwords do not match!', 'danger');
             resetButton();
@@ -104,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Prepare payload (now sending object with id + name)
         const payload = {
             userFullName: fullName,
             userEmailAddress: email,
@@ -112,12 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
             userIdentityNo: identityNo,
             userPassword: password,
             confirmPassword: confirmPassword,
-            userStatus: 1,               // adjust as needed
+            userStatus: 1,
             privileges: {
                 id: privilegesId,
                 privilegeName: privilegeName
-            },
-            // dateOfBirth: dob,         // uncomment if needed
+            }
+            // dateOfBirth: dob,
         };
 
         try {
@@ -133,21 +162,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 showAlert('Registration successful! Redirecting to login...', 'success');
                 setTimeout(() => {
-                    window.location.href = '/login'; // ← adjust path
+                    window.location.href = '/login'; // adjust if needed
                 }, 1800);
             } else {
-                let errorData = null;
-                try {
-                    errorData = await response.json();
-                } catch {}
-
                 let message = `Registration failed (${response.status})`;
-
-                if (errorData) {
+                try {
+                    const errorData = await response.json();
                     if (Array.isArray(errorData) && errorData.length > 0) {
-                        message = errorData[0].resolveIssueDetails 
-                            || errorData[0].message 
-                            || message;
+                        message = errorData[0].resolveIssueDetails || errorData[0].message || message;
                     } else if (errorData.resolveIssueDetails) {
                         message = errorData.resolveIssueDetails;
                     } else if (errorData.message) {
@@ -155,8 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (errorData.detail) {
                         message = errorData.detail;
                     }
+                } catch {
+                    // parsing failed → keep default message
                 }
-
                 showAlert(message, 'danger');
             }
         } catch (err) {
@@ -164,12 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showAlert('Network error – please check your connection and try again.', 'danger');
         } finally {
             resetButton();
-        }
-
-        function showAlert(text, type) {
-            alertDiv.textContent = text;
-            alertDiv.classList.add(`alert-${type}`);
-            alertDiv.classList.remove('d-none');
         }
 
         function resetButton() {

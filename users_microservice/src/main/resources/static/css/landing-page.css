@@ -1,18 +1,162 @@
-/* css/landing.css */
+/* ================================================
+   ALCOHOL AGENT LANDING PAGE – CLEANED & OPTIMIZED
+   ================================================ */
 
+/* ================================================
+   ROOT / VARIABLES (assumed – add if missing)
+   ================================================ */
+:root {
+  --black: #000000;
+  --dark-orange: #e65100;
+  --light-orange: #ff5722;
+  --focus-green: #4caf50;
+  --text-light: #f0f0f0;
+  --text-muted: #aaaaaa;
+}
+
+/* ================================================
+   GLOBAL FORM & INPUT STYLES
+   ================================================ */
+.form-control,
+.form-control::placeholder {
+  background-color: #111;
+  color: white;
+  border: 1px solid #333;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 1;
+}
+
+.form-control:focus {
+  border-color: var(--focus-green);
+  box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+  background-color: #111;
+  color: white;
+}
+
+.form-label {
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+/* ================================================
+   BUTTONS
+   ================================================ */
+.btn {
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:hover,
+.btn:active,
+.btn:focus {
+  transform: none !important;
+}
+
+.btn-primary-custom,
+.btn-black {
+  background-color: white;
+  color: var(--black);
+  border: 2px solid white;
+  padding: 0.55rem 1.6rem;
+  font-size: 0.95rem;
+}
+
+.btn-primary-custom:hover,
+.btn-black:hover {
+  background-color: var(--light-orange);
+  color: white;
+  border-color: var(--light-orange);
+}
+
+.btn-login {
+  background: transparent;
+  color: var(--text-light);
+  border: 2px solid var(--text-light);
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+}
+
+.btn-login:hover {
+  background-color: var(--dark-orange);
+  color: white;
+  border-color: var(--dark-orange);
+}
+
+.btn-learn-more {
+  background-color: var(--light-orange);
+  color: var(--black);
+  border: 2px solid white;
+  padding: 0.55rem 1.6rem;
+  font-size: 0.95rem;
+}
+
+.btn-learn-more:hover {
+  background-color: #f57c00;
+  border-color: white;
+  color: white;
+}
+
+#submitBtn {
+  padding: 0.65rem 2rem;
+  font-size: 1.05rem;
+}
+
+#submitBtn:hover {
+  background-color: var(--dark-orange);
+  border-color: var(--dark-orange);
+  color: white;
+}
+
+/* ================================================
+   NAVIGATION
+   ================================================ */
+nav {
+  background-color: var(--black);
+  z-index: 1000;
+}
+
+.nav-link {
+  color: white;
+  font-weight: 500;
+  transition: color 0.25s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--light-orange);
+}
+
+/* Mobile logo centering */
+#mobile-logo-wrapper {
+  padding-top: 0.75rem;
+}
+
+#mobile-logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70px;
+}
+
+/* ================================================
+   HERO SECTION
+   ================================================ */
 .hero {
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-  background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%);
-  border-bottom: 4px solid var(--pink);
+  background: var(--black);
   text-align: center;
-  padding: 6rem 1rem 8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 9rem 1rem 5rem;
+  min-height: auto;
 }
 
 .hero h1 {
   color: var(--light-orange);
-  font-size: clamp(2.8rem, 8vw, 5.5rem);
   margin-bottom: 1.5rem;
 }
 
@@ -23,39 +167,238 @@
   margin: 0 auto 2.5rem;
 }
 
-.section-features {
-  padding: 6rem 1rem;
+.hero-img img {
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
-.feature-card {
-  background: var(--light-grey);
-  border: 2px solid var(--pink);
+/* Hero logo (desktop) */
+#hero-logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2.5rem;
+}
+
+#hero-logo {
+  max-width: 280px;
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ================================================
+   RESPONSIVE – HERO & TYPOGRAPHY
+   ================================================ */
+@media (min-width: 992px) {
+  .hero {
+    min-height: 85vh;
+    padding: 12rem 1rem 6rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #hero-logo {
+    max-width: 280px;
+  }
+
+  .hero h1 {
+    font-size: 4.2rem;
+  }
+}
+
+@media (max-width: 991px) {
+  #hero-logo,
+  #hero-logo-wrapper {
+    display: none !important;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .hero {
+    padding-top: 8rem;
+    padding-bottom: 4rem;
+  }
+
+  .hero h1 {
+    font-size: 2.6rem !important;
+  }
+
+  .lead {
+    font-size: 1.2rem !important;
+  }
+}
+
+/* ================================================
+   SECTIONS & CARDS (global dark theme)
+   ================================================ */
+.hero,
+.section-grey,
+.section-medium,
+nav,
+footer,
+#features,
+#pricing,
+#contact,
+#stats,
+#testimonials {
+  background-color: var(--black);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+section,
+.hero {
+  padding: 2.5rem 1rem;
+}
+
+.card,
+.testimonial-card {
+  background-color: #0d0d0d;
+  border: 1px solid #222;
   border-radius: 12px;
-  padding: 2rem;
-  transition: all 0.3s ease;
+  color: var(--text-light);
+  transition: box-shadow 0.3s ease;
 }
 
-.feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 32px rgba(255, 105, 180, 0.18);
+.card:hover,
+.testimonial-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
-/* Optional: make it even more visible or add italic style */
-#contactForm .form-control::placeholder {
-  /* color: rgba(255, 255, 255, 0.9); */   /* alternative - almost fully white */
-  /* font-style: italic; */
+/* ================================================
+   STATS / AVATARS
+   ================================================ */
+.avatar-circle {
+  width: 140px;
+  height: 140px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  margin: 0 auto 1.5rem;
 }
 
-/* If your background is dark → ensure inputs have dark background so white text shows */
-#contactForm .form-control {
-  background-color: #2c2c2c;            /* dark grey/black - adjust to your theme */
-  color: #ffffff;                       /* white text when typing */
-  border: 1px solid #555;               /* subtle border */
+.avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+  display: block;
 }
 
-/* Optional: placeholder changes color slightly on focus */
-#contactForm .form-control:focus::placeholder {
-  color: rgba(255, 255, 255, 0.4);      /* fades a bit when focused */
+.stats-number {
+  color: var(--light-orange);
+  min-height: 60px;
+  text-shadow: 0 2px 10px rgba(255, 183, 77, 0.3);
 }
 
-/* ... add your other landing sections: CTA, testimonials, etc. ... */
+/* ================================================
+   TESTIMONIALS CAROUSEL
+   ================================================ */
+#testimonialsCarousel {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.testimonial-card {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.8rem 1.5rem;
+}
+
+.carousel-fade .carousel-item {
+  transition: opacity 0.65s ease-in-out;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.carousel-fade .carousel-item.active {
+  opacity: 1;
+  position: relative;
+}
+
+.carousel-indicators {
+  display: none !important;
+}
+
+.carousel-inner {
+  position: relative;
+  min-height: 220px;
+}
+
+/* ================================================
+   FOOTER
+   ================================================ */
+footer {
+  background-color: var(--black);
+  color: var(--text-muted);
+  padding: 2.5rem 0 2rem;
+  text-align: center;
+}
+
+footer a {
+  color: var(--light-orange);
+}
+
+/* ================================================
+   MISC / LEGACY CLEANUP
+   ================================================ */
+@media (max-width: 991px) {
+  .hero-text {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+}
+
+/* ================================================
+   COLOR OVERRIDES FOR SPECIFIC ELEMENTS
+   ================================================ */
+
+/* Testimonial location text (e.g. "Cape Town", "Johannesburg") */
+.testimonial-card .text-muted.small {
+  color: var(--light-orange) !important;
+}
+
+/* Footer "Made with focus on clarity & responsibility" text */
+footer p.text-muted.small.mb-0 {
+  color: var(--light-orange) !important;
+}
+
+.testimonial-card .text-muted.small,
+footer p.text-muted.small.mb-0 {
+  color: var(--dark-orange) !important;   /* #e65100 – deeper orange */
+}
+
+@media (max-width: 991.98px) {
+  .hero-title {
+    display: none;
+  }
+}
+
+.hero {
+    padding-top: 5rem;           /* fallback / small screens ~80px */
+}
+
+@media (max-width: 991.98px) {   /* mobile & tablet – up to lg breakpoint */
+    .hero {
+        padding-top: 11rem !important;   /* ≈176px – adjust 10.5rem–12rem as needed */
+    }
+}
+
+@media (min-width: 992px) {      /* desktop lg+ */
+    .hero {
+        padding-top: 4rem;           /* or 4rem–6rem – whatever looks balanced on desktop */
+    }
+}
