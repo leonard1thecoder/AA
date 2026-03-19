@@ -421,12 +421,11 @@ public class UsersService implements ServiceContract {
                 }
 
                 try {
-                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(castedRequest.getUsersEmailAddress(), castedRequest.getUsersPassword()));
                     if (redisStatus) {
                         logger.info("user with email {} successfully logged in using cache data : {}", redisUserResponse.getUsersEmailAddress(), redisUserResponse);
-
                         return List.of(redisUserResponse);
                     } else {
+                        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(castedRequest.getUsersEmailAddress(), castedRequest.getUsersPassword()));
 
                         logger.info("user with email {} successfully logged in using jpa data : {}", castedRequest.getUsersEmailAddress(), jpaUserResponse);
 
@@ -438,23 +437,17 @@ public class UsersService implements ServiceContract {
                         return List.of(jpaUserResponse);
                     }
                 } catch (AuthenticationException e) {
-                    if (redisStatus) {
-
-                        logger.info("delete cached data for login : {}", redisService.delete(encrypt));
-                        var errorMessage = "cached data shows change of password ";
-                        var resolveIssue = "please log in again";
-                        throw throwExceptionAndReport(new CachedUsersPasswordChangedException(errorMessage), errorMessage, resolveIssue);
-                    } else {
+        
                         if (passwordStatus) {
                             var errorMessage = UsersControllerAdvice.setMessage("password inserted is incorrect");
-                            var resolveIssue = "please provide correct password or update password";
+                            var resolveIssue = "please provide correct password";
                             throw throwExceptionAndReport(new UsersPasswordIncorrectException(errorMessage), errorMessage, resolveIssue);
                         } else {
                             var errorMessage = UsersControllerAdvice.setMessage("email address " + castedRequest.getUsersEmailAddress() + " not found, verify your email or register");
-                            var resolveIssue = "Enter correct email address or register using the email entered";
+                            var resolveIssue = "Enter correct email address";
                             throw throwExceptionAndReport(new UserNotFoundException(errorMessage), errorMessage, resolveIssue);
                         }
-                    }
+                    
 
                 }
             } catch (NullPointerException e) {
