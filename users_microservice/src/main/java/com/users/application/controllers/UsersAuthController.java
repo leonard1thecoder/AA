@@ -50,7 +50,6 @@ public class UsersAuthController extends UserServiceConcurrentExecutor {
             return ResponseEntity.ok(List.of(users));
         } else {
             ErrorResponse error = (ErrorResponse) list;
-            logger.warn("Error response : {}, error stack : {}", error, error.getException().getStackTrace());
            return ResponseEntity.badRequest().body(List.of(error));
         }
     }
